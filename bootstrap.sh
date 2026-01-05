@@ -2,14 +2,12 @@
 set -e
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "Building configuration (as user)..."
-    # Build DOES NOT need sudo
-    nix build .#darwinConfigurations.work-mac.system
-
-    echo "Applying configuration (may ask for sudo password)..."
-    # Only the switch needs sudo permissions
-    sudo ./result/sw/bin/darwin-rebuild switch --flake .#work-mac
+    echo "Bootstrapping nix-darwin..."
+    sudo nix run nix-darwin -- switch --flake .
+elif [[ -f /etc/NIXOS ]]; then
+    echo "Bootstrapping NixOS..."
+    sudo nixos-rebuild switch --flake .
 else
-    # Fedora logic remains the same
-    nix run github:nix-community/home-manager -- init --flake .#personal-fedora
+    echo "Bootstrapping home-manager..."
+    nix run github:nix-community/home-manager -- switch --flake ".#$(hostname)"
 fi

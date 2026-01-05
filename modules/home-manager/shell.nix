@@ -1,11 +1,13 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.zsh = {
     enable = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    enableCompletion = true;
     shellAliases = {
       ll = "ls -l";
       gs = "git status";
-      # Now you can just type 'apply' from anywhere in your repo
-      apply = "just switch";
     };
   };
   programs.git = {
