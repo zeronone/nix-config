@@ -76,9 +76,14 @@
 
       # 2. asahi-fedora (Linux machines managed by Home Manager Standalone)
       homeConfigurations."asahi-fedora" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.aarch64-linux;
+        pkgs = import nixpkgs {
+          system = "aarch64-linux";
+          config.allowUnfree = true;
+        };
         extraSpecialArgs = { inherit globalPackages; };
-        modules = [ ./machines/home-manager/asahi-fedora.nix ];
+        modules = [
+          ./machines/home-manager/asahi-fedora.nix
+        ];
       };
 
       # 3. NixOS (for NixOS based machines)
