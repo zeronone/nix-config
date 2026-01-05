@@ -9,5 +9,5 @@ elif [[ -f /etc/NIXOS ]]; then
     sudo nixos-rebuild switch --flake .
 else
     echo "Bootstrapping home-manager..."
-    nix run github:nix-community/home-manager -- switch --flake ".#$(hostname)"
+    nix run home-manager/master -- switch --flake ".#$(hostname)"
 fi
