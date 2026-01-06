@@ -63,7 +63,7 @@
 
     in
     {
-      # 1. MacOS machines managed by Nix Darwin
+      # work macbook
       darwinConfigurations."IT-JPN-31519" = nix-darwin.lib.darwinSystem {
         pkgs = import nixpkgs {
           system = "aarch64-darwin";
@@ -77,6 +77,23 @@
 
           # customized config
           ./machines/nix-darwin/IT-JPN-31519.nix
+        ];
+      };
+
+      # personal macbook
+      darwinConfigurations."arif-mac" = nix-darwin.lib.darwinSystem {
+        pkgs = import nixpkgs {
+          system = "aarch64-darwin";
+          config.allowUnfree = true;
+        };
+        specialArgs = { inherit home-manager globalPackages; };
+        modules = [
+          home-manager.darwinModules.home-manager
+          # common config
+          ./modules/nix-darwin/bootstrap.nix
+
+          # customized config
+          ./machines/nix-darwin/arif-mac.nix
         ];
       };
 
