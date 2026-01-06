@@ -16,7 +16,7 @@
     # No support for: MacBookPro18,2 yet
     # hardware.url = "github:nixos/nixos-hardware";
 
-    # Declarative kde plasma manager
+    # Declarative kde plasma manager (plasma 6)
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,6 +40,7 @@
       nixpkgs,
       nix-darwin,
       home-manager,
+      plasma-manager,
       treefmt-nix,
       systems,
       ...
@@ -54,6 +55,7 @@
           just
           fastfetch
           ripgrep
+          vim
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
@@ -63,11 +65,15 @@
     {
       # 1. MacOS machines managed by Nix Darwin
       darwinConfigurations."IT-JPN-31519" = nix-darwin.lib.darwinSystem {
+        pkgs = import nixpkgs {
+          system = "aarch64-darwin";
+          config.allowUnfree = true;
+        };
         specialArgs = { inherit home-manager globalPackages; };
         modules = [
-          { nixpkgs.hostPlatform = "aarch64-darwin"; }
-          ./modules/nix-darwin/bootstrap.nix
           home-manager.darwinModules.home-manager
+          # common config
+          ./modules/nix-darwin/bootstrap.nix
 
           # customized config
           ./machines/nix-darwin/IT-JPN-31519.nix
@@ -80,8 +86,13 @@
           system = "aarch64-linux";
           config.allowUnfree = true;
         };
-        extraSpecialArgs = { inherit globalPackages; };
+        extraSpecialArgs = {
+          inherit globalPackages;
+          inherit inputs;
+        };
         modules = [
+          plasma-manager.homeModules.plasma-manager
+          # customized config
           ./machines/home-manager/asahi-fedora.nix
         ];
       };

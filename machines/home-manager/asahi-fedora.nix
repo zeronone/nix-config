@@ -8,7 +8,10 @@ let
   username = "arif";
 in
 {
-  imports = [ ../../modules/home-manager/shell.nix ];
+  imports = [
+    ../../modules/home-manager/shell.nix
+    ../../modules/home-manager/kde-plasma.nix
+  ];
   home.username = "${username}";
   home.homeDirectory = "/home/${username}";
   home.stateVersion = "25.11";
@@ -43,5 +46,4 @@ in
         echo "zsh is now set as default shell !"
       fi
   '';
-
 }
