@@ -1,6 +1,6 @@
 { pkgs, inputs, ... }:
 {
-  imports = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
+  imports = [ inputs.plasma-manager.homeModules.plasma-manager ];
 
   programs.plasma = {
     enable = true;
@@ -13,6 +13,8 @@
       command = "ghostty";
     };
     configFile = {
+      kxkbrc.Layout.Options = "ctrl:nocaps,ctrl:swap_lwin_lctl,ctrl:swap_rwin_rctl";
+
       kcminputrc.Keyboard.RepeatDelay = 350;
       kcminputrc.Keyboard.RepeatRate = 40;
       kcminputrc."Libinput/1452/834/Apple SPI Trackpad".NaturalScroll = false;

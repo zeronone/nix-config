@@ -11,6 +11,7 @@ in
   imports = [
     ../../modules/home-manager/shell.nix
     ../../modules/home-manager/kde-plasma.nix
+    ../../modules/home-manager/jp-ime.nix
   ];
   home.username = "${username}";
   home.homeDirectory = "/home/${username}";
