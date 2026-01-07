@@ -5,47 +5,22 @@
   ...
 }:
 {
+  imports = [
+    ../common/nix.nix
+    ./mac-nix.nix
+  ];
+
   # Set the host platform to aarch64-darwin
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   # Allow nix-darwin to manage Nix
   nix.enable = true;
   nix.settings = {
-    substituters = [
-      "https://cache.nixos.org/"
-    ];
-    trusted-public-keys = [
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-    ];
-
-    trusted-users = [ "@admin" ];
-
-    # https://github.com/NixOS/nix/issues/7273
-    auto-optimise-store = false;
-
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-
     extra-platforms = lib.mkIf (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") [
       "x86_64-darwin"
       "aarch64-darwin"
     ];
-
-    # Recommended when using `direnv` etc.
-    keep-derivations = true;
-    keep-outputs = true;
   };
-  # Don't need channels since I use flakes
-  nix.channel.enable = false;
-
-  # Store management
-  nix.gc.automatic = true;
-  nix.gc.interval.Hour = 3;
-  nix.gc.options = "--delete-older-than 15d";
-  nix.optimise.automatic = true;
-  nix.optimise.interval.Hour = 4;
 
   # Needed for nix-darwin
   programs.zsh.enable = true;

@@ -7,20 +7,13 @@
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # NixOS profiles to optimize settings for different hardware
     # No support for: MacBookPro18,2 yet
     # hardware.url = "github:nixos/nixos-hardware";
-
-    # Declarative kde plasma manager (plasma 6)
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
 
     # Nix Darwin (for MacOS machines)
     nix-darwin = {
@@ -39,7 +32,6 @@
       nixpkgs,
       nix-darwin,
       home-manager,
-      plasma-manager,
       treefmt-nix,
       systems,
       ...
@@ -96,29 +88,15 @@
         ];
       };
 
-      # 2. asahi-fedora (Linux machines managed by Home Manager Standalone)
-      homeConfigurations."asahi-fedora" = home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          system = "aarch64-linux";
-          config.allowUnfree = true;
-        };
-        extraSpecialArgs = {
-          inherit globalPackages;
-          inherit inputs;
-        };
-        modules = [
-          plasma-manager.homeModules.plasma-manager
-          # customized config
-          ./machines/home-manager/asahi-fedora.nix
-        ];
-      };
-
       # 3. NixOS (for NixOS based machines)
       nixosConfigurations."asahi-nixos" = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
+        specialArgs = { inherit home-manager globalPackages; };
         modules = [
-          ./machines/nixos/asahi-nixos
           ./modules/nixos/cosmic.nix
+
+          # customized config
+          ./machines/nixos/asahi-nixos
         ];
       };
 

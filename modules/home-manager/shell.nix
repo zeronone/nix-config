@@ -14,7 +14,6 @@
     enable = true;
     settings.init.defaultBranch = "main";
   };
-
   programs.neovim = {
     enable = true;
     defaultEditor = true;

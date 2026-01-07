@@ -3,7 +3,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild switch --flake .; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild switch --flake .; \
+        sudo nixos-rebuild switch --impure --flake .; \
     else \
         home-manager switch --flake ".#$(hostname)"; \
     fi

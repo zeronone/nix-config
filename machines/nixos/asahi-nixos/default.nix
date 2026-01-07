@@ -8,64 +8,26 @@
   pkgs,
   ...
 }:
-
 {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     # Include apple silicon support
-    ./apple-silicon-support
+    ../../../modules/nixos/apple-silicon-support
+    ../../../modules/common/nix.nix
 
-    ../../../modules/nixos/nix.nix
+    # customizations
+    ./networking.nix
+    ./home.nix
   ];
-
-  # TODO move to home manager
-  programs.firefox.enable = true;
-
-  # Binary cache for apple-silicon kernel
-  nix.settings = {
-    extra-substituters = [
-      "https://nixos-apple-silicon.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
-    ];
-  };
-
-  # Firmware is copied in bootstrap.sh
-  # Need to pass --impure to nixos-install
-  hardware.asahi.peripheralFirmwareDirectory =
-    lib.findFirst (path: builtins.pathExists (path + "/all_firmware.tar.gz")) null
-      [
-        # path when the system is operating normally
-        /etc/nixos/firmware
-        # path when the system is mounted in the installer
-        /mnt/etc/nixos/firmware
-      ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   # should be set to false for asahi
   boot.loader.efi.canTouchEfiVariables = false;
 
-  networking.hostName = "asahi-nixos"; # Define your hostname.
-
-  # Configure network connections interactively with nmcli or nmtui.
-  networking.networkmanager.enable = true;
-
   # Set your time zone.
   time.timeZone = "Asia/Tokyo";
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.arif = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-  };
-
-  networking.wireless.iwd = {
-    enable = true;
-    settings.General.EnableNetworkConfiguration = true;
-  };
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
