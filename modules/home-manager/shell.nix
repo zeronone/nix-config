@@ -14,4 +14,8 @@
     enable = true;
     settings.init.defaultBranch = "main";
   };
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 }

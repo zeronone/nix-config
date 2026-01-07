@@ -14,7 +14,6 @@
     ];
 
     opts = {
-      clipboard = "unnamedplus";
       number = true; # Show line numbers
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
@@ -27,6 +26,9 @@
         transparent_background = true;
       };
     };
+
+    editorconfig.enable = true;
+    clipboard.register = "unnamedplus";
 
     plugins.lightline.enable = true;
     plugins.lualine.enable = true;
