@@ -8,6 +8,9 @@
     home-manager.nixosModules.default
   ];
 
+  # backup before overwritting config files
+  home-manager.backupFileExtension = "bak";
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
 

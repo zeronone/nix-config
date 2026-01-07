@@ -6,7 +6,7 @@
         model: "pc104",
         layout: "us,jp",
         variant: ",",
-        options: Some("terminate:ctrl_alt_bksp,caps:ctrl_modifier,ctrl:swap_win_ctl"),
+        options: Some("terminate:ctrl_alt_bksp,compose:ralt,caps:ctrl_modifier,ctrl:swap_lwin_lctl,ctrl:swap_rwin_rctl"),
         repeat_delay: 200,
         repeat_rate: 40,
     )
@@ -22,7 +22,7 @@
         click_method: Some(Clickfinger),
         scroll_config: Some((
             method: Some(TwoFinger),
-            natural_scroll: Some(true),
+            natural_scroll: Some(false),
             scroll_button: None,
             scroll_factor: None,
         )),
