@@ -17,7 +17,12 @@
 
     # Nix Darwin (for MacOS machines)
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixvim = {
+      url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -30,8 +35,9 @@
     {
       self,
       nixpkgs,
-      nix-darwin,
       home-manager,
+      nix-darwin,
+      nixvim,
       treefmt-nix,
       systems,
       ...
@@ -46,7 +52,6 @@
           just
           fastfetch
           ripgrep
-          neovim
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
@@ -60,9 +65,8 @@
           system = "aarch64-darwin";
           config.allowUnfree = true;
         };
-        specialArgs = { inherit home-manager globalPackages; };
+        specialArgs = { inherit inputs globalPackages; };
         modules = [
-          home-manager.darwinModules.home-manager
           # common config
           ./modules/nix-darwin/bootstrap.nix
 
@@ -77,7 +81,7 @@
           system = "aarch64-darwin";
           config.allowUnfree = true;
         };
-        specialArgs = { inherit home-manager globalPackages; };
+        specialArgs = { inherit inputs globalPackages; };
         modules = [
           home-manager.darwinModules.home-manager
           # common config
@@ -91,7 +95,7 @@
       # 3. NixOS (for NixOS based machines)
       nixosConfigurations."asahi-nixos" = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
-        specialArgs = { inherit home-manager globalPackages; };
+        specialArgs = { inherit inputs globalPackages; };
         modules = [
           ./modules/nixos/cosmic.nix
 

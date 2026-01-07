@@ -1,11 +1,11 @@
 {
   pkgs,
-  home-manager,
+  inputs,
   ...
 }:
 {
   imports = [
-    home-manager.nixosModules.default
+    inputs.home-manager.nixosModules.default
   ];
 
   # backup before overwritting config files
@@ -13,6 +13,7 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  home-manager.extraSpecialArgs = { inherit inputs; };
 
   # Users
   users.users.arif = {
@@ -31,6 +32,7 @@
 
       ../../../modules/home-manager/shell.nix
       ../../../modules/home-manager/cosmic.nix
+      ../../../modules/home-manager/nixvim.nix
     ];
     home.username = "arif";
     home.homeDirectory = "/home/arif";

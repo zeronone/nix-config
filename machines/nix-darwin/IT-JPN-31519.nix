@@ -1,6 +1,10 @@
 # Work machine
-{ ... }:
+{ inputs, ... }:
 {
+  imports = [
+    inputs.home-manager.darwinModules.home-manager
+  ];
+
   # Primary user
   system.primaryUser = "arezai";
   users.users.arezai.home = "/Users/arezai";
@@ -8,8 +12,13 @@
   # Home manager
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  home-manager.extraSpecialArgs = { inherit inputs; };
+
   home-manager.users.arezai = {
-    imports = [ ../../modules/home-manager/shell.nix ];
+    imports = [
+      ../../modules/home-manager/shell.nix
+      ../../modules/home-manager/nixvim.nix
+    ];
     home.username = "arezai";
     home.homeDirectory = "/Users/arezai";
     home.stateVersion = "25.11";

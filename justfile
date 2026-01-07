@@ -8,9 +8,9 @@ switch:
         home-manager switch --flake ".#$(hostname)"; \
     fi
 
-dry-run:
+check:
     @if [ "$(uname)" = "Darwin" ]; then \
-        echo "TODO"; \
+        sudo darwin-rebuild check --flake .; \
     elif [ -f /etc/NIXOS ]; then \
         nixos-rebuild dry-run --impure --flake .; \
     else \
