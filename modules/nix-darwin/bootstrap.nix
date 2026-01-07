@@ -84,6 +84,7 @@
     FXEnableExtensionChangeWarning = true;
     NewWindowTarget = "Home";
     ShowPathbar = true;
+    AppleShowAllFiles = true;
   };
 
   # System packages (global + darwin-specific)

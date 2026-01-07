@@ -55,7 +55,7 @@
           just
           fastfetch
           ripgrep
-          vim
+          neovim
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
