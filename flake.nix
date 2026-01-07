@@ -3,8 +3,7 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # Home manager
     home-manager = {
@@ -115,12 +114,13 @@
       };
 
       # 3. NixOS (for NixOS based machines)
-      # nixosConfigurations."asahi-nixos" = nixpkgs.lib.nixosSystem {
-      #   system = "aarch64-linux";
-      #   modules = [
-      #     ./machines/nixos/asahi-nixos.nix
-      #   ];
-      # };
+      nixosConfigurations."asahi-nixos" = nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        modules = [
+          ./machines/nixos/asahi-nixos
+          ./modules/nixos/cosmic.nix
+        ];
+      };
 
       # for `nix fmt`
       formatter = eachSystem (pkgs: treefmtEval.${pkgs.system}.config.build.wrapper);
