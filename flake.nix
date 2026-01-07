@@ -57,50 +57,127 @@
       # Eval the treefmt modules from ./treefmt.nix
       treefmtEval = eachSystem (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
 
+      # Shared home-manager modules for all hosts
+      sharedHomeModules = [
+        ./modules/home-manager/shell.nix
+        ./modules/home-manager/nixvim.nix
+      ];
+
+      # Helper function to configure home-manager
+      mkHomeManager =
+        {
+          username,
+          homeDirectory,
+          homeModules ? [ ],
+        }:
+        {
+          home-manager.backupFileExtension = "bak";
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.sharedModules = sharedHomeModules;
+          home-manager.users.${username} = {
+            imports = homeModules;
+            home.username = username;
+            home.homeDirectory = homeDirectory;
+            home.stateVersion = "25.11";
+          };
+        };
+
+      # Helper function to create Darwin hosts
+      mkDarwinHost =
+        {
+          hostname,
+          username,
+          system ? "aarch64-darwin",
+          modules ? [ ],
+          homeModules ? [ ],
+        }:
+        nix-darwin.lib.darwinSystem {
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+          specialArgs = { inherit inputs globalPackages; };
+          modules = [
+            home-manager.darwinModules.home-manager
+            ./modules/common/nix.nix
+            ./modules/nix-darwin/bootstrap.nix
+            {
+              system.primaryUser = username;
+              users.users.${username}.home = "/Users/${username}";
+            }
+            (mkHomeManager {
+              inherit username homeModules;
+              homeDirectory = "/Users/${username}";
+            })
+          ]
+          ++ modules;
+        };
+
+      # Helper function to create NixOS hosts
+      mkNixosHost =
+        {
+          hostname,
+          username,
+          system ? "aarch64-linux",
+          modules ? [ ],
+          homeModules ? [ ],
+        }:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = { inherit inputs globalPackages; };
+          modules = [
+            home-manager.nixosModules.default
+            ./modules/common/nix.nix
+            {
+              users.users.${username} = {
+                isNormalUser = true;
+                extraGroups = [ "wheel" ];
+              };
+            }
+            (mkHomeManager {
+              inherit username homeModules;
+              homeDirectory = "/home/${username}";
+            })
+          ]
+          ++ modules;
+        };
+
     in
     {
       # work macbook
-      darwinConfigurations."IT-JPN-31519" = nix-darwin.lib.darwinSystem {
-        pkgs = import nixpkgs {
-          system = "aarch64-darwin";
-          config.allowUnfree = true;
-        };
-        specialArgs = { inherit inputs globalPackages; };
+      darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
+        hostname = "IT-JPN-31519";
+        username = "arezai";
         modules = [
-          # common config
-          ./modules/nix-darwin/bootstrap.nix
-
-          # customized config
           ./machines/nix-darwin/IT-JPN-31519.nix
         ];
       };
 
       # personal macbook
-      darwinConfigurations."arif-mac" = nix-darwin.lib.darwinSystem {
-        pkgs = import nixpkgs {
-          system = "aarch64-darwin";
-          config.allowUnfree = true;
-        };
-        specialArgs = { inherit inputs globalPackages; };
+      darwinConfigurations."arif-mac" = mkDarwinHost {
+        hostname = "arif-mac";
+        username = "arif";
         modules = [
-          home-manager.darwinModules.home-manager
-          # common config
-          ./modules/nix-darwin/bootstrap.nix
-
-          # customized config
           ./machines/nix-darwin/arif-mac.nix
         ];
       };
 
-      # 3. NixOS (for NixOS based machines)
-      nixosConfigurations."asahi-nixos" = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        specialArgs = { inherit inputs globalPackages; };
+      # NixOS (for NixOS based machines)
+      nixosConfigurations."asahi-nixos" = mkNixosHost {
+        hostname = "asahi-nixos";
+        username = "arif";
         modules = [
           ./modules/nixos/cosmic.nix
-
-          # customized config
           ./machines/nixos/asahi-nixos
+        ];
+        homeModules = [
+          ./modules/home-manager/cosmic.nix
+          {
+            programs.firefox.enable = true;
+            programs.chromium.enable = true;
+          }
         ];
       };
 

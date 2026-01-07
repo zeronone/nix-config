@@ -6,7 +6,6 @@
 }:
 {
   imports = [
-    ../common/nix.nix
     ./mac-nix.nix
   ];
 

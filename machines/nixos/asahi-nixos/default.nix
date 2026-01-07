@@ -14,11 +14,7 @@
     ./hardware-configuration.nix
     # Include apple silicon support
     ../../../modules/nixos/apple-silicon-support
-    ../../../modules/common/nix.nix
-
-    # customizations
-    ./networking.nix
-    ./home.nix
+    ../../../modules/nixos/networking.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
