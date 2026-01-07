@@ -15,7 +15,12 @@
     ./hardware-configuration.nix
     # Include apple silicon support
     ./apple-silicon-support
+
+    ../../../modules/nixos/nix.nix
   ];
+
+  # TODO move to home manager
+  programs.firefox.enable = true;
 
   # Binary cache for apple-silicon kernel
   nix.settings = {
@@ -29,7 +34,14 @@
 
   # Firmware is copied in bootstrap.sh
   # Need to pass --impure to nixos-install
-  hardware.asahi.peripheralFirmwareDirectory = /mnt/etc/nixos/firmware;
+  hardware.asahi.peripheralFirmwareDirectory =
+    lib.findFirst (path: builtins.pathExists (path + "/all_firmware.tar.gz")) null
+      [
+        # path when the system is operating normally
+        /etc/nixos/firmware
+        # path when the system is mounted in the installer
+        /mnt/etc/nixos/firmware
+      ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

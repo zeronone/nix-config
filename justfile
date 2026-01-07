@@ -8,6 +8,15 @@ switch:
         home-manager switch --flake ".#$(hostname)"; \
     fi
 
+dry-run:
+    @if [ "$(uname)" = "Darwin" ]; then \
+        echo "TODO"; \
+    elif [ -f /etc/NIXOS ]; then \
+        nixos-rebuild dry-run --impure --flake .; \
+    else \
+        echo "TODO"; \
+    fi
+
 fmt:
     nix fmt
 
