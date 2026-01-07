@@ -20,12 +20,14 @@
   # home-manager
   home-manager.users.arif = {
     imports = [
-      ../../../modules/home-manager/shell.nix
       {
         # common programs
         programs.firefox.enable = true;
         programs.chromium.enable = true;
       }
+
+      ../../../modules/home-manager/shell.nix
+      ../../../modules/home-manager/cosmic.nix
     ];
     home.username = "arif";
     home.homeDirectory = "/home/arif";
