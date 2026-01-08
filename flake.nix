@@ -52,6 +52,7 @@
           just
           fastfetch
           ripgrep
+          wget
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
