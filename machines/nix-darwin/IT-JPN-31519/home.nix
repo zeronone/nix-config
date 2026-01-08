@@ -26,10 +26,10 @@
     #           # ''${line%\"*} removes everything from the last " to the end
     #           TEMP_VAL="''${line#*\"}"
     #           SYSTEM_PATH="''${TEMP_VAL%\"*}"
-    #           
+    #
     #           # 3. Append to existing PATH
     #           export PATH="$PATH:$SYSTEM_PATH"
-    #           
+    #
     #           # We found it, so we can stop looking
     #           break
     #       fi
