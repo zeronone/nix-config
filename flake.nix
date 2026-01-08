@@ -29,6 +29,12 @@
     # Apple Silicon support for NixOS
     nixos-apple-silicon.url = "github:nix-community/nixos-apple-silicon";
 
+    # Private repo for Apple Silicon firmware (non-distributable)
+    asahi-firmware = {
+      url = "git+ssh://git@github.com/zeronone/asahi-firmware.git?dir=m1pro";
+      flake = false;
+    };
+
     # treefmt
     treefmt-nix.url = "github:numtide/treefmt-nix";
     systems.url = "github:nix-systems/default";
@@ -42,6 +48,7 @@
       nix-darwin,
       nixvim,
       nixos-apple-silicon,
+      asahi-firmware,
       treefmt-nix,
       systems,
       ...

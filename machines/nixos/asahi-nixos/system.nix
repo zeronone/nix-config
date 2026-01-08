@@ -26,8 +26,8 @@
     ];
   };
 
-  # Firmware is copied to /etc/nixos/firmware by bootstrap.sh
-  hardware.asahi.peripheralFirmwareDirectory = /etc/nixos/firmware;
+  # Firmware from private git repo (see scripts/push-asahi-firmware.sh)
+  hardware.asahi.peripheralFirmwareDirectory = inputs.asahi-firmware;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

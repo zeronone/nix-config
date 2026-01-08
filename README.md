@@ -34,3 +34,38 @@ EOF
 ```
 just switch
 ```
+
+## Apple Silicon (Asahi Linux) Setup
+
+Apple Silicon Macs require non-distributable firmware files for Wi-Fi and other peripherals.
+These are stored in a private git repository and referenced as a flake input.
+
+### Initial firmware setup (on the Asahi Linux machine)
+
+1. Create a private git repository (e.g., `github.com/zeronone/asahi-firmware`)
+
+2. Push firmware to the repository:
+   ```bash
+   ./scripts/push-asahi-firmware.sh --dir m1pro
+   ```
+
+   Use a different `--dir` for each machine type (e.g., `m1pro`, `m2max`, `m3`).
+
+3. Update the flake lock file:
+   ```bash
+   nix flake lock --update-input asahi-firmware
+   ```
+
+4. Proceed with normal installation:
+   ```bash
+   ./bootstrap.sh
+   ```
+
+### Updating firmware
+
+If firmware is updated (e.g., after macOS update), re-run:
+```bash
+./scripts/push-asahi-firmware.sh --dir m1pro
+nix flake lock --update-input asahi-firmware
+just switch
+```
