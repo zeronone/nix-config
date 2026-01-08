@@ -1,5 +1,23 @@
 {
   "nodes": {
+    "asahi-firmware": {
+      "flake": false,
+      "locked": {
+        "dir": "m1pro",
+        "lastModified": 1767915960,
+        "narHash": "sha256-Fv8O1kNGhZKaeKc3g/aeSSj56uO6SC009giisatI3r8=",
+        "ref": "refs/heads/main",
+        "rev": "fc9e096015bb90b764d899160e3fedad1da05c6a",
+        "revCount": 1,
+        "type": "git",
+        "url": "ssh://git@github.com/zeronone/asahi-firmware.git"
+      },
+      "original": {
+        "dir": "m1pro",
+        "type": "git",
+        "url": "ssh://git@github.com/zeronone/asahi-firmware.git"
+      }
+    },
     "flake-compat": {
       "locked": {
         "lastModified": 1746162366,
@@ -240,6 +258,7 @@
     },
     "root": {
       "inputs": {
+        "asahi-firmware": "asahi-firmware",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nixos-apple-silicon": "nixos-apple-silicon",

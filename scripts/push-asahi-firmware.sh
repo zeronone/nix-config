@@ -61,20 +61,14 @@ TEMP_DIR=$(mktemp -d)
 trap "rm -rf $TEMP_DIR" EXIT
 
 echo "Cloning firmware repository..."
-if ! git clone "$FIRMWARE_REPO" "$TEMP_DIR/repo" 2>/dev/null; then
-    echo "Repository doesn't exist or can't be cloned. Initializing new repository..."
-    mkdir -p "$TEMP_DIR/repo"
-    cd "$TEMP_DIR/repo"
-    git init
-    git remote add origin "$FIRMWARE_REPO"
-else
-    cd "$TEMP_DIR/repo"
-fi
+git clone "$FIRMWARE_REPO" "$TEMP_DIR/repo"
+cd "$TEMP_DIR/repo"
 
 echo "Copying firmware to $FIRMWARE_DIR/..."
 mkdir -p "$FIRMWARE_DIR"
 cp -p "$FIRMWARE_SOURCE/all_firmware.tar.gz" "$FIRMWARE_DIR/"
 cp -p "$FIRMWARE_SOURCE"/kernelcache* "$FIRMWARE_DIR/" 2>/dev/null || true
+git lfs track "$FIRMWARE_SOURCE/*"
 
 echo "Checking for changes..."
 git add "$FIRMWARE_DIR"
