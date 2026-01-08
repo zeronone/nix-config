@@ -1,13 +1,23 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   programs.zsh = {
     enable = true;
+    # To avoid conflict with ~/.zshrc modified by other means in work machines
+    dotDir = "${config.home.homeDirectory}/.config/zsh";
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     enableCompletion = true;
     shellAliases = {
-      ll = "ls -l";
+      ls = "ls -alGh";
       gs = "git status";
+      gl = " git log --graph --decorate --pretty=oneline --abbrev-commit";
+      gll = "git log --graph --abbrev-commit --decorate --date=relative --all";
+    };
+
+    history = {
+      append = false;
+      share = false;
+      size = 10000;
     };
   };
   programs.git = {

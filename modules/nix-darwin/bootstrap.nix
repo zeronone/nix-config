@@ -28,7 +28,8 @@
   # system.configurationRevision = self.rev or self.dirtyRev or null;
 
   # enable touch ID for sudo auth
-  security.pam.services.sudo_local.touchIdAuth = true;
+  # It gets too annoying in Ansible runs
+  # security.pam.services.sudo_local.touchIdAuth = true;
 
   # Keyboard
   system.keyboard.enableKeyMapping = true;
@@ -67,9 +68,6 @@
     ++ (with pkgs; [
       # Add darwin-specific packages here
     ]);
-
-  # Enable homebrew
-  homebrew.enable = true;
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog

@@ -93,6 +93,9 @@
           modules ? [ ],
           homeModules ? [ ],
         }:
+        let
+          machineDir = ./machines/nix-darwin/${hostname};
+        in
         nix-darwin.lib.darwinSystem {
           pkgs = import nixpkgs {
             inherit system;
@@ -103,13 +106,15 @@
             home-manager.darwinModules.home-manager
             ./modules/common/nix.nix
             ./modules/nix-darwin/bootstrap.nix
+            (machineDir + /system.nix)
             {
               system.primaryUser = username;
               users.users.${username}.home = "/Users/${username}";
             }
             (mkHomeManager {
-              inherit username homeModules;
+              inherit username;
               homeDirectory = "/Users/${username}";
+              homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
             })
           ]
           ++ modules;
@@ -124,12 +129,16 @@
           modules ? [ ],
           homeModules ? [ ],
         }:
+        let
+          machineDir = ./machines/nixos/${hostname};
+        in
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = { inherit inputs globalPackages; };
           modules = [
             home-manager.nixosModules.default
             ./modules/common/nix.nix
+            (machineDir + /system.nix)
             {
               users.users.${username} = {
                 isNormalUser = true;
@@ -137,8 +146,9 @@
               };
             }
             (mkHomeManager {
-              inherit username homeModules;
+              inherit username;
               homeDirectory = "/home/${username}";
+              homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
             })
           ]
           ++ modules;
@@ -150,18 +160,12 @@
       darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
         hostname = "IT-JPN-31519";
         username = "arezai";
-        modules = [
-          ./machines/nix-darwin/IT-JPN-31519.nix
-        ];
       };
 
       # personal macbook
       darwinConfigurations."arif-mac" = mkDarwinHost {
         hostname = "arif-mac";
         username = "arif";
-        modules = [
-          ./machines/nix-darwin/arif-mac.nix
-        ];
       };
 
       # NixOS (for NixOS based machines)
@@ -170,14 +174,9 @@
         username = "arif";
         modules = [
           ./modules/nixos/cosmic.nix
-          ./machines/nixos/asahi-nixos
         ];
         homeModules = [
           ./modules/home-manager/cosmic.nix
-          {
-            programs.firefox.enable = true;
-            programs.chromium.enable = true;
-          }
         ];
       };
 

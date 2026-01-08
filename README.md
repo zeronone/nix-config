@@ -32,5 +32,5 @@ EOF
 ## Updates
 
 ```
-apply
+just switch
 ```
