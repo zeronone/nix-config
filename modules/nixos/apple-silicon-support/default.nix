@@ -18,14 +18,7 @@
     ];
   };
 
-  # Firmware is copied in bootstrap.sh
-  # Need to pass --impure to nixos-install
-  hardware.asahi.peripheralFirmwareDirectory =
-    lib.findFirst (path: builtins.pathExists (path + "/all_firmware.tar.gz")) null
-      [
-        # path when the system is operating normally
-        /etc/nixos/firmware
-        # path when the system is mounted in the installer
-        /mnt/etc/nixos/firmware
-      ];
+  # Firmware is copied to /etc/nixos/firmware by bootstrap.sh (both on installer and target)
+  # Using string-to-path conversion to avoid impure builtins.pathExists
+  hardware.asahi.peripheralFirmwareDirectory = /etc/nixos/firmware;
 }
