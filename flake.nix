@@ -102,7 +102,14 @@
             inherit system;
             config.allowUnfree = true;
           };
-          specialArgs = { inherit inputs globalPackages; };
+          specialArgs = {
+            inherit
+              inputs
+              globalPackages
+              username
+              hostname
+              ;
+          };
           modules = [
             home-manager.darwinModules.home-manager
             ./modules/common/nix.nix
@@ -135,7 +142,14 @@
         in
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs globalPackages; };
+          specialArgs = {
+            inherit
+              inputs
+              globalPackages
+              username
+              hostname
+              ;
+          };
           modules = [
             home-manager.nixosModules.default
             ./modules/common/nix.nix
