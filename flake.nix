@@ -26,6 +26,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Apple Silicon support for NixOS
+    nixos-apple-silicon.url = "github:nix-community/nixos-apple-silicon";
+
     # treefmt
     treefmt-nix.url = "github:numtide/treefmt-nix";
     systems.url = "github:nix-systems/default";
@@ -38,6 +41,7 @@
       home-manager,
       nix-darwin,
       nixvim,
+      nixos-apple-silicon,
       treefmt-nix,
       systems,
       ...

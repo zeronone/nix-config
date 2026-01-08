@@ -1,1 +1,4 @@
 result
+
+# Non-distributable Apple Silicon firmware (copied during bootstrap)
+machines/nixos/asahi-nixos/firmware/

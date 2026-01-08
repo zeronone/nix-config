@@ -6,16 +6,28 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 {
   imports = [
+    # Apple Silicon support from flake input
+    inputs.nixos-apple-silicon.nixosModules.apple-silicon-support
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    # Include apple silicon support
-    ../../../modules/nixos/apple-silicon-support
     ../../../modules/nixos/networking.nix
   ];
+
+  # Binary cache for apple-silicon kernel
+  nix.settings = {
+    extra-substituters = [ "https://nixos-apple-silicon.cachix.org" ];
+    extra-trusted-public-keys = [
+      "nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
+    ];
+  };
+
+  # Firmware is copied to /etc/nixos/firmware by bootstrap.sh
+  hardware.asahi.peripheralFirmwareDirectory = /etc/nixos/firmware;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

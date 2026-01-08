@@ -3,7 +3,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild switch --flake .; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild switch --flake .; \
+        sudo nixos-rebuild switch --flake . --impure; \
     else \
         home-manager switch --flake ".#$(hostname)"; \
     fi
@@ -12,7 +12,7 @@ check:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild check --flake .; \
     elif [ -f /etc/NIXOS ]; then \
-        nixos-rebuild dry-run --flake .; \
+        nixos-rebuild dry-run --flake . --impure; \
     else \
         echo "TODO"; \
     fi
