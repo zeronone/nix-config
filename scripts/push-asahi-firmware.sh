@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#!nix-shell -i bash -p git git-lfs openssh
 set -e
 
 FIRMWARE_REPO="git@github.com:zeronone/asahi-firmware.git"
@@ -8,7 +9,8 @@ FIRMWARE_SOURCE="/boot/asahi"
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
-    echo "Push Apple Silicon firmware to private git repository."
+    echo "Push Apple Silicon firmware to private git repository. Run it from a machine with firmware installed."
+    echo "Dependencies (git, git-lfs, openssh) are provided via nix-shell."
     echo ""
     echo "Options:"
     echo "  -r, --repo URL      Git repository URL (default: $FIRMWARE_REPO)"
@@ -46,6 +48,21 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Initialize git-lfs
+git lfs install --skip-repo > /dev/null 2>&1 || true
+
+# Check GitHub SSH credentials
+echo "Checking GitHub SSH credentials..."
+if ! ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+    echo "Error: GitHub SSH authentication failed."
+    echo "Please ensure your SSH key is set up correctly:"
+    echo "  1. Generate a key: ssh-keygen -t ed25519"
+    echo "  2. Add to GitHub: https://github.com/settings/keys"
+    echo "  3. Test: ssh -T git@github.com"
+    exit 1
+fi
+echo "GitHub SSH authentication successful."
+
 if [[ ! -d "$FIRMWARE_SOURCE" ]]; then
     echo "Error: Firmware source directory not found: $FIRMWARE_SOURCE"
     echo "Make sure you're running this on an Asahi Linux system with firmware installed."
@@ -68,14 +85,28 @@ echo "Copying firmware to $FIRMWARE_DIR/..."
 mkdir -p "$FIRMWARE_DIR"
 cp -p "$FIRMWARE_SOURCE/all_firmware.tar.gz" "$FIRMWARE_DIR/"
 cp -p "$FIRMWARE_SOURCE"/kernelcache* "$FIRMWARE_DIR/" 2>/dev/null || true
-git lfs track "$FIRMWARE_SOURCE/*"
+git lfs track "$FIRMWARE_DIR/*"
 
 echo "Checking for changes..."
-git add "$FIRMWARE_DIR"
+git add .gitattributes "$FIRMWARE_DIR"
 
 if git diff --cached --quiet; then
     echo "No firmware changes detected. Repository is up to date."
     exit 0
+fi
+
+echo ""
+echo "Files to be committed:"
+echo "----------------------"
+git diff --cached --name-status
+echo "----------------------"
+echo ""
+
+read -p "Proceed with commit and push? [y/N] " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
 fi
 
 echo "Committing firmware..."
