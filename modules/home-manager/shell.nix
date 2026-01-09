@@ -9,6 +9,7 @@
     enableCompletion = true;
     shellAliases = {
       ls = "ls -alGh";
+      ll = "ls -alGh";
       gs = "git status";
       gl = " git log --graph --decorate --pretty=oneline --abbrev-commit";
       gll = "git log --graph --abbrev-commit --decorate --date=relative --all";

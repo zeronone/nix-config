@@ -38,6 +38,9 @@
     # treefmt
     treefmt-nix.url = "github:numtide/treefmt-nix";
     systems.url = "github:nix-systems/default";
+
+    # vscode
+    nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
   };
 
   outputs =
@@ -51,6 +54,7 @@
       asahi-firmware,
       treefmt-nix,
       systems,
+      nix-vscode-extensions,
       ...
     }@inputs:
     let
@@ -64,6 +68,8 @@
           fastfetch
           ripgrep
           wget
+          jq
+          curl
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
@@ -162,6 +168,15 @@
               ;
           };
           modules = [
+            (
+              { pkgs, ... }:
+              {
+                nixpkgs.overlays = [ nix-vscode-extensions.overlays.default ];
+              }
+            )
+            {
+              nixpkgs.config.allowUnfree = true;
+            }
             home-manager.nixosModules.default
             ./modules/common/nix.nix
             (machineDir + /system.nix)
