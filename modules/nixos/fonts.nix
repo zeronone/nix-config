@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
 
-  fonts.enableDefaultFonts = true;
+  fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
     noto-fonts
     fira-code

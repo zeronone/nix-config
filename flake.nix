@@ -201,9 +201,11 @@
         modules = [
           ./modules/nixos/cosmic.nix
           ./modules/nixos/fonts.nix
+          ./modules/nixos/jp-ime.nix
         ];
         homeModules = [
           ./modules/home-manager/cosmic.nix
+          ./modules/home-manager/apple-us-iso-fcitx5.nix
         ];
       };
 
