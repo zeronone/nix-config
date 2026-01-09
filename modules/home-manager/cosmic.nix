@@ -1,6 +1,18 @@
 { ... }:
 {
   xdg.configFile = {
+    # this conflicts with fcitx5 input change
+    "cosmic/com.system76.CosmicSettings.Shortcuts/v1/custom".text = ''
+      {
+          (
+              modifiers: [
+                  Super,
+              ],
+              key: "space",
+          ): Disable,
+      }
+    '';
+
     "cosmic/com.system76.CosmicComp/v1/xkb_config".text = ''
       (
           rules: "",
