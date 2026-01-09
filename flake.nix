@@ -200,6 +200,7 @@
         username = "arif";
         modules = [
           ./modules/nixos/cosmic.nix
+          ./modules/nixos/fonts.nix
         ];
         homeModules = [
           ./modules/home-manager/cosmic.nix

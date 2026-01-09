@@ -5,11 +5,11 @@
       (
           rules: "",
           model: "pc104",
-          layout: "us,jp",
+          layout: "us",
           variant: ",",
           options: Some("terminate:ctrl_alt_bksp,compose:ralt,caps:ctrl_modifier,ctrl:swap_lwin_lctl"),
           repeat_delay: 200,
-          repeat_rate: 40,
+          repeat_rate: 60,
       )
     '';
     # Autotile configuration for COSMIC Comp

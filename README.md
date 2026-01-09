@@ -44,19 +44,22 @@ These are stored in a private git repository and referenced as a flake input.
 
 1. Create a private git repository (e.g., `github.com/zeronone/asahi-firmware`)
 
-2. Push firmware to the repository:
+1. Push firmware to the repository:
+
    ```bash
    ./scripts/push-asahi-firmware.sh --dir m1pro
    ```
 
    Use a different `--dir` for each machine type (e.g., `m1pro`, `m2max`, `m3`).
 
-3. Update the flake lock file:
+1. Update the flake lock file:
+
    ```bash
    nix flake lock --update-input asahi-firmware
    ```
 
-4. Proceed with normal installation:
+1. Proceed with normal installation:
+
    ```bash
    ./bootstrap.sh
    ```
@@ -64,6 +67,7 @@ These are stored in a private git repository and referenced as a flake input.
 ### Updating firmware
 
 If firmware is updated (e.g., after macOS update), re-run:
+
 ```bash
 ./scripts/push-asahi-firmware.sh --dir m1pro
 nix flake lock --update-input asahi-firmware
