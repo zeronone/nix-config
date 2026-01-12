@@ -70,6 +70,8 @@
           wget
           jq
           curl
+          direnv
+          nix-direnv
         ];
 
       # Eval the treefmt modules from ./treefmt.nix
@@ -221,6 +223,7 @@
         homeModules = [
           ./modules/home-manager/cosmic.nix
           ./modules/home-manager/apple-us-iso-fcitx5.nix
+          ./modules/home-manager/fontconfig.nix
         ];
       };
 
