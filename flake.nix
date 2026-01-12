@@ -219,6 +219,7 @@
           ./modules/nixos/cosmic.nix
           ./modules/nixos/fonts.nix
           ./modules/nixos/jp-ime.nix
+          ./modules/nixos/macbook-notch.nix
         ];
         homeModules = [
           ./modules/home-manager/cosmic.nix
