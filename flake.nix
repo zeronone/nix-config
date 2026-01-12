@@ -137,6 +137,7 @@
             {
               system.primaryUser = username;
               users.users.${username}.home = "/Users/${username}";
+              networking.hostName = "${hostname}";
             }
             (mkHomeManager {
               inherit username;

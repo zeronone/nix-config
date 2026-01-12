@@ -34,8 +34,9 @@
   # Keyboard
   system.keyboard.enableKeyMapping = true;
   system.keyboard.remapCapsLockToControl = true;
-  system.defaults.NSGlobalDomain.InitialKeyRepeat = 20;
-  system.defaults.NSGlobalDomain.KeyRepeat = 20;
+  system.defaults.NSGlobalDomain.InitialKeyRepeat = 15;
+  system.defaults.NSGlobalDomain.KeyRepeat = 2;
+  system.defaults.NSGlobalDomain.ApplePressAndHoldEnabled = false;
 
   # Networking
   networking.dns = [
