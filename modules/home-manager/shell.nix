@@ -8,6 +8,7 @@
     syntaxHighlighting.enable = true;
     enableCompletion = true;
     shellAliases = {
+      vim = "nvim";
       ls = "ls -alGh";
       ll = "ls -alGh";
       gs = "git status";
@@ -28,5 +29,17 @@
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
+  };
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+  programs.btop = {
+    enable = true;
+    settings = {
+      color_theme = "tokyo-night";
+      theme_background = true;
+      truecolor = true;
+    };
   };
 }

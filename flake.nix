@@ -42,6 +42,12 @@
 
     # vscode
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
+
+    # noctalia
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   outputs =
@@ -239,16 +245,19 @@
         hostname = "asahi-nixos";
         username = "arif";
         modules = [
-          ./modules/nixos/cosmic.nix
+          ./modules/nixos/niri.nix
+          ./modules/nixos/noctalia.nix
           ./modules/nixos/fonts.nix
           ./modules/nixos/macbook-notch.nix
           ./modules/nixos/macbook-us-ansi.nix
           ./modules/nixos/podman.nix
         ];
         homeModules = [
-          ./modules/home-manager/cosmic.nix
+          ./modules/home-manager/niri.nix
+          ./modules/home-manager/noctalia.nix
           ./modules/home-manager/apple-us-iso-fcitx5.nix
           ./modules/home-manager/fontconfig.nix
+          ./modules/home-manager/node.nix
         ];
       };
 

@@ -8,6 +8,16 @@ switch:
         home-manager switch --flake ".#$(hostname)"; \
     fi
 
+# Build and apply on next boot
+boot:
+    @if [ "$(uname)" = "Darwin" ]; then \
+        echo "Not supported"; \
+    elif [ -f /etc/NIXOS ]; then \
+        sudo nixos-rebuild boot --flake .; \
+    else \
+        echo "Not supported"; \
+    fi
+
 check:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild check --flake .; \

@@ -3,7 +3,6 @@
   # Import JP IME
   imports = [ ./jp-ime.nix ];
 
-
   # To easily inspect keyboard input in the terminal
   # wev | grep sym
   environment.systemPackages = with pkgs; [
