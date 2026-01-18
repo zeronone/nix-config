@@ -212,9 +212,15 @@
             ./modules/common/nix.nix
             (machineDir + /system.nix)
             {
+              programs.zsh.enable = true;
               users.users.${username} = {
                 isNormalUser = true;
-                extraGroups = [ "wheel" ];
+                initialPassword = "password";
+                extraGroups = [
+                  "wheel"
+                  "networkmanager"
+                ];
+                shell = pkgs.zsh;
               };
             }
             (mkHomeManager {
