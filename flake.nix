@@ -4,6 +4,7 @@
   inputs = {
     # Nixpkgs
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Home manager
     home-manager = {
@@ -115,21 +116,29 @@
         }:
         let
           machineDir = ./machines/nix-darwin/${hostname};
-        in
-        nix-darwin.lib.darwinSystem {
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
           };
+          pkgs-unstable = import inputs.nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit
               inputs
-              globalPackages
+              pkgs-unstable
               username
               hostname
               ;
           };
           modules = [
+            {
+              # Global packages
+              environment.systemPackages = (globalPackages pkgs);
+            }
             home-manager.darwinModules.home-manager
             ./modules/common/nix.nix
             ./modules/nix-darwin/bootstrap.nix
@@ -159,18 +168,31 @@
         }:
         let
           machineDir = ./machines/nixos/${hostname};
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+          pkgs-unstable = import inputs.nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+          nixGlobalPackages = (globalPackages pkgs) ++ (with pkgs; [ wl-clipboard ]);
         in
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = {
             inherit
               inputs
-              globalPackages
+              pkgs-unstable
               username
               hostname
               ;
           };
           modules = [
+            {
+              # Global packages
+              environment.systemPackages = nixGlobalPackages;
+            }
             (
               { pkgs, ... }:
               {
@@ -219,8 +241,9 @@
         modules = [
           ./modules/nixos/cosmic.nix
           ./modules/nixos/fonts.nix
-          ./modules/nixos/jp-ime.nix
           ./modules/nixos/macbook-notch.nix
+          ./modules/nixos/macbook-us-ansi.nix
+          ./modules/nixos/podman.nix
         ];
         homeModules = [
           ./modules/home-manager/cosmic.nix

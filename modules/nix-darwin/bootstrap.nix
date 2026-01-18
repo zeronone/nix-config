@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  globalPackages,
   ...
 }:
 {
@@ -62,13 +61,6 @@
     ShowPathbar = true;
     AppleShowAllFiles = true;
   };
-
-  # System packages (global + darwin-specific)
-  environment.systemPackages =
-    (globalPackages pkgs)
-    ++ (with pkgs; [
-      # Add darwin-specific packages here
-    ]);
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog

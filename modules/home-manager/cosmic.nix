@@ -12,14 +12,15 @@
           ): Disable,
       }
     '';
-
+    # Old config
+    # terminate:ctrl_alt_bksp,compose:ralt,caps:ctrl_modifier,ctrl:swap_lwin_lctl
     "cosmic/com.system76.CosmicComp/v1/xkb_config".text = ''
       (
           rules: "",
           model: "pc104",
           layout: "us",
           variant: "",
-          options: Some("terminate:ctrl_alt_bksp,compose:ralt,caps:ctrl_modifier,ctrl:swap_lwin_lctl"),
+          options: Some("terminate:ctrl_alt_bksp,compose:ralt"),
           repeat_delay: 200,
           repeat_rate: 60,
       )'';
