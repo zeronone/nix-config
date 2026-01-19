@@ -8,28 +8,21 @@
       "complex_modifications": {
         "rules": [
           {
-            "description": "Map Tab to Left Command when held",
+            "description": "Map Tab to Hyper when held",
             "manipulators": [
               {
-                "type": "basic",
                 "from": {
                   "key_code": "tab",
-                  "modifiers": {
-                    "optional": [
-                      "any"
-                    ]
-                  }
+                  "modifiers": { "optional": ["any"] }
                 },
-                "to_if_alone": [
-                  {
-                    "key_code": "tab"
-                  }
-                ],
+                "to_if_alone": [{ "key_code": "tab" }],
                 "to_if_held_down": [
                   {
-                    "key_code": "left_command"
+                    "key_code": "left_shift",
+                    "modifiers": ["left_command", "left_control", "left_option"]
                   }
-                ]
+                ],
+                "type": "basic"
               }
             ]
           },

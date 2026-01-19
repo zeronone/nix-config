@@ -267,6 +267,7 @@
             }
           )
           ./modules/darwin/macbook-us-ansi.nix
+          ./modules/darwin/hammerspoon.nix
         ];
       };
 
