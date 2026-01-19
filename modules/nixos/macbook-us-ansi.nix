@@ -14,7 +14,6 @@
   # 2. Sort by key and delete all existing keybindings for muhenkan
   # 3. Add entries for muhenkan -> Deactive IME for each mode
   #    Precomposition, composition, conversion
-
   services.kanata = {
     enable = true;
     # Use latest version

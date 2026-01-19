@@ -252,6 +252,7 @@
         # ];
         modules = [
           ./modules/darwin/nix-homebrew.nix
+          ./modules/darwin/macbook-us-ansi.nix
         ];
       };
 
@@ -261,9 +262,11 @@
         username = "arif";
         modules = [
           ./modules/darwin/nix-homebrew.nix
+          ./modules/darwin/macbook-us-ansi.nix
         ];
         homeModules = [
-          ./modules/home-manager/osx-paneru.nix
+          # Not working well
+          # ./modules/home-manager/osx-paneru.nix
         ];
       };
 

@@ -1,0 +1,54 @@
+(defcfg
+  process-unmapped-keys yes
+)
+;; fn not supported
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /         rsft
+  lctl lalt lmet           spc            rmet ralt      up lft down rght
+)
+
+(defvar
+  tap-timeout   200
+  hold-timeout  200
+  tt            $tap-timeout
+  ht            $hold-timeout
+)
+
+(defalias
+  #|
+    Using meta keys as japanese eisu and kana on Mac with US keyboard.
+  
+    | Source  | Tap          | Hold |
+    | ------- | ------------ | ---- |
+    | lmet    | lang2 (eisu) | lmet |
+    | rmet    | lang1 (kana) | rmet |
+  
+  |#
+  cmd_l (tap-hold-press $tt $ht eisu lmet)
+  cmd_r (tap-hold-press $tt $ht kana rmet)
+
+  ;; 2. Tab Logic:
+  ;;    Tap  = Tab
+  ;;    Hold = Super (lmet) for window management
+  tab_super (tap-hold-press $tt $ht tab lmet)
+)
+
+;; ---------------------------------------------------------------------------
+;; DEFLAYERMAP: Sparse mapping
+;; Keys NOT listed here will default to their defsrc behavior (pass-through).
+;; ---------------------------------------------------------------------------
+(deflayermap (base-layer)
+  ;; 1. Caps Lock -> Left Control
+  caps lctl
+
+  ;; 2. Tab -> Tab/Super alias
+  tab  @tab_super
+
+  ;; 3. Command Keys -> IME/Ctrl aliases
+  lmet @cmd_l
+  rmet @cmd_r
+)

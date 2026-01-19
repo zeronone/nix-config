@@ -30,8 +30,6 @@
       ];
     };
 
-    casks = [
-      "hammerspoon" # macOS automation
-    ];
+    casks = [ ];
   };
 }

@@ -3,7 +3,11 @@ set -e
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Bootstrapping nix-darwin..."
+    sudo softwareupdate --install-rosetta
     sudo nix run nix-darwin -- switch --flake .
+
+    echo "####### TODO"
+    echo "Give accessbility permissions for Karabiner and other apps"
 elif [[ -f /etc/NIXOS ]]; then
     echo "Bootstrapping NixOS..."
     echo "Note: Ensure firmware is pushed to private repo first (see scripts/push-asahi-firmware.sh)"
