@@ -259,8 +259,6 @@
           ./modules/nixos/podman.nix
         ];
         homeModules = [
-          ./modules/home-manager/niri.nix
-          ./modules/home-manager/noctalia.nix
           ./modules/home-manager/apple-us-iso-fcitx5.nix
           ./modules/home-manager/fontconfig.nix
           ./modules/home-manager/node.nix

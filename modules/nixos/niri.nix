@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   username,
+  lib,
   ...
 }:
 {
@@ -31,8 +32,8 @@
     swaylock
     swayidle
     swaybg
-    mako # notification daemon
-    wlr-randr # utility to manage the outputs of a wayland compositor
+    mako
+    wlr-randr
     swayimg
   ];
 
@@ -45,4 +46,28 @@
       };
     };
   };
+
+  home-manager.users.${username} =
+    { pkgs, ... }:
+    {
+      imports = [ ../home-manager/fuzzel.nix ];
+
+      gtk = {
+        enable = true;
+
+        theme = {
+          name = "Tokyonight-Dark";
+          package = pkgs.tokyonight-gtk-theme;
+        };
+
+        iconTheme = {
+          name = "Adawaita";
+          package = pkgs.adwaita-icon-theme;
+        };
+      };
+
+      xdg.configFile = {
+        "niri/config.kdl".source = ../../config/niri/config.kdl;
+      };
+    };
 }
