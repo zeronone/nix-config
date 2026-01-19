@@ -48,6 +48,13 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+
+    paneru = {
+      url = "github:karinushka/paneru";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
   outputs =
@@ -130,6 +137,7 @@
             inherit system;
             config.allowUnfree = true;
           };
+          homeDirectory = "/Users/${username}";
         in
         nix-darwin.lib.darwinSystem {
           specialArgs = {
@@ -137,6 +145,7 @@
               inputs
               pkgs-unstable
               username
+              homeDirectory
               hostname
               ;
           };
@@ -147,7 +156,7 @@
             }
             home-manager.darwinModules.home-manager
             ./modules/common/nix.nix
-            ./modules/nix-darwin/bootstrap.nix
+            ./modules/darwin/bootstrap.nix
             (machineDir + /system.nix)
             {
               system.primaryUser = username;
@@ -155,8 +164,7 @@
               networking.hostName = "${hostname}";
             }
             (mkHomeManager {
-              inherit username;
-              homeDirectory = "/Users/${username}";
+              inherit username homeDirectory;
               homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
             })
           ]
@@ -183,6 +191,7 @@
             config.allowUnfree = true;
           };
           nixGlobalPackages = (globalPackages pkgs) ++ (with pkgs; [ wl-clipboard ]);
+          homeDirectory = "/home/${username}";
         in
         nixpkgs.lib.nixosSystem {
           inherit system;
@@ -191,6 +200,7 @@
               inputs
               pkgs-unstable
               username
+              homeDirectory
               hostname
               ;
           };
@@ -224,8 +234,7 @@
               };
             }
             (mkHomeManager {
-              inherit username;
-              homeDirectory = "/home/${username}";
+              inherit username homeDirectory;
               homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
             })
           ]
@@ -238,12 +247,24 @@
       darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
         hostname = "IT-JPN-31519";
         username = "arezai";
+        # homeModules = [
+        #   ./modules/home-manager/osx-paneru.nix
+        # ];
+        modules = [
+          ./modules/darwin/nix-homebrew.nix
+        ];
       };
 
       # personal macbook
       darwinConfigurations."arif-mac" = mkDarwinHost {
         hostname = "arif-mac";
         username = "arif";
+        modules = [
+          ./modules/darwin/nix-homebrew.nix
+        ];
+        homeModules = [
+          ./modules/home-manager/osx-paneru.nix
+        ];
       };
 
       # NixOS (for NixOS based machines)

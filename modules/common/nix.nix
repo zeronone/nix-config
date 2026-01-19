@@ -1,4 +1,4 @@
-{ ... }:
+{ homeDirectory, ... }:
 {
   nix.settings = {
     substituters = [
@@ -22,6 +22,11 @@
     keep-derivations = true;
     keep-outputs = true;
   };
+
+  # Run: echo "access-tokens=$(gh auth login)" > ~/.secrets/github-token.conf
+  nix.extraOptions = ''
+    !include ${homeDirectory}/.secrets/github-token.conf
+  '';
 
   # Don't need channels since I use flakes
   nix.channel.enable = false;
