@@ -23,7 +23,7 @@
     keep-outputs = true;
   };
 
-  # Run: echo "access-tokens=$(gh auth login)" > ~/.secrets/github-token.conf
+  # Run: echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/github-token.conf
   nix.extraOptions = ''
     !include ${homeDirectory}/.secrets/github-token.conf
   '';

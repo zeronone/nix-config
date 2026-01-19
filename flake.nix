@@ -252,6 +252,27 @@
         # ];
         modules = [
           ./modules/darwin/nix-homebrew.nix
+          (
+            { lib, ... }:
+            {
+              # Don't delete other brews installed on this machine
+              homebrew.onActivation.cleanup = lib.mkForce "none";
+              homebrew.brews = [
+                "openssl"
+                "readline"
+                "coreutils"
+                "ed"
+                "findutils"
+                "gnu-indent"
+                "gnu-sed"
+                "gnu-tar"
+                "gettext"
+                "gnu-which"
+                "gnutls"
+                "grep"
+              ];
+            }
+          )
           ./modules/darwin/macbook-us-ansi.nix
         ];
       };

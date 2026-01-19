@@ -23,13 +23,20 @@
 
     onActivation = {
       autoUpdate = true;
-      cleanup = "zap";
+
+      cleanup = "none";
       upgrade = true;
       extraFlags = [
         "--verbose"
       ];
     };
 
+    # common casks
     casks = [ ];
+
+    # common brews
+    brews = [
+      "tccutil"
+    ];
   };
 }

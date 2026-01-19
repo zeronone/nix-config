@@ -17,9 +17,9 @@
     };
 
     history = {
-      append = false;
-      share = false;
-      size = 10000;
+      append = true;
+      share = true;
+      size = 50000;
     };
   };
   programs.git = {
@@ -41,5 +41,9 @@
       theme_background = true;
       truecolor = true;
     };
+  };
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
   };
 }
