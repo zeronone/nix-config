@@ -19,7 +19,7 @@ input {
     // Omitting settings disables them, or leaves them at their default values.
     keyboard {
       repeat-delay 250 // Delay in milliseconds (default may vary)
-      repeat-rate 35
+      repeat-rate 30
     }
 
     // All commented-out settings here are examples, not defaults.

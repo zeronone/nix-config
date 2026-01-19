@@ -36,16 +36,17 @@
         (defvar
           tap-timeout   200
           hold-timeout  200
+          chord-timeout 50
           tt            $tap-timeout
           ht            $hold-timeout
         )
 
         (defalias
-          ;;    --------------------------------------------------------------
-          ;;    Left Cmd (Tap) -> muhenkan (switch to English)
-          ;;    Left Cmd (Hold)-> lctl
-          ;;    --------------------------------------------------------------
-          cmd_l (tap-hold-press $tt $ht muhenkan lctl)
+          ;; Define lmet's standalone behavior: 
+          ;; Hold = lctl, Tap = muhenkan (as per your original config)
+          lmet_alone (tap-hold-press $tt $ht muhenkan lctl)
+          ;; The alias for the chorded result
+          combined_super lmet
 
           ;;    --------------------------------------------------------------
           ;;    Right Cmd (Tap)  -> kana (switch to composition mode)
@@ -57,6 +58,15 @@
           ;;    Tap  = Tab
           ;;    Hold = Super (lmet) for window management
           tab_super (tap-hold-press $tt $ht tab lmet)
+        )
+
+        (defchords my-chords $chord-timeout
+          ;; 1. The Combination: lalt + lmet = Super (lmet)
+          (lalt lmet) lmet
+
+          ;; 2. The Fallbacks: What happens if only ONE is pressed
+          (lalt) lalt
+          (lmet) @lmet_alone
         )
 
         ;; ---------------------------------------------------------------------------
@@ -71,7 +81,8 @@
           tab  @tab_super
 
           ;; 3. Command Keys -> IME/Ctrl aliases
-          lmet @cmd_l
+          lalt (chord my-chords lalt)
+          lmet (chord my-chords lmet)
           rmet @cmd_r
         )
       '';

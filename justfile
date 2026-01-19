@@ -22,6 +22,7 @@ check:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild check --flake .; \
     elif [ -f /etc/NIXOS ]; then \
+        niri validate -c ./config/niri/config.kdl; \
         nixos-rebuild dry-run --flake .; \
     else \
         echo "TODO"; \
