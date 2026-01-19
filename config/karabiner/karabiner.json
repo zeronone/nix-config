@@ -8,7 +8,7 @@
       "complex_modifications": {
         "rules": [
           {
-            "description": "Map Tab to Hyper when held",
+            "description": "Map Tab to Hyper (f19) when held",
             "manipulators": [
               {
                 "from": {
@@ -18,8 +18,7 @@
                 "to_if_alone": [{ "key_code": "tab" }],
                 "to_if_held_down": [
                   {
-                    "key_code": "left_shift",
-                    "modifiers": ["left_command", "left_control", "left_option"]
+                    "key_code": "f19"
                   }
                 ],
                 "type": "basic"
