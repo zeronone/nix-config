@@ -1,4 +1,20 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
+let
+  binds = [
+    "--bind='ctrl-d:preview-down'"
+    "--bind='ctrl-u:preview-up'"
+    "--bind='ctrl-space:toggle'"
+    "--bind='ctrl-s:toggle-sort'"
+    "--bind='ctrl-y:yank'"
+    "--bind='ctrl-alt-p:change-preview-window(down|hidden|)'"
+  ];
+  sortFilesCmd = "${lib.getExe pkgs.eza} -s modified -1 --no-quotes --reverse";
+in
 {
   programs.zsh = {
     enable = true;
@@ -9,8 +25,6 @@
     enableCompletion = true;
     shellAliases = {
       vim = "nvim";
-      ls = "ls -alGh";
-      ll = "ls -alGh";
       gs = "git status";
       gl = " git log --graph --decorate --pretty=oneline --abbrev-commit";
       gll = "git log --graph --abbrev-commit --decorate --date=relative --all";
@@ -21,6 +35,22 @@
       share = true;
       size = 50000;
     };
+
+    plugins = [
+      {
+        name = "fzf-vi-mode";
+        src = "${pkgs.zsh-vi-mode}/share/zsh-vi-mode";
+      }
+      {
+        name = "fzf-tab";
+        src = "${pkgs.zsh-fzf-tab}/share/fzf-tab";
+      }
+    ];
+
+    initContent = ''
+      # needed instead of fzf.enableZshIntegration = true so zsh-vi-mode and fzf do not conflict
+      zvm_after_init_commands+=(eval "$(fzf --zsh)")
+    '';
   };
   programs.git = {
     enable = true;
@@ -42,8 +72,46 @@
       truecolor = true;
     };
   };
+
+  # eza
+  programs.eza = {
+    enable = true;
+    colors = "auto";
+    git = true;
+    icons = "auto";
+    extraOptions = [
+      "--group"
+      "--header"
+      "--smart-group"
+      "--classify=auto"
+      "--group-directories-first"
+    ];
+  };
+  home.shellAliases = rec {
+    ls = "eza -s modified --reverse";
+    lt = "${ls} --tree";
+    tree = "${lt}";
+  };
+
+  # fzf
+  programs.fd = {
+    enable = true;
+    hidden = true;
+  };
+  home.packages = with pkgs; [
+    fzf-preview
+  ];
+  home.shellAliases.fzfp = "${lib.getExe pkgs.fzf} --preview='${lib.getExe pkgs.fzf-preview} {}'";
+
   programs.fzf = {
     enable = true;
-    enableZshIntegration = true;
+    defaultCommand = "fd -t f";
+    changeDirWidgetCommand = "fd -t d";
+    fileWidgetCommand = "fd -t f -X ${sortFilesCmd}";
+    fileWidgetOptions = binds ++ [ "--preview='${lib.getExe pkgs.fzf-preview} {}'" ];
+    changeDirWidgetOptions = binds ++ [ "--preview='${lib.getExe pkgs.eza} -T {}'" ];
+    # conflicts with zsh-vi-mode
+    # Enabled explicitly in programs.zsh.initExtra
+    # enableZshIntegration = true;
   };
 }

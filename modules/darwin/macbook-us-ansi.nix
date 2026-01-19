@@ -12,16 +12,14 @@
     "karabiner-elements"
   ];
 
-  home-manager.users.${username} = 
+  home-manager.users.${username} =
     { pkgs, ... }:
     {
       home.file.".config/karabiner/karabiner.json".source = ../../config/karabiner/karabiner.json;
     };
 
-
   # Kanata didn't work well
   # Need to permit it in "Accessibility", and daemon needs "Full Disk Access"
-
 
   # homebrew.brews = [
   #   "kanata"

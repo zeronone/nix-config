@@ -49,11 +49,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    paneru = {
-      url = "github:karinushka/paneru";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
@@ -247,9 +242,7 @@
       darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
         hostname = "IT-JPN-31519";
         username = "arezai";
-        # homeModules = [
-        #   ./modules/home-manager/osx-paneru.nix
-        # ];
+        homeModules = [ ];
         modules = [
           ./modules/darwin/nix-homebrew.nix
           (
@@ -285,10 +278,7 @@
           ./modules/darwin/nix-homebrew.nix
           ./modules/darwin/macbook-us-ansi.nix
         ];
-        homeModules = [
-          # Not working well
-          # ./modules/home-manager/osx-paneru.nix
-        ];
+        homeModules = [ ];
       };
 
       # NixOS (for NixOS based machines)

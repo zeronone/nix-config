@@ -361,26 +361,6 @@
         "type": "github"
       }
     },
-    "paneru": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1768692345,
-        "narHash": "sha256-xUA6u/jZqPAxfYhtbdV4r02HpGoxs5Bvf3s/MgV7Dhw=",
-        "owner": "karinushka",
-        "repo": "paneru",
-        "rev": "bd09f4953b818def0e2a1c4bfe7e6ddbff930fd8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "karinushka",
-        "repo": "paneru",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "asahi-firmware": "asahi-firmware",
@@ -393,7 +373,6 @@
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvim": "nixvim",
         "noctalia": "noctalia",
-        "paneru": "paneru",
         "systems": "systems_3",
         "treefmt-nix": "treefmt-nix"
       }
