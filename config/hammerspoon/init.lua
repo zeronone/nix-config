@@ -14,8 +14,9 @@ local function initPaperWM(PaperWM)
 
   -- Displays
   local allScreens = hs.screen.allScreens()
+  -- If one screen, don't enable
   if #allScreens == 1 then
-    PaperWM.window_filter:setDefaultFilter()
+    PaperWM.window_filter:setScreens({})
     return
   end
 
@@ -23,9 +24,9 @@ local function initPaperWM(PaperWM)
 
   for _, screen in ipairs(allScreens) do
     local name = screen:name()
-    local builtIn = name:find("^Built%-in") ~= nil
+    local dell = name:find("^Dell") ~= nil
 
-    if not builtIn then
+    if not dell then
       table.insert(screens, screen:id())
       print("using screen: " .. name)
     else
@@ -38,7 +39,7 @@ end
 
 local function watchDisplays()
   local PaperWM = hs.loadSpoon("PaperWM")
-  setDisplays(PaperWM)
+  initPaperWM(PaperWM)
   PaperWM:start()
 end
 
@@ -59,10 +60,10 @@ spoon.SpoonInstall:andUse("PaperWM", {
       window_gap = 2,
 
       center_mouse = true,
-      window_ratios = { 1/3, 1/2, 2/3 },
+      window_ratios = { 1/3, 1/2, 2/3, 1 },
 
       swipe_fingers = 4,
-      swipe_gain = 1.0,
+      swipe_gain = 2.0,
 
       drag_window = { "cmd", "alt" },
       lift_window = { "cmd", "alt", "shift" }
@@ -96,8 +97,10 @@ spoon.SpoonInstall:andUse("PaperWM", {
       cycle_height         = {{"cmd", "alt", "shift"}, "r"},
   
       -- increase/decrease width
-      increase_width = {{"cmd", "alt", "shift"}, "="},  -- + sign
+      increase_width = {{"cmd", "alt"}, "="},  -- + sign
       decrease_width = {{"cmd", "alt"}, "-"},
+      increase_heigth = {{"cmd", "alt", "shift"}, "="},  -- + sign
+      decrease_heigth = {{"cmd", "alt", "shift"}, "-"},
       
       -- Utility
       center_window        = {{"cmd", "alt"}, "c"},

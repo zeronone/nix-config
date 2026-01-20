@@ -1,27 +1,40 @@
 {
-  "global": { "show_in_menu_bar": false },
+  "global": {
+    "show_in_menu_bar": false
+  },
   "profiles": [
     {
       "name": "Default profile",
       "selected": true,
       "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" },
       "complex_modifications": {
+        "parameters": {
+          "basic.to_if_held_down_threshold_milliseconds": 200,
+          "basic.to_if_alone_timeout_milliseconds": 200,
+          "basic.to_delayed_action_delay_milliseconds": 200,
+          "basic.simultaneous_threshold_milliseconds": 50
+        },
         "rules": [
           {
-            "description": "Map Tab to Hyper (f19) when held",
+            "description": "Tab one shot. Hyper-lite (Cmd+Opt) immediately when held or combined.",
             "manipulators": [
               {
+                "type": "basic",
                 "from": {
                   "key_code": "tab",
                   "modifiers": { "optional": ["any"] }
                 },
-                "to_if_alone": [{ "key_code": "tab" }],
-                "to_if_held_down": [
+                "to": [
                   {
-                    "key_code": "f19"
+                    "key_code": "left_command",
+                    "modifiers": ["left_option"]
                   }
                 ],
-                "type": "basic"
+                "to_if_alone": [
+                  {
+                    "key_code": "tab"
+                  }
+                ]
               }
             ]
           },
