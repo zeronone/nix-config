@@ -11,6 +11,11 @@ local function initPaperWM(PaperWM)
   -- Apps
   PaperWM.window_filter:rejectApp("Karabiner-Elements")
   PaperWM.window_filter:rejectApp("Zoom Workplace")
+  PaperWM.window_filter:rejectApp("Finder")
+  PaperWM.window_filter:rejectApp("Picture in Picture")
+  PaperWM.window_filter:rejectApp("qemu-system-aarch64")
+  PaperWM.window_filter:rejectApp("System Settings")
+  PaperWM.window_filter:rejectApp("Activity Monitor")
 
   -- Displays
   local allScreens = hs.screen.allScreens()
@@ -24,7 +29,7 @@ local function initPaperWM(PaperWM)
 
   for _, screen in ipairs(allScreens) do
     local name = screen:name()
-    local dell = name:find("^Dell") ~= nil
+    local dell = name:find("^DELL") ~= nil
 
     if not dell then
       table.insert(screens, screen:id())
