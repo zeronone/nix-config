@@ -36,6 +36,8 @@
   system.defaults.NSGlobalDomain.InitialKeyRepeat = 15;
   system.defaults.NSGlobalDomain.KeyRepeat = 2;
   system.defaults.NSGlobalDomain.ApplePressAndHoldEnabled = false;
+  system.defaults.WindowManager.EnableStandardClickToShowDesktop = false;
+  system.defaults.NSGlobalDomain."com.apple.swipescrolldirection" = false;
 
   # Networking
   networking.dns = [

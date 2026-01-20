@@ -2,6 +2,11 @@
 hs.window.animationDuration = 0 -- disable animations
 hs.loadSpoon("SpoonInstall")
 
+
+---------------------------------
+-- Windows
+---------------------------------
+
 -- Manually downloaded
 ActiveSpace = hs.loadSpoon("ActiveSpace")
 ActiveSpace.compact = true
