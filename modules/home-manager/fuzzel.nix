@@ -1,12 +1,11 @@
 { pkgs, ... }:
 {
-
   programs.fuzzel = {
     enable = true;
     settings = {
       main = {
         font = "PlemolJP Console NF:style=Medium:size=14";
-        terminal = "wezterm";
+        terminal = "ghostty";
         lines = 10;
         width = 50;
         horizontal-pad = 40;

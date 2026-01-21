@@ -1,8 +1,5 @@
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-    wezterm
-  ];
   programs.firefox.enable = true;
   programs.chromium = {
     enable = true;
@@ -11,6 +8,7 @@
       { id = "dbepggeogbaibhgnhhndojpepiihcmeb"; }
     ];
   };
+  programs.ghostty.enable = true;
   programs.vscode = {
     enable = true;
     # some extensions expect these programs to be available

@@ -4,6 +4,7 @@ switch:
         sudo darwin-rebuild switch --flake .; \
     elif [ -f /etc/NIXOS ]; then \
         sudo nixos-rebuild switch --flake .; \
+        niri validate -c ./config/niri/config.kdl; \
     else \
         home-manager switch --flake ".#$(hostname)"; \
     fi

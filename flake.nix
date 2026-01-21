@@ -6,15 +6,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Flake Utils
+    flake-utils.url = "github:numtide/flake-utils";
+
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # NixOS profiles to optimize settings for different hardware
-    # No support for: MacBookPro18,2 yet
-    # hardware.url = "github:nixos/nixos-hardware";
 
     # Nix Darwin (for MacOS machines)
     nix-darwin = {
@@ -38,12 +37,15 @@
 
     # treefmt
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    systems.url = "github:nix-systems/default";
 
     # vscode
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
 
-    # noctalia
+    # niri+noctalia
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -61,19 +63,18 @@
     {
       self,
       nixpkgs,
+      flake-utils,
       home-manager,
       nix-darwin,
       nixvim,
       nixos-apple-silicon,
       asahi-firmware,
       treefmt-nix,
-      systems,
       nix-vscode-extensions,
       ...
     }@inputs:
     let
-      # Small tool to iterate over each systems
-      eachSystem = f: nixpkgs.lib.genAttrs (import systems) (system: f nixpkgs.legacyPackages.${system});
+      # --- Shared Logic & Helpers ---
 
       # Global packages available on all systems
       globalPackages =
@@ -87,9 +88,6 @@
           direnv
           nix-direnv
         ];
-
-      # Eval the treefmt modules from ./treefmt.nix
-      treefmtEval = eachSystem (pkgs: treefmt-nix.lib.evalModule pkgs ./treefmt.nix);
 
       # Shared home-manager modules for all hosts
       sharedHomeModules = [
@@ -242,76 +240,88 @@
         };
 
     in
-    {
-      # work macbook
-      darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
-        hostname = "IT-JPN-31519";
-        username = "arezai";
-        homeModules = [ ];
-        modules = [
-          ./modules/darwin/nix-homebrew.nix
-          (
-            { lib, ... }:
-            {
-              # Don't delete other brews installed on this machine
-              homebrew.onActivation.cleanup = lib.mkForce "none";
-              homebrew.brews = [
-                "openssl"
-                "readline"
-                "coreutils"
-                "ed"
-                "findutils"
-                "gnu-indent"
-                "gnu-sed"
-                "gnu-tar"
-                "gettext"
-                "gnu-which"
-                "gnutls"
-                "grep"
-              ];
-            }
-          )
-          ./modules/darwin/macbook-us-ansi.nix
-          ./modules/darwin/hammerspoon.nix
-        ];
-      };
+    # --- System Specific Outputs (formatter, checks) ---
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        # Eval the treefmt modules from ./treefmt.nix
+        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+      in
+      {
+        # for `nix fmt`
+        formatter = treefmtEval.config.build.wrapper;
+        # for `nix flake check`
+        checks = {
+          formatting = treefmtEval.config.build.check self;
+        };
+      }
+    )
+    //
+      # --- System Agnostic Outputs (NixOS/Darwin Configurations) ---
+      {
+        # work macbook
+        darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
+          hostname = "IT-JPN-31519";
+          username = "arezai";
+          homeModules = [ ];
+          modules = [
+            ./modules/darwin/nix-homebrew.nix
+            (
+              { lib, ... }:
+              {
+                # Don't delete other brews installed on this machine
+                homebrew.onActivation.cleanup = lib.mkForce "none";
+                homebrew.brews = [
+                  "openssl"
+                  "readline"
+                  "coreutils"
+                  "ed"
+                  "findutils"
+                  "gnu-indent"
+                  "gnu-sed"
+                  "gnu-tar"
+                  "gettext"
+                  "gnu-which"
+                  "gnutls"
+                  "grep"
+                ];
+              }
+            )
+            ./modules/darwin/macbook-us-ansi.nix
+            ./modules/darwin/hammerspoon.nix
+          ];
+        };
 
-      # personal macbook
-      darwinConfigurations."arif-mac" = mkDarwinHost {
-        hostname = "arif-mac";
-        username = "arif";
-        modules = [
-          ./modules/darwin/nix-homebrew.nix
-          ./modules/darwin/macbook-us-ansi.nix
-        ];
-        homeModules = [ ];
-      };
+        # personal macbook
+        darwinConfigurations."arif-mac" = mkDarwinHost {
+          hostname = "arif-mac";
+          username = "arif";
+          modules = [
+            ./modules/darwin/nix-homebrew.nix
+            ./modules/darwin/macbook-us-ansi.nix
+          ];
+          homeModules = [ ];
+        };
 
-      # NixOS (for NixOS based machines)
-      nixosConfigurations."asahi-nixos" = mkNixosHost {
-        hostname = "asahi-nixos";
-        username = "arif";
-        modules = [
-          ./modules/nixos/niri.nix
-          ./modules/nixos/noctalia.nix
-          ./modules/nixos/fonts.nix
-          ./modules/nixos/macbook-notch.nix
-          ./modules/nixos/macbook-us-ansi.nix
-          ./modules/nixos/podman.nix
-          ./modules/nixos/rust.nix
-        ];
-        homeModules = [
-          ./modules/home-manager/apple-us-iso-fcitx5.nix
-          ./modules/home-manager/fontconfig.nix
-          ./modules/home-manager/node.nix
-        ];
+        # NixOS (for NixOS based machines)
+        nixosConfigurations."asahi-nixos" = mkNixosHost {
+          hostname = "asahi-nixos";
+          username = "arif";
+          modules = [
+            ./modules/nixos/niri.nix
+            ./modules/nixos/noctalia.nix
+            ./modules/nixos/fonts.nix
+            ./modules/nixos/macbook-notch.nix
+            ./modules/nixos/macbook-us-ansi.nix
+            ./modules/nixos/podman.nix
+            ./modules/nixos/rust.nix
+          ];
+          homeModules = [
+            ./modules/home-manager/apple-us-iso-fcitx5.nix
+            ./modules/home-manager/fontconfig.nix
+            ./modules/home-manager/node.nix
+          ];
+        };
       };
-
-      # for `nix fmt`
-      formatter = eachSystem (pkgs: treefmtEval.${pkgs.system}.config.build.wrapper);
-      # for `nix flake check`
-      checks = eachSystem (pkgs: {
-        formatting = treefmtEval.${pkgs.system}.config.build.check self;
-      });
-    };
 }

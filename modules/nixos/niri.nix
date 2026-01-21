@@ -6,9 +6,19 @@
   ...
 }:
 {
+  imports = [
+    inputs.niri.nixosModules.niri
+  ];
+  # It is recommended to use this overlay over directly accessing the outputs.
+  # This is because the overlay ensures that the dependencies match your system's nixpkgs version,
+  # which is most important for mesa. If mesa doesn't match, niri will be unable to run in a TTY.
+  nixpkgs.overlays = [ inputs.niri.overlays.niri ];
+
   programs.niri = {
     enable = true;
+    package = pkgs.niri-stable;
   };
+
   programs.yazi = {
     enable = true;
     plugins = {
@@ -19,53 +29,17 @@
     };
   };
 
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
-
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
-  environment.systemPackages = with pkgs; [
-    xwayland-satellite
-    tokyonight-gtk-theme
-    swaylock
-    swayidle
-    swaybg
-    mako
-    wlr-randr
-    swayimg
-  ];
-
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd niri";
-        user = "greeter";
-      };
-    };
-  };
 
   home-manager.users.${username} =
     { pkgs, ... }:
     {
-      imports = [ ../home-manager/fuzzel.nix ];
+      imports = [
+        ../../modules/home-manager/fuzzel.nix
+      ];
 
-      gtk = {
-        enable = true;
-
-        theme = {
-          name = "Tokyonight-Dark";
-          package = pkgs.tokyonight-gtk-theme;
-        };
-
-        iconTheme = {
-          name = "Adawaita";
-          package = pkgs.adwaita-icon-theme;
-        };
-      };
-
+      # we configure our own config manually
+      programs.niri.config = null;
       xdg.configFile = {
         "niri/config.kdl".source = ../../config/niri/config.kdl;
       };
