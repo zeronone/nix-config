@@ -50,6 +50,11 @@
     };
 
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -293,6 +298,7 @@
           ./modules/nixos/macbook-notch.nix
           ./modules/nixos/macbook-us-ansi.nix
           ./modules/nixos/podman.nix
+          ./modules/nixos/rust.nix
         ];
         homeModules = [
           ./modules/home-manager/apple-us-iso-fcitx5.nix
