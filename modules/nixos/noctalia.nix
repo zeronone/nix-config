@@ -24,24 +24,51 @@
       programs.noctalia-shell = {
         enable = true;
         settings = {
+          wallpaper = {
+            enabled = false;
+          };
           bar = {
             density = "compact";
             position = "top";
-            showCapsule = false;
+            showOutline = false;
+            showCapsule = true;
             widgets = {
               left = [
                 {
-                  id = "ControlCenter";
-                  useDistroLogo = true;
+                  hideUnoccupied = false;
+                  id = "Workspace";
+                  labelMode = "none";
                 }
+                {
+                  id = "Launcher";
+                }
+                {
+                  id = "ControlCenter";
+                }
+                {
+                  id = "SystemMonitor";
+                }
+                {
+                  id = "ActiveWindow";
+                }
+                {
+                  id = "MediaMini";
+                }
+              ];
+              center = [ ];
+              right = [
                 {
                   id = "Network";
                 }
                 {
                   id = "Bluetooth";
                 }
-              ];
-              right = [
+                {
+                  id = "Volume";
+                }
+                {
+                  id = "Brightness";
+                }
                 {
                   alwaysShowPercentage = false;
                   id = "Battery";
@@ -55,9 +82,7 @@
                   usePrimaryColor = true;
                 }
                 {
-                  hideUnoccupied = false;
-                  id = "Workspace";
-                  labelMode = "none";
+                  id = "NotificationHistory";
                 }
               ];
             };

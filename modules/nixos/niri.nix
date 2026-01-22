@@ -30,16 +30,23 @@
   };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.systemPackages = with pkgs; [
+    swaybg
+    swaylock
+    swayidle
+    mako
+    xwayland-satellite
+  ];
 
   home-manager.users.${username} =
     { pkgs, ... }:
     {
-      imports = [
-        ../../modules/home-manager/fuzzel.nix
-      ];
-
       # we configure our own config manually
       programs.niri.config = null;
+      home.file."wallpaper.png" = {
+        source = ../../nix-dark.png;
+        force = true;
+      };
       xdg.configFile = {
         "niri/config.kdl".source = ../../config/niri/config.kdl;
       };
