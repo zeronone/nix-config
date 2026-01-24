@@ -320,12 +320,12 @@
             ./modules/nixos/macbook-us-ansi.nix
             ./modules/nixos/podman.nix
             ./modules/nixos/rust.nix
+            ./modules/nixos/gui-apps.nix
           ];
           homeModules = [
             ./modules/home-manager/apple-us-iso-fcitx5.nix
             ./modules/home-manager/fontconfig.nix
             ./modules/home-manager/node.nix
-            ./modules/home-manager/linux-gui-apps.nix
           ];
         };
       };

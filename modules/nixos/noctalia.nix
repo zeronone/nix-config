@@ -5,8 +5,8 @@
   ...
 }:
 {
+  # Pre-requisites
   networking.networkmanager.enable = true;
-  hardware.bluetooth.enable = true;
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
 
@@ -14,10 +14,9 @@
     flake-inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
-  users.users.${username}.extraGroups = [
-    "networkmanager"
-    "bluetooth"
-  ];
+  users.users."${username}" = {
+    extraGroups = [ "bluetooth" ];
+  };
 
   home-manager.users.${username} =
     { pkgs, flake-inputs, ... }:

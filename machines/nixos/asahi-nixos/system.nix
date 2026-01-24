@@ -26,8 +26,20 @@
     ];
   };
 
-  # Firmware from private git repo (see scripts/push-asahi-firmware.sh)
-  hardware.asahi.peripheralFirmwareDirectory = flake-inputs.asahi-firmware;
+  hardware.asahi = {
+    enable = true;
+    # Firmware from private git repo (see scripts/push-asahi-firmware.sh)
+    peripheralFirmwareDirectory = flake-inputs.asahi-firmware;
+  };
+
+  # Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  hardware.bluetooth.settings = {
+    General = {
+      Experimental = true;
+    };
+  };
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
