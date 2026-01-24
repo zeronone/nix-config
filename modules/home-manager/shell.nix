@@ -51,7 +51,10 @@ in
       # needed instead of fzf.enableZshIntegration = true so zsh-vi-mode and fzf do not conflict
       zvm_after_init_commands+=(eval "$(fzf --zsh)")
 
-      EDITOR=nvim
+      # We have set EDITOR=nvim, which enables vi keybindings
+      # However the following two from emacs are useful, so we add it manually
+      bindkey '^a' beginning-of-line
+      bindkey '^e' end-of-line
     '';
   };
   programs.git = {

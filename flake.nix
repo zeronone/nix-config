@@ -27,7 +27,10 @@
     };
 
     # Apple Silicon support for NixOS
-    nixos-apple-silicon.url = "github:nix-community/nixos-apple-silicon";
+    nixos-apple-silicon = {
+      url = "github:nix-community/nixos-apple-silicon/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Private repo for Apple Silicon firmware (non-distributable)
     asahi-firmware = {
@@ -63,7 +66,11 @@
     # latest stable release
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
-    nixos-muvm-fex.url = "github:nrabulinski/nixos-muvm-fex";
+    nixos-muvm-fex = {
+      url = "github:nrabulinski/nixos-muvm-fex/native-build";
+      inputs.nixos-apple-silicon.follows = "nixos-apple-silicon";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -315,6 +322,8 @@
           hostname = "asahi-nixos";
           username = "arif";
           modules = [
+            #./modules/nixos/x86_64-emulation.nix
+            #./modules/nixos/muvm-fex.nix
             ./modules/nixos/niri.nix
             ./modules/nixos/noctalia.nix
             ./modules/nixos/fonts.nix
@@ -323,8 +332,6 @@
             ./modules/nixos/podman.nix
             ./modules/nixos/rust.nix
             ./modules/nixos/gui-apps.nix
-            # Doesn't work yet
-            # ./modules/nixos/muvm-fex.nix
           ];
           homeModules = [
             ./modules/home-manager/apple-us-iso-fcitx5.nix

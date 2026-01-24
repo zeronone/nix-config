@@ -8,8 +8,7 @@
     enable = true;
     viAlias = true;
     vimAlias = true;
-    # Setting EDITOR=nvim env var messes up with terminals such as Ghostty
-    # defaultEditor = true;
+    defaultEditor = true;
 
     extraPlugins = with pkgs.vimPlugins; [
       vim-nix
