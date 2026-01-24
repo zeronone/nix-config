@@ -57,6 +57,8 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    dolphin-overlay.url = "github:rumboon/dolphin-overlay";
   };
 
   outputs =
@@ -71,6 +73,7 @@
       asahi-firmware,
       treefmt-nix,
       nix-vscode-extensions,
+      dolphin-overlay,
       ...
     }@inputs:
     let
@@ -204,17 +207,15 @@
           };
           modules = [
             {
+              nixpkgs.overlays = [
+                nix-vscode-extensions.overlays.default
+                dolphin-overlay.overlays.default
+              ];
+              nixpkgs.config.allowUnfree = true;
+            }
+            {
               # Global packages
               environment.systemPackages = nixGlobalPackages;
-            }
-            (
-              { pkgs, ... }:
-              {
-                nixpkgs.overlays = [ nix-vscode-extensions.overlays.default ];
-              }
-            )
-            {
-              nixpkgs.config.allowUnfree = true;
             }
             home-manager.nixosModules.default
             ./modules/common/nix.nix

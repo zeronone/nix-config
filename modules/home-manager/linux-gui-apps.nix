@@ -20,7 +20,6 @@
     );
 
     profiles.default.extensions = with pkgs.vscode-marketplace; [
-
       # Core & Vim
       vscodevim.vim
       mkhl.direnv

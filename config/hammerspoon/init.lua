@@ -1,56 +1,95 @@
 
+local hyper = {"cmd", "alt"}
+local hyperctrl = {"cmd", "alt", "ctrl"}
+local hypershift = {"cmd", "alt", "shift"}
+local hypershiftctrl = {"cmd", "alt", "ctrl", "shift"}
+
+
 hs.window.animationDuration = 0 -- disable animations
 hs.loadSpoon("SpoonInstall")
 
+---------------------------------
+-- Helper Function: Issue #135 Fix
+-- Moves window to a specific display and registers it with PaperWM
+---------------------------------
+local function moveWindowToDisplay(direction)
+    local PaperWM = hs.loadSpoon("PaperWM")
+    local win = hs.window.focusedWindow()
+    if not win then return end
+
+    local screen = win:screen()
+    local nextScreen = nil
+
+    if direction == "West" then
+        nextScreen = screen:toWest()
+    elseif direction == "East" then
+        nextScreen = screen:toEast()
+    elseif direction == "North" then
+        nextScreen = screen:toNorth()
+    elseif direction == "South" then
+        nextScreen = screen:toSouth()
+    end
+
+    if nextScreen then
+        -- Detach from current PaperWM strip
+        if PaperWM.window_list[win:id()] then
+            PaperWM.window_filter:allowWindow(win) -- ensure it's tracked
+        end
+        
+        -- Move using standard HS API
+        win:moveToScreen(nextScreen)
+        
+        -- Re-register with PaperWM on the new screen
+        -- A short delay ensures the move completes before PaperWM grabs it
+        hs.timer.doAfter(0.1, function()
+            PaperWM:addWindow(win)
+            win:focus()
+        end)
+    end
+end
 
 ---------------------------------
 -- Windows
 ---------------------------------
 
--- Manually downloaded
+-- ActiveSpace (Optional if strictly no workspaces, but harmless to keep for focus)
 ActiveSpace = hs.loadSpoon("ActiveSpace")
 ActiveSpace.compact = true
 ActiveSpace:start()
 
+-- MouseFollowsFocus
+MouseFollowsFocus = hs.loadSpoon("MouseFollowsFocus")
+MouseFollowsFocus.start()
+
 local function initPaperWM(PaperWM)
-  -- Apps
-  PaperWM.window_filter:rejectApp("Karabiner-Elements")
-  PaperWM.window_filter:rejectApp("Zoom Workplace")
-  PaperWM.window_filter:rejectApp("Finder")
-  PaperWM.window_filter:rejectApp("Picture in Picture")
-  PaperWM.window_filter:rejectApp("qemu-system-aarch64")
-  PaperWM.window_filter:rejectApp("System Settings")
-  PaperWM.window_filter:rejectApp("Activity Monitor")
+    -- Apps to Ignore
+    PaperWM.window_filter:rejectApp("Karabiner-Elements")
+    PaperWM.window_filter:rejectApp("Zoom Workplace")
+    PaperWM.window_filter:rejectApp("Finder")
+    PaperWM.window_filter:rejectApp("System Settings")
+    PaperWM.window_filter:rejectApp("Activity Monitor")
 
-  -- Displays
-  local allScreens = hs.screen.allScreens()
-  -- If one screen, don't enable
-  if #allScreens == 1 then
-    PaperWM.window_filter:setScreens({})
-    return
-  end
-
-  local screens = {}
-
-  for _, screen in ipairs(allScreens) do
-    local name = screen:name()
-    local dell = name:find("^DELL") ~= nil
-
-    if not dell then
-      table.insert(screens, screen:id())
-      print("using screen: " .. name)
-    else
-      print("skipping: " .. name)
+    -- Display Logic
+    local allScreens = hs.screen.allScreens()
+    if #allScreens == 1 then
+        PaperWM.window_filter:setScreens({})
+        return
     end
-  end
 
-  PaperWM.window_filter:setScreens(screens)
+    local screens = {}
+    for _, screen in ipairs(allScreens) do
+        local name = screen:name()
+        if not name:find("^DELL") then
+            table.insert(screens, screen:id())
+        end
+    end
+    PaperWM.window_filter:setScreens(screens)
 end
 
 local function watchDisplays()
-  local PaperWM = hs.loadSpoon("PaperWM")
-  initPaperWM(PaperWM)
-  PaperWM:start()
+    local PaperWM = hs.loadSpoon("PaperWM")
+    initPaperWM(PaperWM)
+    PaperWM:start()
 end
 
 local screenWatcher = hs.screen.watcher.new(watchDisplays)
@@ -62,92 +101,92 @@ spoon.SpoonInstall.repos.PaperWM = {
     desc = "PaperWM.spoon repository",
     branch = "release",
 }
+
 spoon.SpoonInstall:andUse("PaperWM", {
     repo = "PaperWM",
     fn = initPaperWM,
     config = {
-      screen_margin = 16,
-      window_gap = 2,
-
-      center_mouse = true,
-      window_ratios = { 1/3, 1/2, 2/3, 1 },
-
-      swipe_fingers = 4,
-      swipe_gain = 2.0,
-
-      drag_window = { "cmd", "alt" },
-      lift_window = { "cmd", "alt", "shift" }
+        screen_margin = 16,
+        window_gap = 2,
+        center_mouse = true,
+        window_ratios = { 1/3, 1/2, 2/3, 1 },
+        
+        -- Niri-style "Move" = Ctrl
+        drag_window = hyperctrl,
+        lift_window = hypershift
     },
     start = true,
     hotkeys = {
-      -- Try to keep it similar with Niri config in Linux
-      -- Hyper = Mod (Linux) / f19 (Mac)
-      -- Focus: Hyper + h/j/k/l
-      -- Move Window: Hyper + Shift + h/j/k/l
-      -- Switch Workspace: Hyper + 1-9
-      -- Move Window to Workspace: Hyper + Shift + 1-9
-      -- Cycle Width: Hyper + R
-      -- Center: Hyper + C
-      -- Focus (Hyper + h/j/k/l)
-      focus_left  = {{"cmd", "alt"}, "h"},
-      focus_right = {{"cmd", "alt"}, "l"},
-      focus_prev  = {{"cmd", "alt"}, "k"}, -- Up/Prev
-      focus_next  = {{"cmd", "alt"}, "j"}, -- Down/Next
-  
-      -- Move Window (Hyper + Shift + h/j/k/l)
-      swap_left  = {{"cmd", "alt", "shift"}, "h"},
-      swap_right = {{"cmd", "alt", "shift"}, "l"},
-      swap_up    = {{"cmd", "alt", "shift"}, "k"},
-      swap_down  = {{"cmd", "alt", "shift"}, "j"},
-  
-      -- Resizing
-      -- REMOVED: increase_width on "l" (Conflicts with focus_right)
-      -- REMOVED: decrease_width on "h" (Conflicts with focus_left)
-      cycle_width          = {{"cmd", "alt"}, "r"},
-      cycle_height         = {{"cmd", "alt", "shift"}, "r"},
-  
-      -- increase/decrease width
-      increase_width = {{"cmd", "alt"}, "="},  -- + sign
-      decrease_width = {{"cmd", "alt"}, "-"},
-      increase_heigth = {{"cmd", "alt", "shift"}, "="},  -- + sign
-      decrease_heigth = {{"cmd", "alt", "shift"}, "-"},
-      
-      -- Utility
-      center_window        = {{"cmd", "alt"}, "c"},
-      full_width           = {{"cmd", "alt"}, "f"}, -- Maximize equivalent
-      
-      -- Slurp/Barf 
-      -- Mapped to brackets to match Niri
-      slurp_in             = {{"cmd", "alt"}, "["}, 
-      barf_out             = {{"cmd", "alt"}, "]"},
-  
-      -- Workspaces (Hyper + #)
-      switch_space_1 = {{"cmd", "alt"}, "1"},
-      switch_space_2 = {{"cmd", "alt"}, "2"},
-      switch_space_3 = {{"cmd", "alt"}, "3"},
-      switch_space_4 = {{"cmd", "alt"}, "4"},
-      switch_space_5 = {{"cmd", "alt"}, "5"},
-      switch_space_6 = {{"cmd", "alt"}, "6"},
-      switch_space_7 = {{"cmd", "alt"}, "7"},
-      switch_space_8 = {{"cmd", "alt"}, "8"},
-      switch_space_9 = {{"cmd", "alt"}, "9"},
-  
-      -- Move Window to Workspace (Hyper + Shift + #)
-      -- Note: Ensure "move_window_X" is supported in your specific spoon version
-      -- otherwise these map to native space moving
-      move_window_1 = {{"cmd", "alt", "shift"}, "1"},
-      move_window_2 = {{"cmd", "alt", "shift"}, "2"},
-      move_window_3 = {{"cmd", "alt", "shift"}, "3"},
-      move_window_4 = {{"cmd", "alt", "shift"}, "4"},
-      move_window_5 = {{"cmd", "alt", "shift"}, "5"},
-      move_window_6 = {{"cmd", "alt", "shift"}, "6"},
-      move_window_7 = {{"cmd", "alt", "shift"}, "7"},
-      move_window_8 = {{"cmd", "alt", "shift"}, "8"},
-      move_window_9 = {{"cmd", "alt", "shift"}, "9"},
+        --------------------------------------------------
+        -- CONVENTIONS
+        -- Mod   = cmd + alt
+        -- Move  = Mod + ctrl
+        -- Size  = Mod + shift
+        -- Monitor = Mod + Arrows
+        --------------------------------------------------
 
-      -- move the focused window into / out of the tiling layer
-      toggle_floating = {{"cmd", "alt"}, "v"},
-      -- raise all floating windows on top of tiled windows
-      focus_floating  = {{"cmd", "alt", "shift"}, "v"},
+        -- --- FOCUS (H/L only, no J/K) ---
+        focus_left  = {hyper, "h"},
+        focus_right = {hyper, "l"},
+        -- Removed j/k because "Columns are single windows" (1D strip)
+
+        -- --- MOVE WINDOW IN STRIP (Mod + Ctrl + H/L) ---
+        swap_left  = {hyperctrl, "h"},
+        swap_right = {hyperctrl, "l"},
+        -- Removed j/k swap
+
+        -- --- MONITOR FOCUS (Mod + Arrows) ---
+        -- PaperWM doesn't have native monitor focus keys in the map,
+        -- so we rely on the manual binds below or HS defaults.
+        -- We leave this empty here to avoid conflicts and define manually below.
+
+        -- --- SIZING (Mod + Shift) ---
+        cycle_width      = {hyper, "r"},
+        -- Height cycle removed if columns are single windows (usually implies full height)
+        
+        -- Finer adjustments
+        increase_width = {hyper, "="}, 
+        decrease_width = {hyper, "-"},
+        
+        -- --- UTILITY ---
+        center_window    = {hyper, "c"},
+        full_width       = {hyper, "f"}, -- Maximize
+        
+        -- --- SLURP / BARF (Brackets) ---
+        slurp_in         = {hyper, "["}, 
+        barf_out         = {hyper, "]"},
+
+        -- --- FLOATING ---
+        toggle_floating = {hyper, "v"},
+        focus_floating  = {hypershift, "v"},
     }
 })
+
+---------------------------------
+-- Manual Bindings (Monitors & Custom Logic)
+---------------------------------
+
+-- 1. Monitor Focus (Mod + Arrows)
+hs.hotkey.bind(hyper, "left", function() 
+    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenWest() 
+end)
+hs.hotkey.bind(hyper, "right", function() 
+    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenEast() 
+end)
+hs.hotkey.bind(hyper, "up", function() 
+    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenNorth() 
+end)
+hs.hotkey.bind(hyper, "down", function() 
+    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenSouth() 
+end)
+
+-- 2. Move Window to Monitor (Mod + Ctrl + Arrows)
+-- Uses the Issue #135 logic defined at the top
+hs.hotkey.bind(hyperctrl, "left", function() moveWindowToDisplay("West") end)
+hs.hotkey.bind(hyperctrl, "right", function() moveWindowToDisplay("East") end)
+hs.hotkey.bind(hyperctrl, "up", function() moveWindowToDisplay("North") end)
+hs.hotkey.bind(hyperctrl, "down", function() moveWindowToDisplay("South") end)
+
+-- 3. App Launcher (Matches Niri Mod+Space)
+-- Note: Requires an external launcher or use Spotlight
+hs.hotkey.bind(hyper, "space", function() hs.application.launchOrFocus("Raycast") end)

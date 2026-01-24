@@ -32,10 +32,11 @@
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
   environment.systemPackages = with pkgs; [
     swaybg
-    swaylock
-    swayidle
     mako
-    xwayland-satellite
+
+    # Dolphin
+    kdePackages.qtsvg
+    kdePackages.dolphin
   ];
 
   home-manager.users.${username} =
