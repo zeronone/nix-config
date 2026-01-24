@@ -50,6 +50,8 @@ in
     initContent = ''
       # needed instead of fzf.enableZshIntegration = true so zsh-vi-mode and fzf do not conflict
       zvm_after_init_commands+=(eval "$(fzf --zsh)")
+
+      EDITOR=nvim
     '';
   };
   programs.git = {
@@ -88,7 +90,7 @@ in
     ];
   };
   home.shellAliases = rec {
-    ls = "eza -s modified --reverse";
+    ls = "eza -l -s modified --reverse";
     lt = "${ls} --tree";
     tree = "${lt}";
   };

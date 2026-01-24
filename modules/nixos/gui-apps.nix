@@ -1,84 +1,85 @@
 {
-  pkgs,
-  lib,
-  flake-inputs,
   username,
   ...
 }:
 {
-  # Note: The home-manager module didn't work
-
-  # Pre-requisites
-  # Must have enabled xdg-portal.nix
-  imports = [
-    flake-inputs.nix-flatpak.nixosModules.nix-flatpak
-  ];
-
-  # Like homebrew, fetches the latest version
-  # We don't care much about versioning these
-  services.flatpak = {
-    enable = true;
-    uninstallUnmanaged = false;
-    uninstallUnused = true;
-    update = {
-      onActivation = false;
-      auto = {
-        enable = true;
-        onCalendar = "weekly";
-      };
-    };
-    # Merge with default
-    remotes = lib.mkOptionDefault [
-      {
-        name = "flathub-beta";
-        location = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
-      }
-    ];
-
-    overrides = {
-      global = {
-        # Force Wayland by default
-        Context.sockets = [
-          "wayland"
-          "!x11"
-          "!fallback-x11"
-        ];
-
-        Environment = {
-          # Force correct theme for some GTK apps
-          GTK_THEME = "Adwaita:dark";
-        };
-      };
-
-      # example overrides
-      # "org.onlyoffice.desktopeditors".Context.sockets = ["x11"]; # No Wayland support
-      # "com.visualstudio.code".Context = {
-      #   filesystems = [
-      #     "xdg-config/git:ro" # Expose user Git config
-      #     "/run/current-system/sw/bin:ro" # Expose NixOS managed software
-      #   ];
-      #   sockets = [
-      #     "gpg-agent" # Expose GPG agent
-      #     "pcsc" # Expose smart cards (i.e. YubiKey)
-      #   ];
-      # };
-    };
-
-    packages = [
-      "us.zoom.Zoom"
-      "org.libreoffice.LibreOffice"
-      "md.obsidian.Obsidian"
-      "org.gnome.Calculator"
-      "com.discordapp.Discord"
-      "org.videolan.VLC"
-      "com.valvesoftware.Steam"
-      "com.spotify.Client"
-    ];
-  };
+  # Ensure XDG_DATA_DIRS dirs etc are properly configured
+  # The home-manager module below doesn't configure it
+  services.flatpak.enable = true;
 
   home-manager.users.${username} =
-    { pkgs, ... }:
     {
+      pkgs,
+      username,
+      flake-inputs,
+      ...
+    }:
+    {
+      # Two types of GUI apps
+      # Nix-managed (properly versioned and configured)
+      # Flatpak-managed (don't care about versioning)
+
+      # Pre-requisites
+      # Must have enabled xdg-portal.nix
+      imports = [
+        flake-inputs.nix-flatpak.homeManagerModules.nix-flatpak
+      ];
+
+      # Like homebrew, fetches the latest version
+      # We don't care much about versioning these
+      services.flatpak = {
+        enable = true;
+        uninstallUnmanaged = false;
+        uninstallUnused = false;
+        update = {
+          onActivation = false;
+          auto = {
+            enable = true;
+            onCalendar = "weekly";
+          };
+        };
+
+        overrides = {
+          global = {
+            # Force Wayland by default
+            Context.sockets = [
+              "wayland"
+              "!x11"
+              "!fallback-x11"
+            ];
+
+            Environment = {
+              # Force correct theme for some GTK apps
+              GTK_THEME = "Adwaita:dark";
+            };
+          };
+
+          # example overrides
+          # "org.onlyoffice.desktopeditors".Context.sockets = ["x11"]; # No Wayland support
+          # "com.visualstudio.code".Context = {
+          #   filesystems = [
+          #     "xdg-config/git:ro" # Expose user Git config
+          #     "/run/current-system/sw/bin:ro" # Expose NixOS managed software
+          #   ];
+          #   sockets = [
+          #     "gpg-agent" # Expose GPG agent
+          #     "pcsc" # Expose smart cards (i.e. YubiKey)
+          #   ];
+          # };
+        };
+
+        packages = [
+          # "us.zoom.Zoom"
+          "org.libreoffice.LibreOffice"
+          "md.obsidian.Obsidian"
+          "org.gnome.Calculator"
+          "com.discordapp.Discord/x86_64"
+          # "org.videolan.VLC"
+          # "com.valvesoftware.Steam"
+          # "com.spotify.Client"
+        ];
+      };
+
       # The following are directly managed by Nix
       # We want more control on them, with proper versioning
       programs.firefox.enable = true;

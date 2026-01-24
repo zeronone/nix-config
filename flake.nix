@@ -62,6 +62,8 @@
 
     # latest stable release
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+
+    nixos-muvm-fex.url = "github:nrabulinski/nixos-muvm-fex";
   };
 
   outputs =
@@ -321,6 +323,8 @@
             ./modules/nixos/podman.nix
             ./modules/nixos/rust.nix
             ./modules/nixos/gui-apps.nix
+            # Doesn't work yet
+            # ./modules/nixos/muvm-fex.nix
           ];
           homeModules = [
             ./modules/home-manager/apple-us-iso-fcitx5.nix
