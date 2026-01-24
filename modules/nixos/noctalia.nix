@@ -1,6 +1,6 @@
 {
   pkgs,
-  inputs,
+  flake-inputs,
   username,
   ...
 }:
@@ -11,14 +11,19 @@
   services.upower.enable = true;
 
   environment.systemPackages = with pkgs; [
-    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
+    flake-inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
+
+  users.users.${username}.extraGroups = [
+    "networkmanager"
+    "bluetooth"
   ];
 
   home-manager.users.${username} =
-    { pkgs, ... }:
+    { pkgs, flake-inputs, ... }:
     {
       imports = [
-        inputs.noctalia.homeModules.default
+        flake-inputs.noctalia.homeModules.default
       ];
 
       programs.noctalia-shell = {
@@ -41,9 +46,6 @@
                 }
                 {
                   id = "Launcher";
-                }
-                {
-                  id = "ControlCenter";
                 }
                 {
                   id = "SystemMonitor";
@@ -83,6 +85,9 @@
                 }
                 {
                   id = "NotificationHistory";
+                }
+                {
+                  id = "ControlCenter";
                 }
               ];
             };

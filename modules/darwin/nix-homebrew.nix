@@ -1,11 +1,14 @@
 {
   pkgs,
-  inputs,
+  flake-inputs,
   username,
   ...
 }:
 {
-  imports = [ inputs.nix-homebrew.darwinModules.nix-homebrew ];
+  imports = [ flake-inputs.nix-homebrew.darwinModules.nix-homebrew ];
+
+  # Homebrew is used for apps where we don't care too much abour versioning
+  # For example desktop apps
 
   # Install Homebrew
   nix-homebrew = {

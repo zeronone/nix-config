@@ -6,13 +6,13 @@
   config,
   lib,
   pkgs,
-  inputs,
+  flake-inputs,
   ...
 }:
 {
   imports = [
     # Apple Silicon support from flake input
-    inputs.nixos-apple-silicon.nixosModules.apple-silicon-support
+    flake-inputs.nixos-apple-silicon.nixosModules.apple-silicon-support
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ../../../modules/nixos/networking.nix
@@ -27,7 +27,7 @@
   };
 
   # Firmware from private git repo (see scripts/push-asahi-firmware.sh)
-  hardware.asahi.peripheralFirmwareDirectory = inputs.asahi-firmware;
+  hardware.asahi.peripheralFirmwareDirectory = flake-inputs.asahi-firmware;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

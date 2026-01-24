@@ -1,5 +1,43 @@
-{ pkgs, ... }:
 {
+  pkgs,
+  flake-inputs,
+  username,
+  ...
+}:
+{
+  # Pre-requisites
+  # Must have enabled xdg-portal.nix
+  imports = [
+    flake-inputs.nix-flatpak.homeManagerModules.nix-flatpak
+  ];
+
+  # Like homebrew, fetches the latest version
+  # We don't care much about versioning these
+  services.flatpak = {
+    enable = true;
+    uninstallUnmanaged = false;
+    uninstallUnused = true;
+    update = {
+      onActivation = false;
+      auto = {
+        enable = true;
+        onCalendar = "weekly";
+      };
+    };
+  };
+  services.flatpak.packages = [
+    "com.discordapp.Discord"
+    "org.videolan.VLC"
+    "com.valvesoftware.Steam"
+    "com.spotify.Client"
+    "md.obsidian.Obsidian"
+    "org.libreoffice.LibreOffice"
+    "us.zoom.Zoom"
+    "org.gnome.Calculator"
+  ];
+
+  # The following are directly managed by Nix
+  # We want more control on them, with proper versioning
   programs.firefox.enable = true;
   programs.chromium = {
     enable = true;

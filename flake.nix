@@ -59,6 +59,9 @@
     };
 
     dolphin-overlay.url = "github:rumboon/dolphin-overlay";
+
+    # latest stable release
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
   outputs =
@@ -109,7 +112,9 @@
           home-manager.backupFileExtension = "bak";
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.extraSpecialArgs = {
+            flake-inputs = inputs;
+          };
           home-manager.sharedModules = sharedHomeModules;
           home-manager.users.${username} = {
             imports = homeModules;
@@ -142,8 +147,8 @@
         in
         nix-darwin.lib.darwinSystem {
           specialArgs = {
+            flake-inputs = inputs;
             inherit
-              inputs
               pkgs-unstable
               username
               homeDirectory
@@ -165,8 +170,7 @@
               networking.hostName = "${hostname}";
             }
             (mkHomeManager {
-              inherit username homeDirectory;
-              homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
+              inherit username homeDirectory homeModules;
             })
           ]
           ++ modules;
@@ -197,8 +201,8 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = {
+            flake-inputs = inputs;
             inherit
-              inputs
               pkgs-unstable
               username
               homeDirectory
@@ -233,8 +237,7 @@
               };
             }
             (mkHomeManager {
-              inherit username homeDirectory;
-              homeModules = [ (machineDir + /home.nix) ] ++ homeModules;
+              inherit username homeDirectory homeModules;
             })
           ]
           ++ modules;
@@ -322,6 +325,7 @@
             ./modules/home-manager/apple-us-iso-fcitx5.nix
             ./modules/home-manager/fontconfig.nix
             ./modules/home-manager/node.nix
+            ./modules/home-manager/linux-gui-apps.nix
           ];
         };
       };

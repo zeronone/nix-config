@@ -1,8 +1,11 @@
-# home.nix
-{ inputs, ... }:
+# This didn't work well, disalbed for now.
+# Need to give permissions to Accessibility, can we use tccutils?
+# Needs to have Karbiner-Elements installed
+
+{ flake-inputs, ... }:
 {
   imports = [
-    inputs.paneru.homeModules.paneru
+    flake-inputs.paneru.homeModules.paneru
   ];
 
   services.paneru = {
