@@ -69,7 +69,7 @@
     nixos-muvm-fex = {
       url = "github:nrabulinski/nixos-muvm-fex/native-build";
       inputs.nixos-apple-silicon.follows = "nixos-apple-silicon";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
 
@@ -225,6 +225,11 @@
                 dolphin-overlay.overlays.default
               ];
               nixpkgs.config.allowUnfree = true;
+
+              # other common config
+              boot.kernel.sysctl = {
+                "fs.file-max" = 262144;
+              };
             }
             {
               # Global packages

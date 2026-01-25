@@ -1,4 +1,4 @@
 { ... }:
 {
-  boot.kernelParams = [ "apple_dcp.show_notch=1" ];
+  boot.kernelParams = [ "appledrm.show_notch=1" ];
 }

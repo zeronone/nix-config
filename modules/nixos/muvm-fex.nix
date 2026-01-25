@@ -9,7 +9,7 @@
 
         # Set to false if you have an x86_64 builder available
         # Will default to false if your nixpkgs is new enough
-        config.nixos-muvm-fex.mesaDoCross = false;
+        # config.nixos-muvm-fex.mesaDoCross = false;
         overlays = [ flake-inputs.nixos-muvm-fex.overlays.default ];
       };
     in
