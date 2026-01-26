@@ -137,7 +137,7 @@
           homeModules ? [ ],
         }:
         let
-          machineDir = ./machines/nix-darwin/${hostname};
+          machineDir = ./machines/darwin/${hostname};
           pkgs = import nixpkgs {
             inherit system;
             config.allowUnfree = true;
@@ -276,9 +276,10 @@
         darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
           hostname = "IT-JPN-31519";
           username = "arezai";
-          homeModules = [ ];
           modules = [
             ./modules/darwin/nix-homebrew.nix
+            ./modules/darwin/macbook-us-ansi.nix
+            ./modules/darwin/hammerspoon.nix
             (
               { lib, ... }:
               {
@@ -300,8 +301,9 @@
                 ];
               }
             )
-            ./modules/darwin/macbook-us-ansi.nix
-            ./modules/darwin/hammerspoon.nix
+          ];
+          homeModules = [
+            ./machines/darwin/IT-JPN-31519/home.nix
           ];
         };
 
@@ -313,7 +315,9 @@
             ./modules/darwin/nix-homebrew.nix
             ./modules/darwin/macbook-us-ansi.nix
           ];
-          homeModules = [ ];
+          homeModules = [
+            ./machines/darwin/arif-mac/home.nix
+          ];
         };
 
         # NixOS (for NixOS based machines)

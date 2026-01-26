@@ -18,36 +18,39 @@ let
     # Override muvm to inject the mesa-x86_64-linux into the RootFS
     muvm = prev.muvm.overrideAttrs (oldAttrs: {
       # We overwrite postFixup to replace the default wrapper with our own
-      postFixup = let
-        # We create a new init script that references the custom mesa package
-        newInitScript = final.writeShellApplication {
-          name = "muvm-init";
-          runtimeInputs = [ final.coreutils ];
-          text = ''
-            if [[ ! -f /etc/NIXOS ]]; then exit; fi
+      postFixup =
+        let
+          # We create a new init script that references the custom mesa package
+          newInitScript = final.writeShellApplication {
+            name = "muvm-init";
+            runtimeInputs = [ final.coreutils ];
+            text = ''
+              if [[ ! -f /etc/NIXOS ]]; then exit; fi
 
-            ln -s /run/muvm-host/run/current-system /run/current-system
+              ln -s /run/muvm-host/run/current-system /run/current-system
 
-            # OVERRIDE: Point opengl-driver to our Cross-Compiled Mesa
-            ln -s ${final.mesa-x86_64-linux} /run/opengl-driver
-          '';
-        };
+              # OVERRIDE: Point opengl-driver to our Cross-Compiled Mesa
+              ln -s ${final.mesa-x86_64-linux} /run/opengl-driver
+            '';
+          };
 
-        # We must reconstruct the runtime PATH for the wrapper because 
-        # replacing postFixup removes the original wrapper logic.
-        # We pull dependencies from 'final' to ensure they exist.
-        binPath = [
-          final.dhcpcd
-          final.passt
-          (placeholder "out")
-        ] ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
+          # We must reconstruct the runtime PATH for the wrapper because
+          # replacing postFixup removes the original wrapper logic.
+          # We pull dependencies from 'final' to ensure they exist.
+          binPath = [
+            final.dhcpcd
+            final.passt
+            (placeholder "out")
+          ]
+          ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
 
-      in ''
-        # recreate the binary wrapper
-        wrapProgram $out/bin/muvm \
-          --prefix PATH : "${final.lib.makeBinPath binPath}" \
-          --add-flags "--execute-pre=${final.lib.getExe newInitScript}"
-      '';
+        in
+        ''
+          # recreate the binary wrapper
+          wrapProgram $out/bin/muvm \
+            --prefix PATH : "${final.lib.makeBinPath binPath}" \
+            --add-flags "--execute-pre=${final.lib.getExe newInitScript}"
+        '';
     });
   };
 in
