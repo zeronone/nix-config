@@ -65,12 +65,6 @@
 
     # latest stable release
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
-
-    nixos-muvm-fex = {
-      url = "github:nrabulinski/nixos-muvm-fex/native-build";
-      inputs.nixos-apple-silicon.follows = "nixos-apple-silicon";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
   };
 
   outputs =
@@ -328,7 +322,7 @@
           username = "arif";
           modules = [
             #./modules/nixos/x86_64-emulation.nix
-            #./modules/nixos/muvm-fex.nix
+            ./modules/nixos/muvm-fex.nix
             ./modules/nixos/niri.nix
             ./modules/nixos/noctalia.nix
             ./modules/nixos/fonts.nix

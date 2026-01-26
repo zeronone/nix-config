@@ -1,4 +1,4 @@
-{ homeDirectory, ... }:
+{ username, homeDirectory, ... }:
 {
   nix.settings = {
     substituters = [
@@ -8,7 +8,19 @@
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     ];
 
-    trusted-users = [ "@admin" ];
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://zeronone.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "zeronone.cachix.org-1:PbaDDNg+I3i0ykG67L2SBt7Z5wtS52kH8l+CEJCnqro="
+    ];
+
+    trusted-users = [
+      "@admin"
+      username
+    ];
 
     # https://github.com/NixOS/nix/issues/7273
     auto-optimise-store = false;

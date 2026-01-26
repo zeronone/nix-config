@@ -19,6 +19,9 @@ boot:
         echo "Not supported"; \
     fi
 
+watch-store:
+    cachix watch-store zeronone
+
 check:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild check --flake .; \

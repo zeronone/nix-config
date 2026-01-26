@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "__flake-compat": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1743448263,
-        "narHash": "sha256-PplvwAEkj+/MFkM6Q9V59L6f6i3Tbdc/9yLRf/iwECg=",
-        "ref": "refs/heads/main",
-        "rev": "6588972962297c7abd300a72c55b2c7e21c1dc54",
-        "revCount": 85,
-        "type": "git",
-        "url": "https://git.lix.systems/lix-project/flake-compat.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "https://git.lix.systems/lix-project/flake-compat.git"
-      }
-    },
     "asahi-firmware": {
       "flake": false,
       "locked": {
@@ -343,32 +327,6 @@
         "type": "github"
       }
     },
-    "nixos-muvm-fex": {
-      "inputs": {
-        "__flake-compat": "__flake-compat",
-        "nixos-apple-silicon": [
-          "nixos-apple-silicon"
-        ],
-        "nixpkgs": [
-          "nixpkgs-unstable"
-        ],
-        "nixpkgs-muvm": "nixpkgs-muvm"
-      },
-      "locked": {
-        "lastModified": 1747923214,
-        "narHash": "sha256-rva/48UdH1TdrlI8gX6LEd0W/3NxE4OVPWB3FMSYzfo=",
-        "owner": "nrabulinski",
-        "repo": "nixos-muvm-fex",
-        "rev": "9bf86173ca62ab64e63c1c83b27b664e3df3e03a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nrabulinski",
-        "ref": "native-build",
-        "repo": "nixos-muvm-fex",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1743890059,
@@ -380,23 +338,6 @@
       },
       "original": {
         "owner": "NixOS",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-muvm": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1746131127,
-        "narHash": "sha256-Ean8ZaL0+2clYRNzOnBdNYTloXvFw4IfG8XXCUYV4Yw=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "8a30e8fcec6df3bdea313b05067a39840756255f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "refs/pull/397932/head",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -560,7 +501,6 @@
         "nix-homebrew": "nix-homebrew",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-apple-silicon": "nixos-apple-silicon",
-        "nixos-muvm-fex": "nixos-muvm-fex",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvim": "nixvim",
