@@ -1,22 +1,26 @@
 {
   pkgs,
+  pkgs-unstable,
   ...
 }:
 let
   muvm-fex-overlay = final: prev: {
+    # Mesa from pkgs-stable
     # Mesa for inside the MicroVM container
     mesa-x86_64-linux = final.pkgsCross.gnu64.mesa;
     # Still need this Asahi fork of virglrenderer
     virglrenderer = prev.virglrenderer.overrideAttrs (old: {
       src = final.fetchurl {
         url = "https://gitlab.freedesktop.org/asahi/virglrenderer/-/archive/asahi-20250424/virglrenderer-asahi-20250806.tar.bz2";
-        hash = "sha256-9qFOsSv8o6h9nJXtMKksEaFlDP1of/LXsg3LCRL79JM=";
+        hash = "sha256-96qatlyDxn8IA8/WLH58XUwThDIzNOGpgXvDQ9/cqjA=";
       };
       mesonFlags = old.mesonFlags ++ [ (final.lib.mesonOption "drm-renderers" "asahi-experimental") ];
     });
 
+    fex = pkgs-unstable.fex;
+
     # Override muvm to inject the mesa-x86_64-linux into the RootFS
-    muvm = prev.muvm.overrideAttrs (oldAttrs: {
+    muvm = pkgs-unstable.muvm.overrideAttrs (oldAttrs: {
       # We overwrite postFixup to replace the default wrapper with our own
       postFixup =
         let
@@ -40,6 +44,7 @@ let
           binPath = [
             final.dhcpcd
             final.passt
+            final.socat
             (placeholder "out")
           ]
           ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
@@ -84,7 +89,6 @@ in
   # muvm is already installed with a wrapper that adds --execute-pre
   # and loads the necessary GPU drivers
   environment.systemPackages = with pkgs; [
-    mesa-x86_64-linux
     muvm
     fex
   ];
