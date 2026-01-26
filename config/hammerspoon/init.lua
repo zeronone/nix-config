@@ -59,7 +59,7 @@ ActiveSpace:start()
 
 -- MouseFollowsFocus
 MouseFollowsFocus = hs.loadSpoon("MouseFollowsFocus")
-MouseFollowsFocus.start()
+MouseFollowsFocus:start()
 
 local function initPaperWM(PaperWM)
     -- Apps to Ignore

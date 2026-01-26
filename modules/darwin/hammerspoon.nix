@@ -29,10 +29,10 @@ in
       };
     };
 
-    home.file.".config/hammerspoon/Spoons/MouseFollowFocus.spoon" = {
+    home.file.".config/hammerspoon/Spoons/MouseFollowsFocus.spoon" = {
       source = pkgs.fetchzip {
         url = " https://github.com/Hammerspoon/Spoons/raw/${hammerSpoonRepoCommit}/Spoons/MouseFollowsFocus.spoon.zip";
-        hash = "";
+        hash = "sha256-TI3LxurbBohvR9xI+HvrorGZl5QyPB1+uSX0uMC2RiQ=";
       };
     };
 
