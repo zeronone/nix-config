@@ -10,11 +10,9 @@
 
     extra-substituters = [
       "https://nix-community.cachix.org"
-      "https://zeronone.cachix.org"
     ];
     extra-trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "zeronone.cachix.org-1:PbaDDNg+I3i0ykG67L2SBt7Z5wtS52kH8l+CEJCnqro="
     ];
 
     trusted-users = [

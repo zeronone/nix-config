@@ -5,6 +5,43 @@
 }:
 let
   muvm-fex-overlay = final: prev: {
+    # 1. Update libkrunfw to 5.1.0 (Required for libkrun 1.17.0)
+    libkrunfw = prev.libkrunfw.overrideAttrs (old: rec {
+      version = "5.1.0";
+      src = final.fetchFromGitHub {
+        owner = "containers";
+        repo = "libkrunfw";
+        tag = "v${version}";
+        hash = final.lib.fakeHash; # TODO: Update this hash
+      };
+
+      # libkrunfw 5.1.0 rebases on kernel 6.12.62
+      kernelSrc = final.fetchurl {
+        url = "mirror://kernel/linux/kernel/v6.x/linux-6.12.62.tar.xz";
+        hash = final.lib.fakeHash; # TODO: Update this hash
+      };
+    });
+
+    # 2. Update libkrun to 1.17.0
+    libkrun = prev.libkrun.overrideAttrs (old: rec {
+      version = "1.17.0";
+      src = final.fetchFromGitHub {
+        owner = "containers";
+        repo = "libkrun";
+        tag = "v${version}";
+        hash = final.lib.fakeHash; # TODO: Update this hash
+      };
+
+      # Cargo dependencies will change with the new version
+      cargoDeps = final.rustPlatform.fetchCargoVendor {
+        inherit src;
+        hash = final.lib.fakeHash; # TODO: Update this hash
+      };
+
+      # Ensure we link against the NEW libkrunfw defined above
+      buildInputs = [ final.libkrunfw ] ++ final.lib.filter (i: i != prev.libkrunfw) old.buildInputs;
+    });
+
     # Mesa from pkgs-stable
     # Mesa for inside the MicroVM container
     mesa-x86_64-linux = final.pkgsCross.gnu64.mesa;
@@ -20,43 +57,47 @@ let
     fex = pkgs-unstable.fex;
 
     # Override muvm to inject the mesa-x86_64-linux into the RootFS
-    muvm = pkgs-unstable.muvm.overrideAttrs (oldAttrs: {
-      # We overwrite postFixup to replace the default wrapper with our own
-      postFixup =
-        let
-          # We create a new init script that references the custom mesa package
-          newInitScript = final.writeShellApplication {
-            name = "muvm-init";
-            runtimeInputs = [ final.coreutils ];
-            text = ''
-              if [[ ! -f /etc/NIXOS ]]; then exit; fi
+    muvm =
+      (pkgs-unstable.muvm.override {
+        libkrun = final.libkrun;
+      }).overrideAttrs
+        (oldAttrs: {
+          # We overwrite postFixup to replace the default wrapper with our own
+          postFixup =
+            let
+              # We create a new init script that references the custom mesa package
+              newInitScript = final.writeShellApplication {
+                name = "muvm-init";
+                runtimeInputs = [ final.coreutils ];
+                text = ''
+                  if [[ ! -f /etc/NIXOS ]]; then exit; fi
 
-              ln -s /run/muvm-host/run/current-system /run/current-system
+                  ln -s /run/muvm-host/run/current-system /run/current-system
 
-              # OVERRIDE: Point opengl-driver to our Cross-Compiled Mesa
-              ln -s ${final.mesa-x86_64-linux} /run/opengl-driver
+                  # OVERRIDE: Point opengl-driver to our Cross-Compiled Mesa
+                  ln -s ${final.mesa-x86_64-linux} /run/opengl-driver
+                '';
+              };
+
+              # We must reconstruct the runtime PATH for the wrapper because
+              # replacing postFixup removes the original wrapper logic.
+              # We pull dependencies from 'final' to ensure they exist.
+              binPath = [
+                final.dhcpcd
+                final.passt
+                final.socat
+                (placeholder "out")
+              ]
+              ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
+
+            in
+            ''
+              # recreate the binary wrapper
+              wrapProgram $out/bin/muvm \
+                --prefix PATH : "${final.lib.makeBinPath binPath}" \
+                --add-flags "--execute-pre=${final.lib.getExe newInitScript}"
             '';
-          };
-
-          # We must reconstruct the runtime PATH for the wrapper because
-          # replacing postFixup removes the original wrapper logic.
-          # We pull dependencies from 'final' to ensure they exist.
-          binPath = [
-            final.dhcpcd
-            final.passt
-            final.socat
-            (placeholder "out")
-          ]
-          ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
-
-        in
-        ''
-          # recreate the binary wrapper
-          wrapProgram $out/bin/muvm \
-            --prefix PATH : "${final.lib.makeBinPath binPath}" \
-            --add-flags "--execute-pre=${final.lib.getExe newInitScript}"
-        '';
-    });
+        });
   };
 in
 {
