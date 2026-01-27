@@ -93,7 +93,7 @@ in
     ];
   };
   home.shellAliases = rec {
-    ls = "eza -l -s modified --reverse";
+    ls = "eza -a -l -s modified --reverse";
     lt = "${ls} --tree";
     tree = "${lt}";
   };

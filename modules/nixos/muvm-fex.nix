@@ -1,6 +1,7 @@
 {
   pkgs,
   pkgs-unstable,
+  lib,
   ...
 }:
 let
@@ -56,81 +57,128 @@ let
 
     fex = pkgs-unstable.fex;
 
-    # Override muvm to inject the mesa-x86_64-linux into the RootFS
-    muvm =
-      (pkgs-unstable.muvm.override {
+    # Override muvm: Remove default wrappers and inject updated deps
+    # Default wrappers adds:
+    # --add-flags "--execute-pre=... to mount opengl drivers
+    # We already prepare a custom rootfs
+    muvm = (
+      pkgs-unstable.muvm.override {
         libkrun = final.libkrun;
-      }).overrideAttrs
-        (oldAttrs: {
-          # We overwrite postFixup to replace the default wrapper with our own
-          postFixup =
-            let
-              # We create a new init script that references the custom mesa package
-              newInitScript = final.writeShellApplication {
-                name = "muvm-init";
-                runtimeInputs = [ final.coreutils ];
-                text = ''
-                  if [[ ! -f /etc/NIXOS ]]; then exit; fi
+      }
+    );
 
-                  ln -s /run/muvm-host/run/current-system /run/current-system
+    fex-emu-rootfs-fedora = pkgs.stdenv.mkDerivation rec {
+      pname = "fex-emu-rootfs-fedora";
+      version = "1.1.2-fc43";
 
-                  # OVERRIDE: Point opengl-driver to our Cross-Compiled Mesa
-                  ln -s ${final.mesa-x86_64-linux} /run/opengl-driver
-                '';
-              };
+      src = pkgs.fetchurl {
+        url = "https://riscv-kojipkgs.fedoraproject.org//packages/fex-emu-rootfs-fedora/42%5E1.1/2.fc43/noarch/fex-emu-rootfs-fedora-42%5E1.1-2.fc43.noarch.rpm";
+        sha256 = "sha256-xyN2yWi+1ErbCT/gynZFxrXjYdyUvEE76nfddotOPAQ=";
+      };
 
-              # We must reconstruct the runtime PATH for the wrapper because
-              # replacing postFixup removes the original wrapper logic.
-              # We pull dependencies from 'final' to ensure they exist.
-              binPath = [
-                final.dhcpcd
-                final.passt
-                final.socat
-                (placeholder "out")
-              ]
-              ++ final.lib.optionals final.stdenv.hostPlatform.isAarch64 [ final.fex ];
+      # Required tools
+      nativeBuildInputs = [
+        final.rpm
+        final.cpio
+        final.autoPatchelfHook
+      ];
 
-            in
-            ''
-              # recreate the binary wrapper
-              wrapProgram $out/bin/muvm \
-                --prefix PATH : "${final.lib.makeBinPath binPath}" \
-                --add-flags "--execute-pre=${final.lib.getExe newInitScript}"
-            '';
-        });
+      unpackPhase = ''
+        # Extract the RPM content
+        rpm2cpio $src | cpio -idmv
+      '';
+
+      installPhase = ''
+        # Copy files to the Nix store
+        mkdir -p $out
+        cp -r usr/share/fex-emu/RootFS $out/
+      '';
+    };
+
   };
+  # The Init Script
+  # This script runs INSIDE the VM as root.
+  vmInitScript = pkgs.writeShellApplication {
+    name = "muvm-guest-init.sh";
+    runtimeInputs = [
+      pkgs.coreutils
+    ];
+    text = ''
+      set -x
+
+      # Host Paths (Nix Store Paths)
+      # HOST_MESA="${pkgs.mesa-x86_64-linux}"
+
+      # Guest Paths (Prefix with /run/muvm-host)
+      # GUEST_MESA="/run/muvm-host$HOST_MESA"
+
+      # MESA_SRC="$GUEST_MESA"
+
+      # 1. Setup OpenGL Driver
+      # # We symlink the host's cross-compiled mesa to /run/opengl-driver
+      # mkdir -p /run/opengl-driver
+      # ln -sf "$MESA_SRC" /run/opengl-driver
+    '';
+  };
+
+  # --- 3. The Runner ---
+  muvm-x86-runner = pkgs.writeShellScriptBin "muvm-x86-runner" ''
+    echo ":: Launching muvm..."
+    echo ":: Will run: $@"
+    echo ":: FEX RootFS at: ${pkgs.fex-emu-rootfs-fedora}/RootFS/default.erofs"
+
+    exec ${pkgs.muvm}/bin/muvm \
+      --execute-pre "${lib.getExe vmInitScript}" \
+      --fex-image "${pkgs.fex-emu-rootfs-fedora}/RootFS/default.erofs" \
+      $@
+  '';
 in
 {
   # Background
   # https://docs.fedoraproject.org/en-US/fedora-asahi-remix/x86-support/
 
-  # Default nixos emulation uses qemu-user-static (i.e: qeumu-x86_64-static for emulation)
-  # But apple silicon requires 16K pages, but most x86 apps don't work well with it.
+  # What does muvm do?
+  # 1. Creates a MicroVM: Launches a libkrun-based virtual machine running a 4K-page Linux kernel to
+  #    bypass the 16K-page incompatibility of the Apple Silicon host.
+  # 2. Mirrors Host Filesystem: Mounts the host's root filesystem inside the VM (sharing /usr, /home, etc.)
+  #    while keeping specific directories like /dev and /run private to the guest.
+  # 3. Enables Emulation: Configures the guest's binfmt_misc to automatically run x86/x86-64 binaries
+  #    using FEX-emu (leveraging hardware TSO for performance).
+  # 4. Manages RootFS: Mounts a custom FEX root filesystem and overlays at /run/fex-emu/
+  #    to provide necessary x86/x86-64 shared libraries.
+  # 5. Bridges Hardware/Audio: Implements pass-through for the GPU (native context), X11,
+  #    PulseAudio, and input devices to integrate seamlessly with the host desktop.
 
-  # FEX is a fast x86 emulator
-  # FEX also supports 4K pages only, and most programs don't support 16K pages well
-  # muvm launches a microVM (with 4K kernel) and then uses FEX emulator to run x86 programs
+  # Virtualization: Host (aarch64) -> muvm (4k kernel) -> FEX -> x86 binary
 
-  # Virtualization: muvm -> FEX -> x86 binary
+  # Debugging
+  # Checking if muvm works
+  #   muvm -- ls -l /run/muvm-host            # run aarch64 binaries inside muvm 4k kernel
+  #   muvm -- ls -l /proc/sys/fs/binfmt_misc  # Check binfmt is configured to FEX inside muvm
 
-  # Run x86 binaries inside muvm and interpret with FEX
-  # muvm -- FEXBash -c 'nix run nixpkgs#legacyPackages.x86_64-linux.hello'
+  # Checking x86 binaries with FEX running inside muvm
+  #   muvm-x86-runner -- $(nix build nixpkgs#legacyPackages.x86_64-linux.hello --print-out-paths --no-link)/bin/hello
+  #   muvm-x86-runner -- env
 
-  # Run flatpak apps
-  # muvm -- flatpak run org.example.AppName
-  # muvm -- FEXBash -c 'flatpak run org.example.AppName'
+  # Running Flatpak apps (currently not working)
+  #   muvm-x86-runner -- flatpak run --verbose --arch=x86_64 com.discordapp.Discord
+     
 
   # Overlay on pkgs-stable, as our mesa driver comes from there
   nixpkgs.overlays = [ muvm-fex-overlay ];
 
-  # Enable virtualization (check if really needed ?)
-  # virtualisation.libvirtd.enable = true;
-
   # Install necessary deps
-  # muvm is already installed with a wrapper that adds --execute-pre
-  # and loads the necessary GPU drivers
   environment.systemPackages = with pkgs; [
+    # Needed by FEXRootFSFetcher
+    fuse
+    squashfuse
+    squashfsTools
+
+    # Main deps
     muvm
     fex
+
+    # Helper script
+    muvm-x86-runner
   ];
 }

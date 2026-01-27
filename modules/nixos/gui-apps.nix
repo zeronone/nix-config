@@ -73,10 +73,14 @@
           "org.libreoffice.LibreOffice"
           "md.obsidian.Obsidian"
           "org.gnome.Calculator"
+          "org.videolan.VLC"
+
+          # x86 only available
           "com.discordapp.Discord/x86_64"
-          # "org.videolan.VLC"
-          # "com.valvesoftware.Steam"
-          # "com.spotify.Client"
+          "com.valvesoftware.Steam/x86_64"
+
+          # Doesn't install
+          # "com.spotify.Client/x86_64"
         ];
       };
 
