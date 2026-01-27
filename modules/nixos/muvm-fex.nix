@@ -12,13 +12,13 @@ let
         owner = "containers";
         repo = "libkrunfw";
         tag = "v${version}";
-        hash = final.lib.fakeHash; # TODO: Update this hash
+        hash = "sha256-x9HQP+EqCteoCq2Sl/TQcfdzQC5iuE4gaSKe7tN5dAA=";
       };
 
       # libkrunfw 5.1.0 rebases on kernel 6.12.62
       kernelSrc = final.fetchurl {
         url = "mirror://kernel/linux/kernel/v6.x/linux-6.12.62.tar.xz";
-        hash = final.lib.fakeHash; # TODO: Update this hash
+        hash = "sha256-E+LGhayPq13Zkt0QVzJVTa5RSu81DCqMdBjnt062LBM=";
       };
     });
 
@@ -29,13 +29,13 @@ let
         owner = "containers";
         repo = "libkrun";
         tag = "v${version}";
-        hash = final.lib.fakeHash; # TODO: Update this hash
+        hash = "sha256-6HBSL5Zu29sDoEbZeQ6AsNIXUcqXVVGMk0AR2X6v1yU=";
       };
 
       # Cargo dependencies will change with the new version
       cargoDeps = final.rustPlatform.fetchCargoVendor {
         inherit src;
-        hash = final.lib.fakeHash; # TODO: Update this hash
+        hash = "sha256-UIzbtBJH6aivoIxko1Wxdod/jUN44pERX9Hd+v7TC3Q=";
       };
 
       # Ensure we link against the NEW libkrunfw defined above
