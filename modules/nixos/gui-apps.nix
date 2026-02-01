@@ -55,15 +55,10 @@
           };
 
           # example overrides
-          # "org.onlyoffice.desktopeditors".Context.sockets = ["x11"]; # No Wayland support
           # "com.visualstudio.code".Context = {
           #   filesystems = [
           #     "xdg-config/git:ro" # Expose user Git config
           #     "/run/current-system/sw/bin:ro" # Expose NixOS managed software
-          #   ];
-          #   sockets = [
-          #     "gpg-agent" # Expose GPG agent
-          #     "pcsc" # Expose smart cards (i.e. YubiKey)
           #   ];
           # };
         };
@@ -97,39 +92,46 @@
       programs.ghostty.enable = true;
       programs.vscode = {
         enable = true;
-        # some extensions expect these programs to be available
-        package = pkgs.vscodium.fhsWithPackages (
-          ps: with ps; [
-            rustup
-            zlib
-          ]
-        );
+        profiles.default = {
+          keybindings = [
+            {
+              key = "ctrl+a";
+              command = "cursorLineStart";
+              when = "textInputFocus && vim.mode == 'Insert'";
+            }
+            {
+              key = "ctrl+e";
+              command = "cursorLineEnd";
+              when = "textInputFocus && vim.mode == 'Insert'";
+            }
+          ];
+          extensions = with pkgs.vscode-marketplace; [
+            # Core & Vim
+            vscodevim.vim
+            mkhl.direnv
 
-        profiles.default.extensions = with pkgs.vscode-marketplace; [
-          # Core & Vim
-          vscodevim.vim
-          mkhl.direnv
+            # Nix Development
+            jnoortheen.nix-ide
+            arrterian.nix-env-selector
+            pinage404.nix-extension-pack
 
-          # Nix Development
-          jnoortheen.nix-ide
-          arrterian.nix-env-selector
-          pinage404.nix-extension-pack
+            # Rust Development
+            rust-lang.rust-analyzer
+            tamasfe.even-better-toml
+            fill-labs.dependi
+            swellaby.vscode-rust-test-adapter
+            pinage404.rust-extension-pack
+            vadimcn.vscode-lldb
 
-          # Rust Development
-          rust-lang.rust-analyzer
-          tamasfe.even-better-toml
-          fill-labs.dependi
-          swellaby.vscode-rust-test-adapter
-          pinage404.rust-extension-pack
+            # Testing Utilities
+            hbenl.vscode-test-explorer
+            ms-vscode.test-adapter-converter
 
-          # Testing Utilities
-          hbenl.vscode-test-explorer
-          ms-vscode.test-adapter-converter
-
-          # Misc
-          dracula-theme.theme-dracula
-          yzhang.markdown-all-in-one
-        ];
+            # Misc
+            dracula-theme.theme-dracula
+            yzhang.markdown-all-in-one
+          ];
+        };
       };
     };
 }

@@ -6,132 +6,122 @@
 }:
 let
   muvm-fex-overlay = final: prev: {
-    # 1. Update libkrunfw to 5.1.0 (Required for libkrun 1.17.0)
-    libkrunfw = prev.libkrunfw.overrideAttrs (old: rec {
-      version = "5.1.0";
-      src = final.fetchFromGitHub {
-        owner = "containers";
-        repo = "libkrunfw";
-        tag = "v${version}";
-        hash = "sha256-x9HQP+EqCteoCq2Sl/TQcfdzQC5iuE4gaSKe7tN5dAA=";
-      };
-
-      # libkrunfw 5.1.0 rebases on kernel 6.12.62
-      kernelSrc = final.fetchurl {
-        url = "mirror://kernel/linux/kernel/v6.x/linux-6.12.62.tar.xz";
-        hash = "sha256-E+LGhayPq13Zkt0QVzJVTa5RSu81DCqMdBjnt062LBM=";
-      };
-    });
-
-    # 2. Update libkrun to 1.17.0
-    libkrun = prev.libkrun.overrideAttrs (old: rec {
-      version = "1.17.0";
-      src = final.fetchFromGitHub {
-        owner = "containers";
-        repo = "libkrun";
-        tag = "v${version}";
-        hash = "sha256-6HBSL5Zu29sDoEbZeQ6AsNIXUcqXVVGMk0AR2X6v1yU=";
-      };
-
-      # Cargo dependencies will change with the new version
-      cargoDeps = final.rustPlatform.fetchCargoVendor {
-        inherit src;
-        hash = "sha256-UIzbtBJH6aivoIxko1Wxdod/jUN44pERX9Hd+v7TC3Q=";
-      };
-
-      # Ensure we link against the NEW libkrunfw defined above
-      buildInputs = [ final.libkrunfw ] ++ final.lib.filter (i: i != prev.libkrunfw) old.buildInputs;
-    });
-
-    # Mesa from pkgs-stable
-    # Mesa for inside the MicroVM container
-    mesa-x86_64-linux = final.pkgsCross.gnu64.mesa;
-    # Still need this Asahi fork of virglrenderer
-    virglrenderer = prev.virglrenderer.overrideAttrs (old: {
-      src = final.fetchurl {
-        url = "https://gitlab.freedesktop.org/asahi/virglrenderer/-/archive/asahi-20250424/virglrenderer-asahi-20250806.tar.bz2";
-        hash = "sha256-96qatlyDxn8IA8/WLH58XUwThDIzNOGpgXvDQ9/cqjA=";
-      };
-      mesonFlags = old.mesonFlags ++ [ (final.lib.mesonOption "drm-renderers" "asahi-experimental") ];
-    });
-
+    # Update to libkrunfw to 5.1.0 (Required for libkrun 1.17.0)
+    libkrunfw = pkgs-unstable.libkrunfw;
+    # Update to libkrun to 1.17.0
+    libkrun = pkgs-unstable.libkrun;
     fex = pkgs-unstable.fex;
 
-    # Override muvm: Remove default wrappers and inject updated deps
-    # Default wrappers adds:
-    # --add-flags "--execute-pre=... to mount opengl drivers
-    # We already prepare a custom rootfs
-    muvm = (
-      pkgs-unstable.muvm.override {
+    # Override muvm: Use latest libkrun
+    muvm =
+      (pkgs-unstable.muvm.override {
         libkrun = final.libkrun;
+      }).overrideAttrs
+        (oldAttrs: rec {
+          version = "0.5.0-fork";
+          src = final.fetchFromGitHub {
+            owner = "zeronone";
+            repo = "muvm";
+            rev = "main";
+            hash = "sha256-52mcVx/ofmuAyOOTnezQGtkbw3gqF32fwNKX5vMIffk=";
+          };
+
+          # Cargo dependencies will change with the new version
+          cargoDeps = final.rustPlatform.fetchCargoVendor {
+            inherit src;
+            hash = "sha256-Rx98pDO2NR2BYp6eJMrqQ9n4J8+1pnMBy886cZCEFBo=";
+          };
+
+          # We must patch muvm to look in /run/current-system/...
+          # The default behavior looks in the immutable ${fex}/share path.
+          postPatch = (oldAttrs.postPatch or "") + ''
+            # Replace the store path (or default path) with the NixOS system path
+
+            # Faulty replacement in nixpkgs
+            substituteInPlace crates/muvm/src/guest/mount.rs \
+              --replace-fail "${final.fex}/share/fex-emu" "/usr/share/fex-emu"
+
+            # Used for auto-discovery of RootFS images
+            # substituteInPlace crates/muvm/src/bin/muvm.rs \
+            #   --replace-fail "/usr/share/fex-emu" "/run/current-system/sw/share/fex-emu"
+
+            # substituteInPlace crates/muvm/src/bin/muvm.rs \
+            #   --replace-fail "/usr/local/share/fex-emu" "/run/current-system/sw/share/fex-emu"
+            #   --replace-fail "${final.fex}/share/fex-emu" "/usr/share/fex-emu"
+          '';
+        });
+  };
+
+  # Helper method to create mesa erofs
+  makeMesaErofs =
+    {
+      name,
+      mesaPkg,
+      libDir,
+    }:
+    pkgs.runCommand "${name}.erofs"
+      {
+        nativeBuildInputs = [ pkgs.erofs-utils ];
       }
-    );
+      ''
+        mkdir -p root/usr/${libDir}
 
-    fex-emu-rootfs-fedora = pkgs.stdenv.mkDerivation rec {
-      pname = "fex-emu-rootfs-fedora";
-      version = "1.1.2-fc43";
+        # Use --no-preserve=mode so the copied files are writable.
+        # Use -f to force overwrite if a file already exists.
 
-      src = pkgs.fetchurl {
-        url = "https://riscv-kojipkgs.fedoraproject.org//packages/fex-emu-rootfs-fedora/42%5E1.1/2.fc43/noarch/fex-emu-rootfs-fedora-42%5E1.1-2.fc43.noarch.rpm";
-        sha256 = "sha256-xyN2yWi+1ErbCT/gynZFxrXjYdyUvEE76nfddotOPAQ=";
-      };
+        # Copy libraries
+        cp -L -r -f --no-preserve=mode ${mesaPkg}/lib/* root/usr/${libDir}/
 
-      # Required tools
-      nativeBuildInputs = [
-        final.rpm
-        final.cpio
-        final.autoPatchelfHook
-      ];
-
-      unpackPhase = ''
-        # Extract the RPM content
-        rpm2cpio $src | cpio -idmv
+        mkdir -p $out/share/fex-emu/overlays
+        mkfs.erofs -zlz4hc $out/share/fex-emu/overlays/${name}.erofs root
       '';
 
-      installPhase = ''
-        # Copy files to the Nix store
-        mkdir -p $out
-        cp -r usr/share/fex-emu/RootFS $out/
-      '';
+  # The Mesa Images (x86_64 and i386)
+  # We combine them into one derivation for cleaner systemPackages handling,
+  # but they could be separate if preferred.
+  mesaAssets = pkgs.symlinkJoin {
+    name = "fex-mesa-assets";
+    paths = [
+      (makeMesaErofs {
+        name = "mesa-x86_64";
+        mesaPkg = pkgs.pkgsCross.gnu64.mesa;
+        libDir = "lib64";
+      })
+      (makeMesaErofs {
+        name = "mesa-i386";
+        mesaPkg = pkgs.pkgsCross.gnu32.mesa;
+        libDir = "lib";
+      })
+    ];
+  };
+
+  fexRootFS = pkgs.stdenv.mkDerivation rec {
+    pname = "fex-emu-rootfs-fedora";
+    version = "1.1.2-fc43";
+
+    src = pkgs.fetchurl {
+      url = "https://riscv-kojipkgs.fedoraproject.org//packages/fex-emu-rootfs-fedora/42%5E1.1/2.fc43/noarch/fex-emu-rootfs-fedora-42%5E1.1-2.fc43.noarch.rpm";
+      sha256 = "sha256-xyN2yWi+1ErbCT/gynZFxrXjYdyUvEE76nfddotOPAQ=";
     };
 
-  };
-  # The Init Script
-  # This script runs INSIDE the VM as root.
-  vmInitScript = pkgs.writeShellApplication {
-    name = "muvm-guest-init.sh";
-    runtimeInputs = [
-      pkgs.coreutils
+    # Required tools
+    nativeBuildInputs = [
+      pkgs.rpm
+      pkgs.cpio
+      pkgs.autoPatchelfHook
     ];
-    text = ''
-      set -x
 
-      # Host Paths (Nix Store Paths)
-      # HOST_MESA="${pkgs.mesa-x86_64-linux}"
+    unpackPhase = ''
+      # Extract the RPM content
+      rpm2cpio $src | cpio -idmv
+    '';
 
-      # Guest Paths (Prefix with /run/muvm-host)
-      # GUEST_MESA="/run/muvm-host$HOST_MESA"
-
-      # MESA_SRC="$GUEST_MESA"
-
-      # 1. Setup OpenGL Driver
-      # # We symlink the host's cross-compiled mesa to /run/opengl-driver
-      # mkdir -p /run/opengl-driver
-      # ln -sf "$MESA_SRC" /run/opengl-driver
+    installPhase = ''
+      # Install to the shared system path structure
+      mkdir -p $out/share/fex-emu/RootFS
+      cp usr/share/fex-emu/RootFS/default.erofs $out/share/fex-emu/RootFS/
     '';
   };
-
-  # --- 3. The Runner ---
-  muvm-x86-runner = pkgs.writeShellScriptBin "muvm-x86-runner" ''
-    echo ":: Launching muvm..."
-    echo ":: Will run: $@"
-    echo ":: FEX RootFS at: ${pkgs.fex-emu-rootfs-fedora}/RootFS/default.erofs"
-
-    exec ${pkgs.muvm}/bin/muvm \
-      --execute-pre "${lib.getExe vmInitScript}" \
-      --fex-image "${pkgs.fex-emu-rootfs-fedora}/RootFS/default.erofs" \
-      $@
-  '';
 in
 {
   # Background
@@ -153,32 +143,48 @@ in
 
   # Debugging
   # Checking if muvm works
-  #   muvm -- ls -l /run/muvm-host            # run aarch64 binaries inside muvm 4k kernel
+  #   muvm -- getconf PAGESIZE
   #   muvm -- ls -l /proc/sys/fs/binfmt_misc  # Check binfmt is configured to FEX inside muvm
+  #   muvm -- mount     # run aarch64 binaries inside muvm 4k kernel
 
-  # Checking x86 binaries with FEX running inside muvm
-  #   muvm-x86-runner -- $(nix build nixpkgs#legacyPackages.x86_64-linux.hello --print-out-paths --no-link)/bin/hello
-  #   muvm-x86-runner -- env
+  # Run aarch64 binaries with 4K pagesize kernel
+  #   muvm -- ls -l /
 
-  # Running Flatpak apps (currently not working)
-  #   muvm-x86-runner -- flatpak run --verbose --arch=x86_64 com.discordapp.Discord
-     
+  # Run normal x86 binaries
+  #   muvm -- $(nix build nixpkgs#legacyPackages.x86_64-linux.hello --print-out-paths --no-link)/bin/hello
+
+  # It is same as below
+  #   muvm -- FEX $(nix build nixpkgs#legacyPackages.x86_64-linux.coreutils --print-out-paths --no-link)/bin/ls -l /
+
+  # Running x86 binaries with GPU support inside fedora
+  #   muvm -- flatpak run --verbose --arch=x86_64 com.discordapp.Discord
 
   # Overlay on pkgs-stable, as our mesa driver comes from there
   nixpkgs.overlays = [ muvm-fex-overlay ];
 
+  # FEXBash assumes /bin/bash to exist
+  # services.envfs.enable = true;
+
   # Install necessary deps
   environment.systemPackages = with pkgs; [
     # Needed by FEXRootFSFetcher
-    fuse
-    squashfuse
-    squashfsTools
+    # fuse
+    # squashfuse
+    # squashfsTools
+
+    # RootFS
+    fexRootFS
+    mesaAssets
 
     # Main deps
     muvm
     fex
 
-    # Helper script
-    muvm-x86-runner
+    # utils needed
+    socat
   ];
+
+  # This tells NixOS to symlink the contents of share/fex-emu
+  # from all systemPackages into /run/current-system/sw/share/fex-emu
+  environment.pathsToLink = [ "/share/fex-emu" ];
 }

@@ -33,6 +33,9 @@
     keep-outputs = true;
   };
 
+  # Enable parallel builds
+  nix.settings.max-jobs = "auto";
+
   # Run: echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/github-token.conf
   nix.extraOptions = ''
     !include ${homeDirectory}/.secrets/github-token.conf

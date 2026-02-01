@@ -16,6 +16,15 @@ let
   sortFilesCmd = "${lib.getExe pkgs.eza} -s modified -1 --no-quotes --reverse";
 in
 {
+  home.packages = with pkgs; [
+    # Manually installing bash instead of home-manager
+    # It messes up muvm
+    # programs.bash.enable = true;
+    bashInteractive
+
+    fzf-preview
+  ];
+
   programs.zsh = {
     enable = true;
     # To avoid conflict with ~/.zshrc modified by other means in work machines
@@ -23,12 +32,6 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     enableCompletion = true;
-    shellAliases = {
-      vim = "nvim";
-      gs = "git status";
-      gl = " git log --graph --decorate --pretty=oneline --abbrev-commit";
-      gll = "git log --graph --abbrev-commit --decorate --date=relative --all";
-    };
 
     history = {
       append = true;
@@ -77,6 +80,21 @@ in
       truecolor = true;
     };
   };
+  programs.nix-index = {
+    enable = true;
+    # messes up VM shells
+    # enableBashIntegration = true;
+    enableZshIntegration = true;
+  };
+  programs.nix-init = {
+    enable = true;
+  };
+  programs.nix-your-shell = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-output-monitor.enable = true;
+  };
+  programs.nnn.enable = true;
 
   # eza
   programs.eza = {
@@ -92,10 +110,15 @@ in
       "--group-directories-first"
     ];
   };
+  # confire aliases for all shells
   home.shellAliases = rec {
-    ls = "eza -a -l -s modified --reverse";
+    ls = "eza -al -s modified --reverse";
     lt = "${ls} --tree";
     tree = "${lt}";
+    vim = "nvim";
+    gs = "git status";
+    gl = " git log --graph --decorate --pretty=oneline --abbrev-commit";
+    gll = "git log --graph --abbrev-commit --decorate --date=relative --all";
   };
 
   # fzf
@@ -103,9 +126,6 @@ in
     enable = true;
     hidden = true;
   };
-  home.packages = with pkgs; [
-    fzf-preview
-  ];
   home.shellAliases.fzfp = "${lib.getExe pkgs.fzf} --preview='${lib.getExe pkgs.fzf-preview} {}'";
 
   programs.fzf = {

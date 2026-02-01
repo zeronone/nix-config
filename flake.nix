@@ -93,9 +93,12 @@
           ripgrep
           wget
           jq
+          lsof
           curl
           direnv
           nix-direnv
+          jujutsu
+          git
         ];
 
       # Shared home-manager modules for all hosts
@@ -198,7 +201,12 @@
             inherit system;
             config.allowUnfree = true;
           };
-          nixGlobalPackages = (globalPackages pkgs) ++ (with pkgs; [ wl-clipboard ]);
+          nixGlobalPackages =
+            (globalPackages pkgs)
+            ++ (with pkgs; [
+              wl-clipboard
+              coreutils
+            ]);
           homeDirectory = "/home/${username}";
         in
         nixpkgs.lib.nixosSystem {
@@ -325,7 +333,7 @@
           hostname = "asahi-nixos";
           username = "arif";
           modules = [
-            #./modules/nixos/x86_64-emulation.nix
+            ./modules/nixos/x86_64-emulation.nix
             ./modules/nixos/muvm-fex.nix
             ./modules/nixos/niri.nix
             ./modules/nixos/noctalia.nix
