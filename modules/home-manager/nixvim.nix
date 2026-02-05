@@ -33,6 +33,8 @@
 
     plugins.lightline.enable = true;
     plugins.lualine.enable = true;
+    plugins.neogit.enable = true;
+    plugins.neo-tree.enable = true;
+    plugins.gitsigns.enable = true;
   };
-
 }
