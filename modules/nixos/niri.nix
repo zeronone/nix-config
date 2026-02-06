@@ -45,6 +45,8 @@
     kdePackages.dolphin
   ];
 
+  xdg.autostart.enable = true;
+
   home-manager.users.${username} =
     { pkgs, ... }:
     {

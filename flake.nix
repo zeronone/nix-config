@@ -368,6 +368,7 @@
             ./modules/home-manager/apple-us-iso-fcitx5.nix
             ./modules/home-manager/fontconfig.nix
             ./modules/home-manager/node.nix
+            ./modules/home-manager/keepassxc.nix
           ];
         };
       };
