@@ -84,7 +84,6 @@
     }@inputs:
     let
       # --- Shared Logic & Helpers ---
-
       # Global packages available on all systems
       globalPackages =
         pkgs: with pkgs; [
@@ -104,13 +103,14 @@
       # Shared home-manager modules for all hosts
       sharedHomeModules = [
         ./modules/home-manager/shell.nix
-        ./modules/home-manager/nixvim.nix
+        ./modules/home-manager/development
       ];
 
       # Helper function to configure home-manager
       mkHomeManager =
         {
           username,
+          pkgs-unstable,
           homeDirectory,
           homeModules ? [ ],
         }:
@@ -119,6 +119,7 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.extraSpecialArgs = {
+            inherit pkgs-unstable;
             flake-inputs = inputs;
           };
           home-manager.sharedModules = sharedHomeModules;
@@ -141,15 +142,14 @@
         }:
         let
           machineDir = ./machines/darwin/${hostname};
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          homeDirectory = "/Users/${username}";
           pkgs-unstable = import inputs.nixpkgs-unstable {
             inherit system;
             config.allowUnfree = true;
+            overlays = [
+              nix-vscode-extensions.overlays.default
+            ];
           };
-          homeDirectory = "/Users/${username}";
         in
         nix-darwin.lib.darwinSystem {
           specialArgs = {
@@ -162,10 +162,17 @@
               ;
           };
           modules = [
-            {
-              # Global packages
-              environment.systemPackages = (globalPackages pkgs);
-            }
+            (
+              { pkgs, ... }:
+              {
+                nixpkgs = {
+                  config.allowUnfree = true;
+                };
+
+                # Global packages
+                environment.systemPackages = (globalPackages pkgs);
+              }
+            )
             home-manager.darwinModules.home-manager
             ./modules/common/nix.nix
             ./modules/darwin/bootstrap.nix
@@ -176,7 +183,12 @@
               networking.hostName = "${hostname}";
             }
             (mkHomeManager {
-              inherit username homeDirectory homeModules;
+              inherit
+                username
+                homeDirectory
+                homeModules
+                pkgs-unstable
+                ;
             })
           ]
           ++ modules;
@@ -193,21 +205,14 @@
         }:
         let
           machineDir = ./machines/nixos/${hostname};
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          homeDirectory = "/home/${username}";
           pkgs-unstable = import inputs.nixpkgs-unstable {
             inherit system;
             config.allowUnfree = true;
+            overlays = [
+              nix-vscode-extensions.overlays.default
+            ];
           };
-          nixGlobalPackages =
-            (globalPackages pkgs)
-            ++ (with pkgs; [
-              wl-clipboard
-              coreutils
-            ]);
-          homeDirectory = "/home/${username}";
         in
         nixpkgs.lib.nixosSystem {
           inherit system;
@@ -223,7 +228,6 @@
           modules = [
             {
               nixpkgs.overlays = [
-                nix-vscode-extensions.overlays.default
                 dolphin-overlay.overlays.default
               ];
               nixpkgs.config.allowUnfree = true;
@@ -233,27 +237,43 @@
                 "fs.file-max" = 262144;
               };
             }
-            {
-              # Global packages
-              environment.systemPackages = nixGlobalPackages;
-            }
+            (
+              { pkgs, ... }:
+              {
+                # Global packages
+                environment.systemPackages =
+                  (globalPackages pkgs)
+                  ++ (with pkgs; [
+                    wl-clipboard
+                    coreutils
+                  ]);
+              }
+            )
             home-manager.nixosModules.default
             ./modules/common/nix.nix
             (machineDir + /system.nix)
-            {
-              programs.zsh.enable = true;
-              users.users.${username} = {
-                isNormalUser = true;
-                initialPassword = "password";
-                extraGroups = [
-                  "wheel"
-                  "networkmanager"
-                ];
-                shell = pkgs.zsh;
-              };
-            }
+            (
+              { pkgs, ... }:
+              {
+                programs.zsh.enable = true;
+                users.users.${username} = {
+                  isNormalUser = true;
+                  initialPassword = "password";
+                  extraGroups = [
+                    "wheel"
+                    "networkmanager"
+                  ];
+                  shell = pkgs.zsh;
+                };
+              }
+            )
             (mkHomeManager {
-              inherit username homeDirectory homeModules;
+              inherit
+                username
+                homeDirectory
+                homeModules
+                pkgs-unstable
+                ;
             })
           ]
           ++ modules;
