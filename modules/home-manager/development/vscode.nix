@@ -20,6 +20,7 @@
         "editor.semanticHighlighting.enabled" = true;
         "terminal.integrated.minimumContrastRatio" = 1;
         "workbench.colorTheme" = "Monokai Pro (Filter Spectrum)";
+        "workbench.iconTheme" = "Monokai Pro (Filter Spectrum) Icons";
       };
       extensions = with pkgs-unstable.vscode-marketplace; [
         # Core & Vim
