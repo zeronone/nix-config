@@ -46,18 +46,18 @@ in
 
     keymaps = [
       {
-        mode = [ "i" ];
-        key = "<C-e>";
-        action = "<Esc>A";
+        mode = [ "" "l" ];
+        key = "<c-e>";
+        action = "<Esc>$";
         options = {
           noremap = true;
           silent = true;
         };
       }
       {
-        mode = [ "i" ];
-        key = "<C-a>";
-        action = "<Esc>I";
+        mode = [ "" "l" ];
+        key = "<c-a>";
+        action = "<Esc>^";
         options = {
           noremap = true;
           silent = true;
