@@ -27,7 +27,7 @@ prefer-no-csd
 output "eDP-1" {
   // Logical: 1512x982
   mode "3024x1964@60"
-  scale 2.0
+  scale 1.8
   focus-at-startup
   position x=0 y=0
 }
@@ -106,6 +106,7 @@ layout {
         proportion 0.33333
         proportion 0.5
         proportion 0.66667
+        proportion 0.9
         proportion 1.0
 
         // Fixed sets the width in logical pixels exactly.

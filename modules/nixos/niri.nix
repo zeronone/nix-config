@@ -2,7 +2,6 @@
   flake-inputs,
   pkgs,
   username,
-  lib,
   ...
 }:
 {

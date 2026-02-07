@@ -9,6 +9,11 @@
       keybind = [
         "ctrl+h=goto_split:left"
         "ctrl+l=goto_split:right"
+
+        # Both mac and linux
+        "performable:ctrl+c=copy_to_clipboard"
+        "performable:super+c=copy_to_clipboard"
+        "super+v=paste_from_clipboard"
       ];
     };
     themes = {

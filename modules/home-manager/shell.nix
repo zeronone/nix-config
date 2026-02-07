@@ -23,6 +23,7 @@ in
     bashInteractive
 
     fzf-preview
+    bat
   ];
 
   programs.zsh = {
