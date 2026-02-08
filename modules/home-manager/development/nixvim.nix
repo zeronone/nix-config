@@ -28,8 +28,16 @@
       shiftwidth = 2; # Tab width should be 2
       expandtab = true;
 
+      # https://nvim-mini.org/mini.nvim/doc/mini-completion.html#module-suggestedoptionvalues
       # Ensure the first item is selected in completion-menu
-      completeopt = "menu,menuone,noinsert";
+      completeopt = "menu,menuone,noinsert,fuzzy,nosort";
+      # fallback completion, where to look
+      complete = [
+        "."   # current buffer
+        "w"   # other windows
+        "b"   # loaded buffers
+        "u"   # unloaded buffers
+      ];
     };
 
     keymaps = [
@@ -104,6 +112,17 @@
     plugins.mini-icons.enable = true;
     plugins.mini-snippets.enable = true;
     plugins.mini-completion.enable = true;
+    plugins.mini-keymap = {
+      enable = true;
+      luaConfig.post = ''
+        -- For mini-completion
+        local map_multistep = require('mini.keymap').map_multistep
+        map_multistep('i', '<Tab>',   { 'pmenu_next' })
+        map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
+        map_multistep('i', '<CR>',    { 'pmenu_accept', 'minipairs_cr' })
+        map_multistep('i', '<BS>',    { 'minipairs_bs' })
+      '';
+    };
 
     # Core
     plugins.fzf-lua.enable = true;
