@@ -1,12 +1,12 @@
 # Build and apply configuration based on the host
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild switch --flake .; \
+        sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild switch --flake .; \
+        sudo nixos-rebuild switch --flake . |& nom; \
         niri validate -c ./config/niri/config.kdl; \
     else \
-        home-manager switch --flake ".#$(hostname)"; \
+        home-manager switch --flake ".#$(hostname)" |& nom; \
     fi
 
 # Build and apply on next boot
@@ -14,7 +14,7 @@ boot:
     @if [ "$(uname)" = "Darwin" ]; then \
         echo "Not supported"; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild boot --flake .; \
+        sudo nixos-rebuild boot --flake . |& nom; \
     else \
         echo "Not supported"; \
     fi

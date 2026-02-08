@@ -33,6 +33,12 @@
     keep-outputs = true;
   };
 
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+
   # Enable parallel builds
   nix.settings.max-jobs = "auto";
 

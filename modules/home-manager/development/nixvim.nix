@@ -30,8 +30,8 @@ in
     defaultEditor = true;
     waylandSupport = true;
 
-    globals.mapleader = "\<space>";
-    globals.maplocalleader = "\<space>";
+    globals.mapleader = "<Space>";
+    globals.maplocalleader = "<Space>";
 
     extraPlugins = with pkgs.vimPlugins; [
       vim-nix
@@ -46,7 +46,11 @@ in
 
     keymaps = [
       {
-        mode = [ "" "l" ];
+        mode = [
+          ""
+          "l"
+          "i"
+        ];
         key = "<c-e>";
         action = "<Esc>$";
         options = {
@@ -55,7 +59,11 @@ in
         };
       }
       {
-        mode = [ "" "l" ];
+        mode = [
+          ""
+          "l"
+          "i"
+        ];
         key = "<c-a>";
         action = "<Esc>^";
         options = {
@@ -78,12 +86,48 @@ in
       };
     };
 
-    # Mini package
-    plugins.mini.enable = true;
+    # Mini packages
+    plugins.mini-ai = {
+      enable = true;
+      settings = {
+        n_lines = 500;
+        search_method = "cover_or_nearest";
+        # Requires pluigns.treesitter-textobjects
+        custom_textobjects = {
+          f = {
+            __raw = "require('mini.ai').gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' })";
+          };
+          c = {
+            __raw = "require('mini.ai').gen_spec.treesitter({ a = '@class.outer', i = '@class.inner' })";
+          };
+          o = {
+            __raw = ''
+              require('mini.ai').gen_spec.treesitter({
+                a = { '@conditional.outer', '@loop.outer' },
+                i = { '@conditional.inner', '@loop.inner' },
+              })
+            '';
+          };
+        };
+      };
+    };
+    plugins.mini-align.enable = true;
+    plugins.mini-comment.enable = true;
+    plugins.mini-icons.enable = true;
+    plugins.mini-snippets.enable = true;
+    plugins.mini-completion.enable = true;
 
     # Core
     plugins.fzf-lua.enable = true;
     plugins.trouble.enable = true;
+    plugins.treesitter = {
+      enable = true;
+      # Not in 25.11 yet
+      # highlight.enable = true;
+      # indent.enable = true;
+      # folding.enable = true;
+    };
+    plugins.treesitter-textobjects.enable = true;
 
     # UI
     plugins.lualine.enable = true;
@@ -113,61 +157,6 @@ in
       sqls.enable = true;
       ts_ls.enable = true;
     };
-
-    # completion
-    plugins.blink-cmp = {
-      enable = true;
-      settings = {
-        sources.default = [ "lsp" ];
-
-        completion = {
-          documentation.auto_show = true;
-          documentation.auto_show_delay_ms = 50;
-          menu.auto_show = true;
-          ghost_text.show_with_menu = true;
-
-          list.selection.preselect = true;
-          list.selection.auto_insert = true;
-        };
-
-        keymap = {
-          preset = "enter";
-          "<c-p>" = mkCmdlineMap "select_prev" "fallback_to_mappings";
-          "<c-n>" = mkCmdlineMap "select_next" "fallback_to_mappings";
-          "<tab>" = [
-            "select_next"
-            "fallback"
-          ];
-          "<s-tab>" = [
-            "select_prev"
-            "fallback"
-          ];
-          "<c-b>" = [
-            "scroll_documentation_up"
-            "fallback"
-          ];
-          "<c-f>" = [
-            "scroll_documentation_down"
-            "fallback"
-          ];
-          "<c-k>" = [
-            "show_signature"
-            "hide_signature"
-            "fallback"
-          ];
-        };
-
-        signature.enabled = true;
-        signature.window.show_documentation = true;
-
-        cmdline.keymap = {
-          preset = "inherit";
-        };
-        cmdline.completion.list.selection.preselect = false;
-        cmdline.completion.menu.auto_show = true;
-      };
-    };
-    plugins.blink-ripgrep.enable = true;
 
     # Rust
     plugins.rustaceanvim.enable = true;
