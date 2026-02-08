@@ -33,10 +33,10 @@
       completeopt = "menu,menuone,noinsert,fuzzy,nosort";
       # fallback completion, where to look
       complete = [
-        "."   # current buffer
-        "w"   # other windows
-        "b"   # loaded buffers
-        "u"   # unloaded buffers
+        "." # current buffer
+        "w" # other windows
+        "b" # loaded buffers
+        "u" # unloaded buffers
       ];
     };
 
