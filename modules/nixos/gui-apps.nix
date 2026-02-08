@@ -1,4 +1,6 @@
 {
+  pkgs,
+  lib,
   username,
   ...
 }:
@@ -77,14 +79,22 @@
         ];
       };
 
-      # The following are directly managed by Nix
+      # The following GUI apps are directly managed by Nix
       # We want more control on them, with proper versioning
       programs.firefox.enable = true;
       programs.chromium = {
         enable = true;
+        # DRM support to run Spotify, Netflix
+        package = pkgs.chromium.override { enableWideVine = true; };
+        commandLineArgs = [
+          "--ignore-gpu-blocklist"
+          "--ozone-platform=wayland"
+        ];
         extensions = [
           # Vimium extension ID
           { id = "dbepggeogbaibhgnhhndojpepiihcmeb"; }
+          # keepassxc
+          { id = "oboonakemofpalcgghocfoadofidjkkk"; }
         ];
       };
     };

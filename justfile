@@ -1,9 +1,9 @@
 # Build and apply configuration based on the host
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild switch --flake . |& nom; \
+        sudo -v; sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild switch --flake . |& nom; \
+        sudo -v; sudo nixos-rebuild switch --flake . |& nom; \
         niri validate -c ./config/niri/config.kdl; \
     else \
         home-manager switch --flake ".#$(hostname)" |& nom; \
@@ -14,7 +14,7 @@ boot:
     @if [ "$(uname)" = "Darwin" ]; then \
         echo "Not supported"; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo nixos-rebuild boot --flake . |& nom; \
+        sudo -v; sudo nixos-rebuild boot --flake . |& nom; \
     else \
         echo "Not supported"; \
     fi
@@ -24,7 +24,7 @@ watch-store:
 
 check:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild check --flake .; \
+        sudo -v; sudo darwin-rebuild check --flake .; \
     elif [ -f /etc/NIXOS ]; then \
         niri validate -c ./config/niri/config.kdl || exit 1; \
         nixos-rebuild dry-run --flake .; \
@@ -40,7 +40,7 @@ lint:
 
 # Clean up old generations to free up disk space
 clean:
-    nix-collect-garbage -d
+    nix-collect-garbage -d |& nom
 
 # Update the flake.lock file to get latest package versions
 update:

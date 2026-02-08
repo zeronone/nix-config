@@ -1,23 +1,8 @@
 {
   pkgs,
-  config,
   flake-inputs,
   ...
 }:
-let
-  helpers = config.lib.nixvim;
-  mkCmdlineMap =
-    action: fallback:
-    helpers.mkRaw ''
-      {
-            function (cmp)
-              if vim.fn.getcmdtype() ~= ':' then
-                return cmp.${action}()
-              end
-            end,
-            "${fallback}",
-          }'';
-in
 {
   imports = [
     flake-inputs.nixvim.homeModules.nixvim
@@ -42,6 +27,9 @@ in
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
       expandtab = true;
+
+      # Ensure the first item is selected in completion-menu
+      completeopt = "menu,menuone,noinsert";
     };
 
     keymaps = [
