@@ -1,7 +1,6 @@
 {
   pkgs,
   pkgs-unstable,
-  lib,
   ...
 }:
 let
@@ -95,7 +94,7 @@ let
     ];
   };
 
-  fexRootFS = pkgs.stdenv.mkDerivation rec {
+  fexRootFS = pkgs.stdenv.mkDerivation {
     pname = "fex-emu-rootfs-fedora";
     version = "1.1.2-fc43";
 

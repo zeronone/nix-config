@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   flake-inputs,
   ...
 }:
@@ -13,14 +14,28 @@
     viAlias = true;
     vimAlias = true;
     defaultEditor = true;
-    waylandSupport = true;
+    waylandSupport = lib.mkIf pkgs.stdenv.hostPlatform.isLinux true;
 
-    globals.mapleader = "<Space>";
-    globals.maplocalleader = "<Space>";
+    globals.mapleader = " ";
+    globals.maplocalleader = " ";
 
     extraPlugins = with pkgs.vimPlugins; [
       vim-nix
+      (pkgs.vimUtils.buildVimPlugin {
+        name = "output-panel.nvim";
+        src = pkgs.fetchFromGitHub {
+          owner = "mhanberg";
+          repo = "output-panel.nvim";
+          rev = "a600798";
+          hash = "sha256-OONTXn0+MB+nj+piFW4Lb6Sne7dG4MhXLwl0hhl9aeY=";
+        };
+      })
     ];
+
+    extraConfigLua = ''
+      require("output_panel").setup({ max_buffer_size = 10000 })
+      vim.keymap.set("n", "<leader>o", ":OutputPanel<CR>", { desc = "Toggle Output Panel" })
+    '';
 
     opts = {
       number = true; # Show line numbers
@@ -38,6 +53,10 @@
         "b" # loaded buffers
         "u" # unloaded buffers
       ];
+
+      # case-insensitive search
+      ignorecase = true;
+      smartcase = true;
     };
 
     keymaps = [
@@ -65,6 +84,44 @@
         options = {
           noremap = true;
           silent = true;
+        };
+      }
+
+      # mini-pick
+      {
+        mode = "n";
+        key = "<leader>sf";
+        action = "<cmd>Pick files<cr>";
+        options = {
+          silent = true;
+          desc = "Pick files";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>sg";
+        action = "<cmd>Pick grep_live<cr>";
+        options = {
+          silent = true;
+          desc = "Pick grep_live";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>sb";
+        action = "<cmd>Pick buffers<cr>";
+        options = {
+          silent = true;
+          desc = "Pick buffers";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>se";
+        action = "<cmd>Pick diagnostics<cr>";
+        options = {
+          silent = true;
+          desc = "Pick diagnostics";
         };
       }
     ];
@@ -123,6 +180,12 @@
         map_multistep('i', '<BS>',    { 'minipairs_bs' })
       '';
     };
+    # Testing
+    plugins.mini-pick = {
+      enable = true;
+    };
+    plugins.mini-notify.enable = true;
+    plugins.mini-extra.enable = true;
 
     # Core
     plugins.fzf-lua.enable = true;
