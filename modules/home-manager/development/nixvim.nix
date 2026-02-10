@@ -1,5 +1,6 @@
 {
-  pkgs,
+  # In flake.nix it is configured with pkgs-unstable
+  pkgs-unstable,
   lib,
   flake-inputs,
   ...
@@ -14,16 +15,16 @@
     viAlias = true;
     vimAlias = true;
     defaultEditor = true;
-    waylandSupport = lib.mkIf pkgs.stdenv.hostPlatform.isLinux true;
+    waylandSupport = lib.mkIf pkgs-unstable.stdenv.hostPlatform.isLinux true;
 
     globals.mapleader = " ";
     globals.maplocalleader = " ";
 
-    extraPlugins = with pkgs.vimPlugins; [
+    extraPlugins = with pkgs-unstable.vimPlugins; [
       vim-nix
-      (pkgs.vimUtils.buildVimPlugin {
+      (pkgs-unstable.vimUtils.buildVimPlugin {
         name = "output-panel.nvim";
-        src = pkgs.fetchFromGitHub {
+        src = pkgs-unstable.fetchFromGitHub {
           owner = "mhanberg";
           repo = "output-panel.nvim";
           rev = "a600798";
@@ -118,10 +119,10 @@
       {
         mode = "n";
         key = "<leader>se";
-        action = "<cmd>Pick diagnostics<cr>";
+        action = "<cmd>Pick diagnostic<cr>";
         options = {
           silent = true;
-          desc = "Pick diagnostics";
+          desc = "Pick diagnostic";
         };
       }
     ];
@@ -186,15 +187,54 @@
     };
     plugins.mini-notify.enable = true;
     plugins.mini-extra.enable = true;
+    plugins.mini-cmdline.enable = true;
+    plugins.mini-move = {
+      enable = true;
+      settings = {
+        mappings = {
+          # vissual mode
+          down = "<C-j>";
+          left = "<C-h>";
+          right = "<C-l>";
+          up = "<C-k>";
+
+          # normal mode
+          line_down = "<C-j>";
+          line_left = "<C-h>";
+          line_right = "<C-l>";
+          line_up = "<C-k>";
+        };
+      };
+    };
+    plugins.mini-basics = {
+      enable = true;
+      settings = {
+        options = {
+          basic = true;
+          extra_ui = true;
+          win_borders = "auto";
+        };
+        mappings = {
+          basic = true;
+          option_toggle_prefix = "\\";
+          windows = true;
+          move_with_alt = false;
+        };
+        autocommands = {
+          basic = true;
+          relnum_in_visual_mode = false;
+        };
+        silent = false;
+      };
+    };
 
     # Core
     plugins.fzf-lua.enable = true;
     plugins.trouble.enable = true;
     plugins.treesitter = {
       enable = true;
-      # Not in 25.11 yet
-      # highlight.enable = true;
-      # indent.enable = true;
+      highlight.enable = true;
+      indent.enable = true;
       # folding.enable = true;
     };
     plugins.treesitter-textobjects.enable = true;
