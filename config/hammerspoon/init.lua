@@ -107,9 +107,9 @@ spoon.SpoonInstall:andUse("PaperWM", {
     fn = initPaperWM,
     config = {
         screen_margin = 16,
-        window_gap = 2,
+        window_gap = 4,
         center_mouse = true,
-        window_ratios = { 1/3, 1/2, 2/3, 1 },
+        window_ratios = { 1/3, 1/2, 2/3, 0.9, 1 },
         
         -- Niri-style "Move" = Ctrl
         drag_window = hyperctrl,

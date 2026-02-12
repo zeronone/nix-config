@@ -3,6 +3,7 @@
   programs.vscode = {
     enable = true;
     package = pkgs-unstable.vscodium;
+    mutableExtensionsDir = true;
     profiles.default = {
       keybindings = [
         {
@@ -21,6 +22,15 @@
         "terminal.integrated.minimumContrastRatio" = 1;
         "workbench.colorTheme" = "Monokai Pro (Filter Spectrum)";
         "workbench.iconTheme" = "Monokai Pro (Filter Spectrum) Icons";
+        "json.schemaDownload.trustedDomains" = {
+          "https://schemastore.azurewebsites.net/" = true;
+          "https://raw.githubusercontent.com/" = true;
+          "https://www.schemastore.org/" = true;
+          "https://json.schemastore.org/" = true;
+          "https://json-schema.org/" = true;
+          "https://static.ampcode.com" = true;
+        };
+        "redhat.telemetry.enabled" = false;
       };
       extensions = with pkgs-unstable.vscode-marketplace; [
         # Core & Vim
@@ -39,6 +49,13 @@
         swellaby.vscode-rust-test-adapter
         pinage404.rust-extension-pack
         vadimcn.vscode-lldb
+
+        # Java
+        # vscjava.vscode-java-pack
+        redhat.java
+        vscjava.vscode-java-debug
+        vscjava.vscode-java-test
+        vscjava.vscode-gradle
 
         # Testing Utilities
         hbenl.vscode-test-explorer

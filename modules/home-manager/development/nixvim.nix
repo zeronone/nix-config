@@ -35,7 +35,14 @@
 
     extraConfigLua = ''
       require("output_panel").setup({ max_buffer_size = 10000 })
-      vim.keymap.set("n", "<leader>o", ":OutputPanel<CR>", { desc = "Toggle Output Panel" })
+      vim.keymap.set("n", "<leader>to", ":OutputPanel<CR>", { desc = "Toggle Output Panel" })
+
+      -- Enable inline diagnostics
+      vim.diagnostic.config({ virtual_text = false })
+      vim.keymap.set('n', '<leader>tx', function()
+        local new_config = not vim.diagnostic.config().virtual_lines
+        vim.diagnostic.config({ virtual_lines = new_config })
+      end, { desc = 'Toggle inline diagnostics' })
     '';
 
     opts = {
@@ -55,12 +62,16 @@
         "u" # unloaded buffers
       ];
 
+      # Confirm before quitting
+      confirm = true;
+
       # case-insensitive search
       ignorecase = true;
       smartcase = true;
     };
 
     keymaps = [
+      # start/end of line
       {
         mode = [
           ""
@@ -91,7 +102,7 @@
       # mini-pick
       {
         mode = "n";
-        key = "<leader>sf";
+        key = "<leader>ff";
         action = "<cmd>Pick files<cr>";
         options = {
           silent = true;
@@ -100,7 +111,7 @@
       }
       {
         mode = "n";
-        key = "<leader>sg";
+        key = "<leader>fg";
         action = "<cmd>Pick grep_live<cr>";
         options = {
           silent = true;
@@ -109,20 +120,115 @@
       }
       {
         mode = "n";
-        key = "<leader>sb";
+        key = "<leader>fb";
         action = "<cmd>Pick buffers<cr>";
         options = {
           silent = true;
           desc = "Pick buffers";
         };
       }
+
+      # trouble
       {
         mode = "n";
-        key = "<leader>se";
-        action = "<cmd>Pick diagnostic<cr>";
+        key = "<leader>lx";
+        action = "<cmd>Trouble diagnostics toggle filter.buf=0<cr>";
+        options = {
+          noremap = true;
+          silent = true;
+          desc = "Current buffer diagnostics";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>lX";
+        action = "<cmd>Trouble diagnostics toggle<cr>";
         options = {
           silent = true;
-          desc = "Pick diagnostic";
+          desc = "Project diagnostics";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>lla";
+        action = "<cmd>Trouble lsp<cr>";
+        options = {
+          silent = true;
+          desc = "LSP definitions, implementations, type definitions etc";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>lld";
+        action = "<cmd>Trouble lsp_definitions<cr>";
+        options = {
+          silent = true;
+          desc = "LSP definitions";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>lli";
+        action = "<cmd>Trouble lsp_implementations<cr>";
+        options = {
+          silent = true;
+          desc = "LSP implementations";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>llr";
+        action = "<cmd>Trouble lsp_references<cr>";
+        options = {
+          silent = true;
+          desc = "LSP References";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>llci";
+        action = "<cmd>Trouble lsp_incoming_calls<cr>";
+        options = {
+          silent = true;
+          desc = "LSP incoming calls";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>llco";
+        action = "<cmd>Trouble lsp_outgoing_calls<cr>";
+        options = {
+          silent = true;
+          desc = "LSP outgoing calls";
+        };
+      }
+
+      # neo-tree
+      {
+        mode = "n";
+        key = "<leader>tf";
+        action = "<cmd>Neotree source=filesystem action=show toggle<cr>";
+        options = {
+          silent = true;
+          desc = "File explorer";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>tb";
+        action = "<cmd>Neotree source=buffers position=float toggle<cr>";
+        options = {
+          silent = true;
+          desc = "Buffer explorer";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>tg";
+        action = "<cmd>Neotree source=git_status position=float toggle<cr>";
+        options = {
+          silent = true;
+          desc = "Git Status";
         };
       }
     ];
@@ -198,11 +304,11 @@
           right = "<C-l>";
           up = "<C-k>";
 
-          # normal mode
-          line_down = "<C-j>";
-          line_left = "<C-h>";
-          line_right = "<C-l>";
-          line_up = "<C-k>";
+          # normal mode (disabled)
+          line_down = "";
+          line_left = "";
+          line_right = "";
+          line_up = "";
         };
       };
     };
@@ -230,7 +336,9 @@
 
     # Core
     plugins.fzf-lua.enable = true;
-    plugins.trouble.enable = true;
+    plugins.trouble = {
+      enable = true;
+    };
     plugins.treesitter = {
       enable = true;
       highlight.enable = true;
@@ -241,6 +349,7 @@
 
     # UI
     plugins.lualine.enable = true;
+    plugins.bufferline.enable = true;
 
     # VCS
     plugins.neogit.enable = true;
@@ -273,8 +382,92 @@
     plugins.dap-lldb.enable = true;
 
     # Misc
-    plugins.neo-tree.enable = true;
-    plugins.which-key.enable = true;
+    plugins.neo-tree = {
+      enable = true;
+      settings = {
+        close_if_last_window = true;
+        filesystem = {
+          filtered_items = {
+            visible = true;
+            hide_dotfiles = false;
+            hide_gitignored = false;
+          };
+          follow_current_file = {
+            enabled = true;
+            leave_dirs_open = true;
+          };
+        };
+      };
+    };
+    plugins.which-key = {
+      enable = true;
+      settings = {
+        spec = [
+          {
+            __unkeyed-1 = "<leader>w";
+            group = "Windows";
+            proxy = "<C-w>";
+            expand = {
+              __raw = ''
+                function()
+                  return require("which-key.extras").expand.win()
+                end
+              '';
+            };
+          }
+          {
+            __unkeyed-1 = "<leader>b";
+            group = "Buffers";
+            expand = {
+              __raw = ''
+                function()
+                      return require("which-key.extras").expand.buf()
+                    end
+              '';
+            };
+          }
+          {
+            __unkeyed-1 = "<leader>f";
+            group = "Find";
+            icon = " ";
+          }
+          {
+            __unkeyed-1 = "<leader>t";
+            group = "Toggle";
+          }
+          {
+            __unkeyed-1 = [
+              {
+                __unkeyed-1 = "<leader>l";
+                group = "List";
+              }
+              {
+                __unkeyed-1 = "<leader>ll";
+                group = "LSP";
+              }
+              {
+                __unkeyed-1 = "<leader>llc";
+                group = "Call Hierarchy";
+              }
+            ];
+          }
+          {
+            __unkeyed-1 = "<leader>db";
+            __unkeyed-2 = {
+              __raw = ''
+                function()
+                  require("dap").toggle_breakpoint()
+                end
+              '';
+            };
+            desc = "Breakpoint toggle";
+            mode = "n";
+            silent = true;
+          }
+        ];
+      };
+
+    };
     plugins.harpoon.enable = true;
   };
 }

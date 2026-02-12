@@ -7,5 +7,6 @@
     ./nixvim.nix
     ./vscode.nix
     ./ai-coding.nix
+    ./zellij.nix
   ];
 }

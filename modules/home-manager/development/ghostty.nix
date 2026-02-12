@@ -6,6 +6,8 @@
     enableZshIntegration = true;
     settings = {
       theme = "monokai-pro-spectrum";
+      # to make zellij work
+      macos-option-as-alt = true;
       keybind = [
         # Both mac and linux
         "performable:ctrl+c=copy_to_clipboard"
