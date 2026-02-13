@@ -17,9 +17,6 @@
     defaultEditor = true;
     waylandSupport = lib.mkIf pkgs-unstable.stdenv.hostPlatform.isLinux true;
 
-    globals.mapleader = " ";
-    globals.maplocalleader = " ";
-
     extraPlugins = with pkgs-unstable.vimPlugins; [
       vim-nix
       (pkgs-unstable.vimUtils.buildVimPlugin {
@@ -53,7 +50,7 @@
 
       # https://nvim-mini.org/mini.nvim/doc/mini-completion.html#module-suggestedoptionvalues
       # Ensure the first item is selected in completion-menu
-      completeopt = "menu,menuone,noinsert,fuzzy,nosort";
+      completeopt = "menu,menuone,noinsert,fuzzy,nosort,popup";
       # fallback completion, where to look
       complete = [
         "." # current buffer
@@ -282,6 +279,18 @@
           };
         };
       };
+      luaConfig.post = ''
+        -- mini-ai
+        -- Default van, vin keymappings in mini-ai conflict with lsp mappings
+        -- Change lsp mappings to <leader>l[sS]
+        local map_lsp_selection = function(lhs, desc)
+          local s = vim.startswith(desc, 'Increase') and 1 or -1
+          local rhs = function() vim.lsp.buf.selection_range(s * vim.v.count1) end
+          vim.keymap.set('x', lhs, rhs, { desc = desc })
+        end
+        map_lsp_selection('ls', 'Increase selection')
+        map_lsp_selection('lS', 'Decrease selection')
+      '';
     };
     plugins.mini-align.enable = true;
     plugins.mini-comment.enable = true;
