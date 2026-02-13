@@ -54,10 +54,15 @@
           ;;    --------------------------------------------------------------
           cmd_r (tap-hold-press $tt $ht kana rctl)
 
-          ;; 2. Tab Logic:
+          ;; Tab Logic:
           ;;    Tap  = Tab
           ;;    Hold = Super (lmet) for window management
           tab_super (tap-hold-press $tt $ht tab lmet)
+
+          ;; Return Logic:
+          ;;    Tap  = Return
+          ;;    Hold = rctl
+          ret_super (tap-hold-press $tt $ht ret rctl)
         )
 
         (defchords my-chords $chord-timeout
@@ -74,8 +79,10 @@
         ;; Keys NOT listed here will default to their defsrc behavior (pass-through).
         ;; ---------------------------------------------------------------------------
         (deflayermap (base-layer)
-          ;; 1. Caps Lock -> Left Control
+          ;; Caps Lock -> Left Control
           caps lctl
+          ;; ret -> ret/super alias
+          ret @ret_super
 
           ;; 2. Tab -> Tab/Super alias
           tab  @tab_super

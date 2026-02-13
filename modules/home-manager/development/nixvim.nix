@@ -212,6 +212,30 @@
         };
       }
 
+      # code
+      {
+        mode = "";
+        key = "<leader>ca";
+        action.__raw = ''
+          function() require("opencode").ask("@this: ", { submit = true }) end
+        '';
+        options = {
+          silent = true;
+          desc = "Ask opencode";
+        };
+      }
+      {
+        mode = "x";
+        key = "go";
+        action.__raw = ''
+          function() return require("opencode").operator("@this ") end
+        '';
+        options = {
+          silent = true;
+          desc = "Add range to opencode";
+        };
+      }
+
       # neo-tree
       {
         mode = "n";
@@ -238,6 +262,17 @@
         options = {
           silent = true;
           desc = "Git Status";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>to";
+        action.__raw = ''
+          function() require("opencode").toggle() end
+        '';
+        options = {
+          silent = true;
+          desc = "Opencode";
         };
       }
     ];
@@ -352,6 +387,20 @@
           relnum_in_visual_mode = false;
         };
         silent = false;
+      };
+    };
+
+    # Snacks
+    plugins.snacks = {
+      enable = true;
+      settings = {
+        # Needed by opencode.nvim
+        input = {
+          enabled = true;
+        };
+        terminal = {
+          enabled = true;
+        };
       };
     };
 

@@ -29,8 +29,8 @@
 
     # Apple Silicon support for NixOS
     nixos-apple-silicon = {
-      url = "github:nix-community/nixos-apple-silicon/release-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/nixos-apple-silicon";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # Private repo for Apple Silicon firmware (non-distributable)

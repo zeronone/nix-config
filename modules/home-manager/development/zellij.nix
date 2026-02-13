@@ -51,7 +51,7 @@
           }
           tab name="AI" {
               pane command="opencode" {
-                  args "."
+                  args "--port" "."
               }
           }
           tab name="Shell" {
