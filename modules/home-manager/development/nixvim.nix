@@ -343,7 +343,7 @@
         };
         mappings = {
           basic = true;
-          option_toggle_prefix = "\\";
+          option_toggle_prefix = "<leader>t";
           windows = true;
           move_with_alt = false;
         };
