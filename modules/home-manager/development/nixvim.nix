@@ -40,6 +40,9 @@
         local new_config = not vim.diagnostic.config().virtual_lines
         vim.diagnostic.config({ virtual_lines = new_config })
       end, { desc = 'Toggle inline diagnostics' })
+
+      -- <Esc> to go to normal mode in terminal
+      vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]])
     '';
 
     opts = {
@@ -275,6 +278,15 @@
           desc = "Opencode";
         };
       }
+      {
+        mode = "n";
+        key = "<leader>tt";
+        action = "<cmd>vert terminal<cr>";
+        options = {
+          silent = true;
+          desc = "Terminal";
+        };
+      }
     ];
 
     # Core
@@ -455,7 +467,7 @@
     plugins.neo-tree = {
       enable = true;
       settings = {
-        close_if_last_window = true;
+        close_if_last_window = false;
         filesystem = {
           filtered_items = {
             visible = true;
