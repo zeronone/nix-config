@@ -110,12 +110,24 @@
         };
       }
       {
-        mode = "n";
+        mode = [
+          "n"
+          "x"
+        ];
         key = "<leader>fg";
-        action = "<cmd>Pick grep_live<cr>";
+        action.__raw = ''
+          function()
+            local query = nil
+            if vim.fn.mode():find('[vV\22]') then
+              vim.cmd([[normal! "zy]])
+              query = vim.fn.getreg('z')
+            end
+            require('mini.pick').builtin.grep_live({ tool = 'rg' }, { query = query })
+          end
+        '';
         options = {
+          desc = "Find Grep (Live Selection)";
           silent = true;
-          desc = "Pick grep_live";
         };
       }
       {

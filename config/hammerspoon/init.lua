@@ -68,6 +68,8 @@ local function initPaperWM(PaperWM)
     PaperWM.window_filter:rejectApp("Finder")
     PaperWM.window_filter:rejectApp("System Settings")
     PaperWM.window_filter:rejectApp("Activity Monitor")
+    PaperWM.window_filter:rejectApp("DevTools")
+    PaperWM.window_filter:rejectApp("qemu-system-aarch64")
 
     -- Display Logic
     local allScreens = hs.screen.allScreens()

@@ -16,7 +16,7 @@
         },
         "rules": [
           {
-            "description": "Tab one shot. Hyper-lite (Cmd+Opt) immediately when held or combined.",
+            "description": "Tab one shot. Hyper-lite (Cmd+Opt) when held or combined.",
             "manipulators": [
               {
                 "type": "basic",
@@ -39,7 +39,7 @@
             ]
           },
           {
-            "description": "Return one shot. Hyper-lite (Cmd+Opt) immediately when held or combined.",
+            "description": "Return one shot. Ctrl when held or combined.",
             "manipulators": [
               {
                 "type": "basic",
@@ -49,8 +49,7 @@
                 },
                 "to": [
                   {
-                    "key_code": "left_command",
-                    "modifiers": ["left_option"]
+                    "key_code": "right_control"
                   }
                 ],
                 "to_if_alone": [
