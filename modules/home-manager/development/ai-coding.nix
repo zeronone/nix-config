@@ -33,9 +33,9 @@
     }
   '';
 
-  programs.nixvim = {
-    extraPlugins = [
-      pkgs-unstable.vimPlugins.opencode-nvim
-    ];
-  };
+  # programs.nixvim = {
+  #   extraPlugins = [
+  #     pkgs-unstable.vimPlugins.opencode-nvim
+  #   ];
+  # };
 }

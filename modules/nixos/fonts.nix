@@ -2,8 +2,11 @@
 {
   fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
+    # nerd fonts
     nerd-fonts.hack
     nerd-fonts.jetbrains-mono
+
+    # emoji
     noto-fonts-color-emoji
     # JP fonts
     noto-fonts-cjk-sans

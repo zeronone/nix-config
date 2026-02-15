@@ -1,4 +1,4 @@
-{ ... }:
+{ _, ... }:
 {
   fonts.fontconfig = {
     enable = true;
@@ -6,6 +6,7 @@
     hinting = "medium";
     subpixelRendering = "rgb";
 
+    # Run fc-list
     defaultFonts = {
       serif = [
         "Noto Serif CJK JP"
@@ -16,6 +17,8 @@
         "Noto Color Emoji"
       ];
       monospace = [
+        "JetBrainsMonoNL Nerd Font"
+        # 日本語
         "PlemolJP Console NF"
         "Noto Color Emoji"
       ];

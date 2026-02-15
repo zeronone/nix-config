@@ -4,9 +4,11 @@
 {
   imports = [
     ./ghostty.nix
-    ./nixvim.nix
+    # ./nixvim.nix
+    ./lazyvim.nix
     ./vscode.nix
     ./ai-coding.nix
-    ./zellij.nix
+    #./zellij.nix
+    ./tmux.nix
   ];
 }

@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-unstable,
   lib,
   username,
   ...
@@ -84,8 +85,9 @@
       programs.firefox.enable = true;
       programs.chromium = {
         enable = true;
-        # DRM support to run Spotify, Netflix
-        package = pkgs.chromium.override { enableWideVine = true; };
+        # Use latest from unstable
+        # Enable DRM support to run Spotify, Netflix
+        package = pkgs-unstable.chromium.override { enableWideVine = true; };
         commandLineArgs = [
           "--ignore-gpu-blocklist"
           "--ozone-platform=wayland"
