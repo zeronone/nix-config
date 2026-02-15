@@ -68,7 +68,7 @@ in
           {
             "LazyVim/LazyVim",
             opts = {
-              colorscheme = "catppuccin",
+              colorscheme = "tokyonight-moon",
             },
           },
           -- Configure the catppuccin plugin itself
@@ -79,6 +79,12 @@ in
               flavour = "mocha",
             },
           },
+          -- more color themes
+          { "bluz71/vim-moonfly-colors", name = "moonfly", lazy = false, priority = 1000 },
+          { "bluz71/vim-nightfly-colors", name = "nightfly", lazy = false, priority = 1000 },
+          { "ellisonleao/gruvbox.nvim", name = "gruvbox", lazy = false },
+          { "vague-theme/vague.nvim", name = "vague", lazy = false },
+          { "savq/melange-nvim", name = "melange", lazy = false },
         }
       '';
 
