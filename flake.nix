@@ -63,7 +63,11 @@
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+    bacon-ls = {
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      url = "github:crisidev/bacon-ls";
     };
 
     dolphin-overlay.url = "github:rumboon/dolphin-overlay";

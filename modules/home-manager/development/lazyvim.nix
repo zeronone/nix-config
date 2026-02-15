@@ -20,24 +20,44 @@ in
 
   programs.lazyvim = {
     enable = true;
+    ignoreBuildNotifications = true;
 
     config = {
       # ~/.config/nvim/lua/config/options.lua
       options = ''
         -- Common
         vim.opt.wrap = true
+        vim.opt.winborder = "single"
+
+        -- Disable inline diagnostics by default
+        -- Can be enabled by <leader>cd, <leader>cD
+        vim.diagnostic.config({ virtual_text = false })
 
         -- Use basedpyright
         vim.g.lazyvim_python_lsp = "basedpyright"
 
+        -- TODO: revert back when bacon-ls aarch64 build is ready
         -- use bacon-ls only for diagnostics (faster on large projects)
-        vim.g.lazyvim_rust_diagnostics = "bacon-ls"
+        -- vim.g.lazyvim_rust_diagnostics = "bacon-ls"
       '';
 
-      # ~/.config/nvim/lua/config/lazy.lua
-      # lazy = ''
-      #
-      # '';
+      autocmds = ''
+        -- Disable inline diagnostics by default
+        vim.api.nvim_create_autocmd("BufEnter", {
+          callback = function()
+            vim.diagnostic.config({ virtual_text = false })
+          end,
+        })
+      '';
+
+      keymaps = ''
+        vim.keymap.set(
+          "n",
+          "<leader>cD",
+          "<cmd>Trouble diagnostics toggle filter.buf=0 focus=true<cr>",
+          { desc = "Current Buffer diagnostics" }
+        )
+      '';
     };
 
     # Plugin Configuration
@@ -61,12 +81,40 @@ in
           },
         }
       '';
+
+      noice = ''
+        return {
+          {
+            "folke/noice.nvim",
+            opts = {
+              cmdline = {
+                view = "cmdline",
+              },
+              presets = {
+                lsp_doc_border = true,
+              },
+            },
+          },
+        }
+      '';
+
+      lsp = ''
+        return {
+          {
+            "neovim/nvim-lspconfig",
+            opts = {
+              diagnostics = {
+                virtual_text = false, -- Disables inline text by default
+              },
+            },
+          },
+        }
+      '';
     };
 
     # https://github.com/pfassina/lazyvim-nix/blob/main/data/extras.json
     extras = {
       coding = {
-        blink.enable = true;
         # <leader>cn
         neogen.enable = true;
         mini_surround.enable = true;
@@ -225,7 +273,7 @@ in
       mermaid-cli
 
       # rust
-      bacon
+      # bacon-ls # added in rust.nix, overlay in pkgs
 
       # lsp
       copilot-language-server

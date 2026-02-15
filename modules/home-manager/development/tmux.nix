@@ -4,6 +4,8 @@
     enable = true;
     tmuxp.enable = true;
 
+    # It changes <Esc>+j to <A-j> and thus moving lines in nvim
+    escapeTime = 0;
     keyMode = "vi";
     prefix = "C-a";
     historyLimit = 50000;
