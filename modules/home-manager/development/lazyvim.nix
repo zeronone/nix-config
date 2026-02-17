@@ -57,15 +57,6 @@ in
         -- use bacon-ls only for diagnostics (faster on large projects)
         -- vim.g.lazyvim_rust_diagnostics = "bacon-ls"
       '';
-
-      autocmds = ''
-        -- Disable inline diagnostics by default
-        vim.api.nvim_create_autocmd("BufEnter", {
-          callback = function()
-            vim.diagnostic.config({ virtual_text = false })
-          end,
-        })
-      '';
     };
 
     # Plugin Configuration

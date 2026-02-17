@@ -21,6 +21,13 @@
       bind-key -T copy-mode-vi 'C-j' select-pane -D
       bind-key -T copy-mode-vi 'C-k' select-pane -U
       bind-key -T copy-mode-vi 'C-l' select-pane -R
+
+      # make Shift-Enter work in terminal
+      # Enable extended keys
+      set -s extended-keys on
+      set -as terminal-features 'xterm*:extkeys'
+      # Manual passthrough (if the above doesn't work for your specific term)
+      bind -n S-Enter send-keys Escape "[13;2u"
     '';
 
     # It changes <Esc>+j to <A-j> and thus moving lines in nvim
