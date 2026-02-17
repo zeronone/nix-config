@@ -80,13 +80,21 @@ in
       -- Show underscore lines
       vim.opt.guicursor = ""
 
-      -- Disable mini-completion in Snacks picker input buffers
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "snacks_picker_input", "snacks_input" },
-        callback = function(ev)
-          vim.b[ev.buf].minicompletion_disable = true
-        end,
-      })
+      -- Make dotfiles visible in Snacks explorer (monokai-pro spectrum Comment color)
+      vim.api.nvim_set_hl(0, "SnacksExplorerDotfile", { fg = "#908e8f" })
+
+      -- Suppress inlay hint 'col out of range' errors (Neovim 0.11 bug with completion)
+      -- Only targets the inlay_hint namespace to avoid masking errors in other plugins
+      local ih_ns = vim.api.nvim_get_namespaces()["nvim.lsp.inlayhint"] or -1
+      local orig_set_extmark = vim.api.nvim_buf_set_extmark
+      vim.api.nvim_buf_set_extmark = function(buf, ns, line, col, opts)
+        if ns == ih_ns then
+          local ok, result = pcall(orig_set_extmark, buf, ns, line, col, opts)
+          if ok then return result end
+          return 0
+        end
+        return orig_set_extmark(buf, ns, line, col, opts)
+      end
 
       -- Trouble integration with Snacks picker (<a-t> to send results to Trouble)
       Snacks.config.picker.actions.trouble_open = function(...)
@@ -99,17 +107,6 @@ in
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
       expandtab = true;
-
-      # https://nvim-mini.org/mini.nvim/doc/mini-completion.html#module-suggestedoptionvalues
-      # Ensure the first item is selected in completion-menu
-      completeopt = "menu,menuone,noinsert,fuzzy,nosort,popup";
-      # fallback completion, where to look
-      complete = [
-        "." # current buffer
-        "w" # other windows
-        "b" # loaded buffers
-        "u" # unloaded buffers
-      ];
 
       # Confirm before quitting
       confirm = true;
@@ -229,8 +226,7 @@ in
 
       # ── Explorer (Snacks — replaces Neo-tree) ──
       (mkNLua "<leader>e" "function() Snacks.explorer() end" "Explorer (Root)")
-      (mkNLua "<leader>E"
-        "function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h') }) end"
+      (mkNLua "<leader>E" "function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h') }) end"
         "Explorer (cwd)"
       )
 
@@ -273,9 +269,9 @@ in
       (mkNLua "gI" "function() Snacks.picker.lsp_implementations() end" "Goto Implementation")
       (mkNLua "gy" "function() Snacks.picker.lsp_type_definitions() end" "Goto Type Definition")
       (mkNLua "gD" "function() Snacks.picker.lsp_declarations() end" "Goto Declaration")
-      (mkNLua "K" "function() vim.lsp.buf.hover() end" "Hover")
-      (mkNLua "gK" "function() vim.lsp.buf.signature_help() end" "Signature Help")
-      (mkLua "i" "<c-k>" "function() vim.lsp.buf.signature_help() end" "Signature Help")
+      # K for signature help
+      (mkNLua "K" "function() vim.lsp.buf.signature_help() end" "Signature Help")
+      (mkNLua "gK" "function() vim.lsp.buf.hover() end" "Hover (LSP)")
       (mkNX "<leader>ca" "<cmd>lua vim.lsp.buf.code_action()<cr>" "Code Action")
       (mkNLua "<leader>cc" "function() vim.lsp.codelens.run() end" "Run Codelens")
       (mkNLua "<leader>cC" "function() vim.lsp.codelens.refresh() end" "Refresh Codelens")
@@ -430,8 +426,7 @@ in
       (mkNLua "<leader>:" "function() Snacks.picker.command_history() end" "Command History")
       # Find
       (mkNLua "<leader>ff" "function() Snacks.picker.files() end" "Find Files (Root)")
-      (mkNLua "<leader>fF"
-        "function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h') }) end"
+      (mkNLua "<leader>fF" "function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h') }) end"
         "Find Files (cwd)"
       )
       (mkNLua "<leader>fb" "function() Snacks.picker.buffers() end" "Buffers")
@@ -440,21 +435,17 @@ in
       (mkNLua "<leader>fp" "function() Snacks.picker.projects() end" "Projects")
       # Search
       (mkNLua "<leader>sg" "function() Snacks.picker.grep() end" "Grep (Root)")
-      (mkNLua "<leader>sG"
-        "function() Snacks.picker.grep({ cwd = vim.fn.expand('%:p:h') }) end"
+      (mkNLua "<leader>sG" "function() Snacks.picker.grep({ cwd = vim.fn.expand('%:p:h') }) end"
         "Grep (cwd)"
       )
       (mkNLua "<leader>sw" "function() Snacks.picker.grep_word() end" "Grep Word (Root)")
-      (mkNLua "<leader>sW"
-        "function() Snacks.picker.grep_word({ cwd = vim.fn.expand('%:p:h') }) end"
+      (mkNLua "<leader>sW" "function() Snacks.picker.grep_word({ cwd = vim.fn.expand('%:p:h') }) end"
         "Grep Word (cwd)"
       )
       (mkNLua "<leader>sb" "function() Snacks.picker.lines() end" "Buffer Lines")
       (mkNLua "<leader>sB" "function() Snacks.picker.grep_buffers() end" "Grep Open Buffers")
       (mkNLua "<leader>ss" "function() Snacks.picker.lsp_symbols() end" "LSP Symbols")
-      (mkNLua "<leader>sS" "function() Snacks.picker.lsp_workspace_symbols() end"
-        "LSP Workspace Symbols"
-      )
+      (mkNLua "<leader>sS" "function() Snacks.picker.lsp_workspace_symbols() end" "LSP Workspace Symbols")
       (mkNLua "<leader>sd" "function() Snacks.picker.diagnostics_buffer() end" "Diagnostics (Buffer)")
       (mkNLua "<leader>sD" "function() Snacks.picker.diagnostics() end" "Diagnostics (Workspace)")
       (mkNLua "<leader>sh" "function() Snacks.picker.help() end" "Help Pages")
@@ -543,6 +534,12 @@ in
       settings = {
         devicons = true;
         filter = "spectrum";
+        # Clear background for these plugins so they blend with the editor
+        background_clear = [
+          "toggleterm"
+          "notify"
+          "snacks"
+        ];
       };
     };
 
@@ -585,17 +582,195 @@ in
     };
     plugins.mini-align.enable = true;
     plugins.mini-comment.enable = true;
-    plugins.mini-icons.enable = true;
-    plugins.mini-snippets.enable = true;
-    plugins.mini-completion.enable = true;
+
+    # ── Completion (blink-cmp) ──────────────────────────────────────
+    plugins.luasnip.enable = true;
+    plugins.blink-ripgrep.enable = true;
+    plugins.blink-cmp = {
+      enable = true;
+      # Inject blink capabilities into all LSP servers (needed for vim.lsp.config)
+      luaConfig.post = ''
+        vim.lsp.config('*', {
+          capabilities = require('blink.cmp').get_lsp_capabilities()
+        })
+      '';
+      settings = {
+        # ── Keymap ──
+        keymap = {
+          preset = "none";
+          "<C-space>" = [
+            "show"
+            "show_documentation"
+            "hide_documentation"
+          ];
+          "<Tab>" = [
+            "select_next"
+            "snippet_forward"
+            "fallback"
+          ];
+          "<S-Tab>" = [
+            "select_prev"
+            "snippet_backward"
+            "fallback"
+          ];
+          "<CR>" = [
+            "accept"
+            "fallback"
+          ];
+          "<C-u>" = [
+            "scroll_documentation_up"
+            "fallback"
+          ];
+          "<C-d>" = [
+            "scroll_documentation_down"
+            "fallback"
+          ];
+          "<C-e>" = [
+            "hide"
+            "fallback"
+          ];
+          "<C-n>" = [
+            "select_next"
+            "show"
+          ];
+          "<C-p>" = [
+            "select_prev"
+            "show"
+          ];
+        };
+
+        # ── Completion ──
+        completion = {
+          list = {
+            selection = {
+              preselect = true;
+              auto_insert = false;
+            };
+          };
+
+          menu = {
+            border = "single";
+            winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None";
+            draw = {
+              padding = [
+                1
+                1
+              ];
+              columns = [
+                {
+                  __unkeyed-1 = "kind_icon";
+                }
+                {
+                  __unkeyed-1 = "label";
+                  __unkeyed-2 = "label_description";
+                  gap = 1;
+                }
+                {
+                  __unkeyed-1 = "source_name";
+                }
+              ];
+              treesitter = [ "lsp" ];
+            };
+          };
+
+          documentation = {
+            auto_show = true;
+            auto_show_delay_ms = 200;
+            window = {
+              border = "single";
+              winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None";
+            };
+          };
+
+          ghost_text = {
+            enabled = true;
+          };
+        };
+
+        # ── Signature ──
+        signature = {
+          enabled = true;
+          window = {
+            border = "single";
+            winhighlight = "Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder";
+          };
+        };
+
+        # ── Snippets (LuaSnip) ──
+        snippets = {
+          preset = "luasnip";
+        };
+
+        # ── Sources ──
+        sources = {
+          default = [
+            "lsp"
+            "path"
+            "snippets"
+            "buffer"
+            "ripgrep"
+          ];
+          providers = {
+            ripgrep = {
+              module = "blink-ripgrep";
+              name = "Ripgrep";
+              async = true;
+              score_offset = -3;
+              opts = {
+                prefix_min_len = 3;
+                context_size = 5;
+                max_filesize = "1M";
+                search_casing = "--ignore-case";
+              };
+            };
+          };
+        };
+
+        # ── Cmdline ──
+        cmdline = {
+          enabled = true;
+          keymap = {
+            preset = "cmdline";
+          };
+          sources = [
+            "cmdline"
+          ];
+          completion = {
+            menu = {
+              auto_show = true;
+            };
+            list = {
+              selection = {
+                preselect = true;
+                auto_insert = true;
+              };
+            };
+            ghost_text = {
+              enabled = true;
+            };
+          };
+        };
+
+        # ── Fuzzy (prefer Rust implementation) ──
+        fuzzy = {
+          implementation = "prefer_rust";
+          prebuilt_binaries = {
+            download = false;
+          };
+        };
+
+        # ── Appearance ──
+        appearance = {
+          use_nvim_cmp_as_default = false;
+          nerd_font_variant = "mono";
+        };
+      };
+    };
+
     plugins.mini-keymap = {
       enable = true;
       luaConfig.post = ''
-        -- For mini-completion
         local map_multistep = require('mini.keymap').map_multistep
-        map_multistep('i', '<Tab>',   { 'pmenu_next' })
-        map_multistep('i', '<S-Tab>', { 'pmenu_prev' })
-        map_multistep('i', '<CR>',    { 'pmenu_accept', 'minipairs_cr' })
         map_multistep('i', '<BS>',    { 'minipairs_bs' })
       '';
     };
@@ -717,11 +892,6 @@ in
           };
           win = {
             input = {
-              # Disable completion in picker input (prevents mini-completion from hijacking input)
-              bo = {
-                completeopt = "";
-                buftype = "nofile";
-              };
               keys = {
                 # Flash jump in picker
                 "<a-s>" = {
@@ -1061,7 +1231,7 @@ in
     plugins.neogen = {
       enable = true;
       settings = {
-        snippet_engine = "mini";
+        snippet_engine = "luasnip";
       };
     };
 
