@@ -76,6 +76,9 @@ in
 
       -- <Esc> to go to normal mode in terminal
       vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]])
+
+      -- Show underscore lines
+      vim.opt.guicursor = ""
     '';
 
     opts = {
