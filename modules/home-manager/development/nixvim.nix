@@ -79,6 +79,19 @@ in
 
       -- Show underscore lines
       vim.opt.guicursor = ""
+
+      -- Disable mini-completion in Snacks picker input buffers
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "snacks_picker_input", "snacks_input" },
+        callback = function(ev)
+          vim.b[ev.buf].minicompletion_disable = true
+        end,
+      })
+
+      -- Trouble integration with Snacks picker (<a-t> to send results to Trouble)
+      Snacks.config.picker.actions.trouble_open = function(...)
+        return require("trouble.sources.snacks").actions.trouble_open.action(...)
+      end
     '';
 
     opts = {
@@ -214,9 +227,12 @@ in
       (mkN "<leader>xL" "<cmd>Trouble loclist toggle<cr>" "Location List (Trouble)")
       (mkN "<leader>xQ" "<cmd>Trouble qflist toggle<cr>" "Quickfix List (Trouble)")
 
-      # ── Neo-tree (LazyVim layout) ──
-      (mkN "<leader>e" "<cmd>Neotree source=filesystem action=show toggle<cr>" "Explorer (Root)")
-      (mkN "<leader>E" "<cmd>Neotree source=filesystem action=show toggle dir=%:p:h<cr>" "Explorer (cwd)")
+      # ── Explorer (Snacks — replaces Neo-tree) ──
+      (mkNLua "<leader>e" "function() Snacks.explorer() end" "Explorer (Root)")
+      (mkNLua "<leader>E"
+        "function() Snacks.explorer({ cwd = vim.fn.expand('%:p:h') }) end"
+        "Explorer (cwd)"
+      )
 
       # ── Terminal (Snacks) ──
       (mkNLua "<leader>ft" "function() Snacks.terminal() end" "Terminal (Root)")
@@ -251,12 +267,12 @@ in
       (mkN "<leader>co" "<cmd>OutputPanel<cr>" "Toggle Output Panel")
       (mkNLua "<leader>cd" "function() vim.diagnostic.open_float() end" "Line Diagnostics")
 
-      # ── LSP (LazyVim layout) ──
-      (mkNLua "gd" "function() vim.lsp.buf.definition() end" "Goto Definition")
-      (mkNLua "gr" "function() vim.lsp.buf.references() end" "References")
-      (mkNLua "gI" "function() vim.lsp.buf.implementation() end" "Goto Implementation")
-      (mkNLua "gy" "function() vim.lsp.buf.type_definition() end" "Goto Type Definition")
-      (mkNLua "gD" "function() vim.lsp.buf.declaration() end" "Goto Declaration")
+      # ── LSP (LazyVim layout — via Snacks Picker) ──
+      (mkNLua "gd" "function() Snacks.picker.lsp_definitions() end" "Goto Definition")
+      (mkNLua "gr" "function() Snacks.picker.lsp_references() end" "References")
+      (mkNLua "gI" "function() Snacks.picker.lsp_implementations() end" "Goto Implementation")
+      (mkNLua "gy" "function() Snacks.picker.lsp_type_definitions() end" "Goto Type Definition")
+      (mkNLua "gD" "function() Snacks.picker.lsp_declarations() end" "Goto Declaration")
       (mkNLua "K" "function() vim.lsp.buf.hover() end" "Hover")
       (mkNLua "gK" "function() vim.lsp.buf.signature_help() end" "Signature Help")
       (mkLua "i" "<c-k>" "function() vim.lsp.buf.signature_help() end" "Signature Help")
@@ -310,8 +326,11 @@ in
       (mkN "<leader>xT" "<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>"
         "Todo/Fix/Fixme (Trouble)"
       )
-      (mkN "<leader>st" "<cmd>TodoFzfLua<cr>" "Todo")
-      (mkN "<leader>sT" "<cmd>TodoFzfLua keywords=TODO,FIX,FIXME<cr>" "Todo/Fix/Fixme")
+      (mkNLua "<leader>st" "function() Snacks.picker.todo_comments() end" "Todo")
+      (mkNLua "<leader>sT"
+        ''function() Snacks.picker.todo_comments({ keywords = { "TODO", "FIX", "FIXME" } }) end''
+        "Todo/Fix/Fixme"
+      )
 
       # ── Grug-far (Search and Replace) ──
       (mkNLua "<leader>sr" ''
@@ -396,7 +415,55 @@ in
           Snacks.gitbrowse({ open = function(url) vim.fn.setreg("+", url) end, notify = false })
         end
       '' "Git Browse (copy)")
-      # Git log keymaps handled by fzf-lua (<leader>gc, <leader>gS)
+      # ── Snacks: Git (pickers) ──
+      (mkNLua "<leader>gc" "function() Snacks.picker.git_log() end" "Git Commits")
+      (mkNLua "<leader>gs" "function() Snacks.picker.git_status() end" "Git Status")
+      (mkNLua "<leader>gS" "function() Snacks.picker.git_stash() end" "Git Stash")
+      (mkNLua "<leader>gd" "function() Snacks.picker.git_diff() end" "Git Diff")
+      (mkNLua "<leader>gf" "function() Snacks.picker.git_log_file() end" "Git Log (File)")
+
+      # ── Snacks: Picker (replaces fzf-lua keymaps) ──
+      # Top-level shortcuts
+      (mkNLua "<leader><space>" "function() Snacks.picker.files() end" "Find Files (Root)")
+      (mkNLua "<leader>/" "function() Snacks.picker.grep() end" "Grep (Root)")
+      (mkNLua "<leader>," "function() Snacks.picker.buffers() end" "Buffers")
+      (mkNLua "<leader>:" "function() Snacks.picker.command_history() end" "Command History")
+      # Find
+      (mkNLua "<leader>ff" "function() Snacks.picker.files() end" "Find Files (Root)")
+      (mkNLua "<leader>fF"
+        "function() Snacks.picker.files({ cwd = vim.fn.expand('%:p:h') }) end"
+        "Find Files (cwd)"
+      )
+      (mkNLua "<leader>fb" "function() Snacks.picker.buffers() end" "Buffers")
+      (mkNLua "<leader>fg" "function() Snacks.picker.git_files() end" "Git Files")
+      (mkNLua "<leader>fr" "function() Snacks.picker.recent() end" "Recent Files")
+      (mkNLua "<leader>fp" "function() Snacks.picker.projects() end" "Projects")
+      # Search
+      (mkNLua "<leader>sg" "function() Snacks.picker.grep() end" "Grep (Root)")
+      (mkNLua "<leader>sG"
+        "function() Snacks.picker.grep({ cwd = vim.fn.expand('%:p:h') }) end"
+        "Grep (cwd)"
+      )
+      (mkNLua "<leader>sw" "function() Snacks.picker.grep_word() end" "Grep Word (Root)")
+      (mkNLua "<leader>sW"
+        "function() Snacks.picker.grep_word({ cwd = vim.fn.expand('%:p:h') }) end"
+        "Grep Word (cwd)"
+      )
+      (mkNLua "<leader>sb" "function() Snacks.picker.lines() end" "Buffer Lines")
+      (mkNLua "<leader>sB" "function() Snacks.picker.grep_buffers() end" "Grep Open Buffers")
+      (mkNLua "<leader>ss" "function() Snacks.picker.lsp_symbols() end" "LSP Symbols")
+      (mkNLua "<leader>sS" "function() Snacks.picker.lsp_workspace_symbols() end"
+        "LSP Workspace Symbols"
+      )
+      (mkNLua "<leader>sd" "function() Snacks.picker.diagnostics_buffer() end" "Diagnostics (Buffer)")
+      (mkNLua "<leader>sD" "function() Snacks.picker.diagnostics() end" "Diagnostics (Workspace)")
+      (mkNLua "<leader>sh" "function() Snacks.picker.help() end" "Help Pages")
+      (mkNLua "<leader>sk" "function() Snacks.picker.keymaps() end" "Keymaps")
+      (mkNLua "<leader>sm" "function() Snacks.picker.marks() end" "Marks")
+      (mkNLua "<leader>s\"" "function() Snacks.picker.registers() end" "Registers")
+      (mkNLua "<leader>sR" "function() Snacks.picker.resume() end" "Resume Last Picker")
+      (mkNLua "<leader>su" "function() Snacks.picker.undo() end" "Undo Tree")
+      (mkNLua "<leader>uC" "function() Snacks.picker.colorschemes() end" "Colorschemes")
 
       # ── Snacks: Toggle ──
       (mkNLua "<leader>uZ" "function() Snacks.toggle.zoom():toggle() end" "Toggle Zoom")
@@ -576,8 +643,6 @@ in
     plugins.snacks = {
       enable = true;
       settings = {
-        # disabled
-        # picer: we use fzf-lua
         input = {
           enabled = true;
         };
@@ -612,111 +677,185 @@ in
         scroll = {
           enabled = true;
         };
+
+        # ── Snacks Picker (replaces fzf-lua) ──
+        picker = {
+          enabled = true;
+          # Override vim.ui.select with snacks picker UI
+          ui_select = true;
+          sources = {
+            explorer = {
+              # Show dotfiles and gitignored (like neo-tree was configured)
+              hidden = true;
+              ignored = true;
+            };
+          };
+          # Flash integration for jump labels in picker list
+          actions = {
+            flash = {
+              __raw = ''
+                function(picker)
+                  require("flash").jump({
+                    pattern = "^",
+                    label = { after = { 0, 0 } },
+                    search = {
+                      mode = "search",
+                      exclude = {
+                        function(win)
+                          return vim.bo[vim.api.nvim_win_get_buf(win)].filetype ~= "snacks_picker_list"
+                        end,
+                      },
+                    },
+                    action = function(match)
+                      local idx = picker.list:row2idx(match.pos[1])
+                      picker.list:_move(idx, true, true)
+                    end,
+                  })
+                end
+              '';
+            };
+          };
+          win = {
+            input = {
+              # Disable completion in picker input (prevents mini-completion from hijacking input)
+              bo = {
+                completeopt = "";
+                buftype = "nofile";
+              };
+              keys = {
+                # Flash jump in picker
+                "<a-s>" = {
+                  __unkeyed-1 = "flash";
+                  mode = [
+                    "n"
+                    "i"
+                  ];
+                };
+                s = {
+                  __unkeyed-1 = "flash";
+                };
+                # Send to Trouble
+                "<a-t>" = {
+                  __unkeyed-1 = "trouble_open";
+                  mode = [
+                    "n"
+                    "i"
+                  ];
+                };
+              };
+            };
+          };
+        };
+
+        # ── Snacks Explorer (replaces neo-tree) ──
+        explorer = {
+          enabled = true;
+        };
       };
     };
     plugins.smear-cursor.enable = true;
 
     # Core
-    plugins.fzf-lua = {
-      enable = true;
-      keymaps = {
-        "<leader><space>" = {
-          action = "files";
-          options.desc = "Find Files (Root)";
-        };
-        "<leader>/" = {
-          action = "live_grep";
-          options.desc = "Grep (Root)";
-        };
-        "<leader>," = {
-          action = "buffers";
-          options.desc = "Buffers";
-        };
-        "<leader>:" = {
-          action = "command_history";
-          options.desc = "Command History";
-        };
-        "<leader>ff" = {
-          action = "files";
-          options.desc = "Find Files (Root)";
-        };
-        "<leader>fF" = {
-          action = "files";
-          settings.cwd = "%:p:h";
-          options.desc = "Find Files (cwd)";
-        };
-        "<leader>fb" = {
-          action = "buffers";
-          options.desc = "Buffers";
-        };
-        "<leader>fg" = {
-          action = "git_files";
-          options.desc = "Git Files";
-        };
-        "<leader>fr" = {
-          action = "oldfiles";
-          options.desc = "Recent Files";
-        };
-        "<leader>sg" = {
-          action = "live_grep";
-          options.desc = "Grep (Root)";
-        };
-        "<leader>sG" = {
-          action = "live_grep";
-          settings.cwd = "%:p:h";
-          options.desc = "Grep (cwd)";
-        };
-        "<leader>sw" = {
-          action = "grep_cword";
-          options.desc = "Grep Word (Root)";
-        };
-        "<leader>sW" = {
-          action = "grep_cword";
-          settings.cwd = "%:p:h";
-          options.desc = "Grep Word (cwd)";
-        };
-        "<leader>ss" = {
-          action = "lsp_document_symbols";
-          options.desc = "LSP Symbols";
-        };
-        "<leader>sS" = {
-          action = "lsp_workspace_symbols";
-          options.desc = "LSP Workspace Symbols";
-        };
-        "<leader>sd" = {
-          action = "diagnostics_document";
-          options.desc = "Diagnostics (Buffer)";
-        };
-        "<leader>sD" = {
-          action = "diagnostics_workspace";
-          options.desc = "Diagnostics (Workspace)";
-        };
-        "<leader>sh" = {
-          action = "help_tags";
-          options.desc = "Help Pages";
-        };
-        "<leader>sk" = {
-          action = "keymaps";
-          options.desc = "Keymaps";
-        };
-        "<leader>sm" = {
-          action = "marks";
-          options.desc = "Marks";
-        };
-        "<leader>s\"" = {
-          action = "registers";
-          options.desc = "Registers";
-        };
-        "<leader>gc" = {
-          action = "git_commits";
-          options.desc = "Git Commits";
-        };
-        "<leader>gS" = {
-          action = "git_status";
-          options.desc = "Git Status";
-        };
-      };
-    };
+    # plugins.fzf-lua = {
+    #   enable = true;
+    #   keymaps = {
+    #     "<leader><space>" = {
+    #       action = "files";
+    #       options.desc = "Find Files (Root)";
+    #     };
+    #     "<leader>/" = {
+    #       action = "live_grep";
+    #       options.desc = "Grep (Root)";
+    #     };
+    #     "<leader>," = {
+    #       action = "buffers";
+    #       options.desc = "Buffers";
+    #     };
+    #     "<leader>:" = {
+    #       action = "command_history";
+    #       options.desc = "Command History";
+    #     };
+    #     "<leader>ff" = {
+    #       action = "files";
+    #       options.desc = "Find Files (Root)";
+    #     };
+    #     "<leader>fF" = {
+    #       action = "files";
+    #       settings.cwd = "%:p:h";
+    #       options.desc = "Find Files (cwd)";
+    #     };
+    #     "<leader>fb" = {
+    #       action = "buffers";
+    #       options.desc = "Buffers";
+    #     };
+    #     "<leader>fg" = {
+    #       action = "git_files";
+    #       options.desc = "Git Files";
+    #     };
+    #     "<leader>fr" = {
+    #       action = "oldfiles";
+    #       options.desc = "Recent Files";
+    #     };
+    #     "<leader>sg" = {
+    #       action = "live_grep";
+    #       options.desc = "Grep (Root)";
+    #     };
+    #     "<leader>sG" = {
+    #       action = "live_grep";
+    #       settings.cwd = "%:p:h";
+    #       options.desc = "Grep (cwd)";
+    #     };
+    #     "<leader>sw" = {
+    #       action = "grep_cword";
+    #       options.desc = "Grep Word (Root)";
+    #     };
+    #     "<leader>sW" = {
+    #       action = "grep_cword";
+    #       settings.cwd = "%:p:h";
+    #       options.desc = "Grep Word (cwd)";
+    #     };
+    #     "<leader>ss" = {
+    #       action = "lsp_document_symbols";
+    #       options.desc = "LSP Symbols";
+    #     };
+    #     "<leader>sS" = {
+    #       action = "lsp_workspace_symbols";
+    #       options.desc = "LSP Workspace Symbols";
+    #     };
+    #     "<leader>sd" = {
+    #       action = "diagnostics_document";
+    #       options.desc = "Diagnostics (Buffer)";
+    #     };
+    #     "<leader>sD" = {
+    #       action = "diagnostics_workspace";
+    #       options.desc = "Diagnostics (Workspace)";
+    #     };
+    #     "<leader>sh" = {
+    #       action = "help_tags";
+    #       options.desc = "Help Pages";
+    #     };
+    #     "<leader>sk" = {
+    #       action = "keymaps";
+    #       options.desc = "Keymaps";
+    #     };
+    #     "<leader>sm" = {
+    #       action = "marks";
+    #       options.desc = "Marks";
+    #     };
+    #     "<leader>s\"" = {
+    #       action = "registers";
+    #       options.desc = "Registers";
+    #     };
+    #     "<leader>gc" = {
+    #       action = "git_commits";
+    #       options.desc = "Git Commits";
+    #     };
+    #     "<leader>gS" = {
+    #       action = "git_status";
+    #       options.desc = "Git Status";
+    #     };
+    #   };
+    # };
     plugins.trouble = {
       enable = true;
     };
@@ -993,23 +1132,23 @@ in
     plugins.dap-lldb.enable = true;
 
     # Misc
-    plugins.neo-tree = {
-      enable = true;
-      settings = {
-        close_if_last_window = false;
-        filesystem = {
-          filtered_items = {
-            visible = true;
-            hide_dotfiles = false;
-            hide_gitignored = false;
-          };
-          follow_current_file = {
-            enabled = true;
-            leave_dirs_open = true;
-          };
-        };
-      };
-    };
+    # plugins.neo-tree = {
+    #   enable = true;
+    #   settings = {
+    #     close_if_last_window = false;
+    #     filesystem = {
+    #       filtered_items = {
+    #         visible = true;
+    #         hide_dotfiles = false;
+    #         hide_gitignored = false;
+    #       };
+    #       follow_current_file = {
+    #         enabled = true;
+    #         leave_dirs_open = true;
+    #       };
+    #     };
+    #   };
+    # };
     plugins.which-key = {
       enable = true;
       settings = {

@@ -17,6 +17,7 @@
         "Noto Color Emoji"
       ];
       monospace = [
+        "IosevkaTerm Nerd Font Mono"
         "JetBrainsMonoNL Nerd Font"
         # 日本語
         "PlemolJP Console NF"

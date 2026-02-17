@@ -8,6 +8,7 @@
       theme = "monokai-pro-spectrum";
       # to make zellij work
       macos-option-as-alt = true;
+      font-family = "IosevkaTerm Nerd Font Mono";
       keybind = [
         # Both mac and linux
         "performable:ctrl+c=copy_to_clipboard"

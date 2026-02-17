@@ -3,6 +3,7 @@
   fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
     # nerd fonts
+    nerd-fonts.iosevka-term
     nerd-fonts.hack
     nerd-fonts.jetbrains-mono
 
