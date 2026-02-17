@@ -53,6 +53,15 @@ in
           hash = "sha256-OONTXn0+MB+nj+piFW4Lb6Sne7dG4MhXLwl0hhl9aeY=";
         };
       })
+      (pkgs-unstable.vimUtils.buildVimPlugin {
+        name = "spring-boot.nvim";
+        src = pkgs-unstable.fetchFromGitHub {
+          owner = "JavaHello";
+          repo = "spring-boot.nvim";
+          rev = "main";
+          hash = "sha256-ioGlxjZIqtNlPedwI/HX3xA3HOWJ50WmWFyYIQPHDrg=";
+        };
+      })
     ];
 
     extraConfigLua = ''
@@ -922,23 +931,41 @@ in
     # LSP
     plugins.lsp.enable = true;
     plugins.dap.enable = true;
-    lsp.servers = {
-      basedpyright.enable = true;
-      bashls.enable = true;
-      bufls.enable = true;
-      clangd.enable = true;
-      gitlab_ci_ls.enable = true;
-      hls.enable = true;
-      html.enable = true;
-      java.enable = true;   # this uses nvim-java (better than jdtls)
-      jsonls.enable = true;
-      just.enable = true;
-      nixd.enable = true;
-      rust-analyzer.enable = true;
-      sqls.enable = true;
-      ts_ls.enable = true;
-      # required by sidekick even though NES is disabled
-      copilot.enable = true;
+    lsp = {
+      inlayHints.enable = true;
+      servers = {
+        basedpyright.enable = true;
+        bashls.enable = true;
+        bufls.enable = true;
+        clangd.enable = true;
+        gitlab_ci_ls.enable = true;
+        hls.enable = true;
+        html.enable = true;
+        jsonls.enable = true;
+        just.enable = true;
+        nixd.enable = true;
+        rust-analyzer.enable = true;
+        sqls.enable = true;
+        ts_ls.enable = true;
+        # required by sidekick even though NES is disabled
+        copilot = {
+          enable = true;
+          activate = false;
+        };
+      };
+    };
+
+    # nvim-java plugin
+    # this manages the jdtls, and associated plugins
+    # Also needs spring-boot
+    plugins.java = {
+      enable = true;
+      # spring-boot is already enabled above
+      # require('java').setup() will be called by nixvim
+      # https://github.com/nvim-java/nvim-java?tab=readme-ov-file
+      luaConfig.post = ''
+        vim.lsp.enable('jdtls')
+      '';
     };
 
     # Rust
