@@ -70,18 +70,26 @@ in
       -- Disable virtual_text diagnostics by default
       -- Can be enabled by <leader>cd, <leader>cD
       vim.diagnostic.config({ virtual_text = false })
+      -- Better defaults
+      vim.diagnostic.config({
+        float = {
+          border = "rounded", -- 'single', 'double', 'shadow', etc.
+          header = "Diagnostics", -- Header text
+          prefix = "● ", -- Prefix for each line
+          scope = "line", -- Show diagnostics for 'cursor' or 'line'
+          focusable = true, -- Allow focusing the window
+          source = "always",
+        },
+      })
+
+      -- Match float border background with the float background
+      vim.api.nvim_set_hl(0, "FloatBorder", { link = "NormalFloat" })
 
       -- Disable macros
       vim.keymap.set('n', 'q', '<Nop>', { noremap = true, silent = true, desc = 'Disable q key' })
 
-      -- <Esc> to go to normal mode in terminal
-      vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]])
-
       -- Show underscore lines
       vim.opt.guicursor = ""
-
-      -- Make dotfiles visible in Snacks explorer (monokai-pro spectrum Comment color)
-      vim.api.nvim_set_hl(0, "SnacksExplorerDotfile", { fg = "#908e8f" })
 
       -- Suppress inlay hint 'col out of range' errors (Neovim 0.11 bug with completion)
       -- Only targets the inlay_hint namespace to avoid masking errors in other plugins
@@ -100,6 +108,14 @@ in
       Snacks.config.picker.actions.trouble_open = function(...)
         return require("trouble.sources.snacks").actions.trouble_open.action(...)
       end
+
+      -- Snacks explorer default colors are too dim
+      vim.api.nvim_set_hl(0, "SnacksPickerDir", { link = "Text" })
+      vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { link = "Text" })
+      vim.api.nvim_set_hl(0, "SnacksPickerPathHidden", { link = "Text" })
+      vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { link = "Text" })
+      vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Text" })
+      vim.api.nvim_set_hl(0, "SnacksPickerGitStatusIgnored", { link = "Text" })
     '';
 
     opts = {
@@ -534,12 +550,6 @@ in
       settings = {
         devicons = true;
         filter = "spectrum";
-        # Clear background for these plugins so they blend with the editor
-        background_clear = [
-          "toggleterm"
-          "notify"
-          "snacks"
-        ];
       };
     };
 
@@ -923,109 +933,8 @@ in
         };
       };
     };
-    plugins.smear-cursor.enable = true;
 
     # Core
-    # plugins.fzf-lua = {
-    #   enable = true;
-    #   keymaps = {
-    #     "<leader><space>" = {
-    #       action = "files";
-    #       options.desc = "Find Files (Root)";
-    #     };
-    #     "<leader>/" = {
-    #       action = "live_grep";
-    #       options.desc = "Grep (Root)";
-    #     };
-    #     "<leader>," = {
-    #       action = "buffers";
-    #       options.desc = "Buffers";
-    #     };
-    #     "<leader>:" = {
-    #       action = "command_history";
-    #       options.desc = "Command History";
-    #     };
-    #     "<leader>ff" = {
-    #       action = "files";
-    #       options.desc = "Find Files (Root)";
-    #     };
-    #     "<leader>fF" = {
-    #       action = "files";
-    #       settings.cwd = "%:p:h";
-    #       options.desc = "Find Files (cwd)";
-    #     };
-    #     "<leader>fb" = {
-    #       action = "buffers";
-    #       options.desc = "Buffers";
-    #     };
-    #     "<leader>fg" = {
-    #       action = "git_files";
-    #       options.desc = "Git Files";
-    #     };
-    #     "<leader>fr" = {
-    #       action = "oldfiles";
-    #       options.desc = "Recent Files";
-    #     };
-    #     "<leader>sg" = {
-    #       action = "live_grep";
-    #       options.desc = "Grep (Root)";
-    #     };
-    #     "<leader>sG" = {
-    #       action = "live_grep";
-    #       settings.cwd = "%:p:h";
-    #       options.desc = "Grep (cwd)";
-    #     };
-    #     "<leader>sw" = {
-    #       action = "grep_cword";
-    #       options.desc = "Grep Word (Root)";
-    #     };
-    #     "<leader>sW" = {
-    #       action = "grep_cword";
-    #       settings.cwd = "%:p:h";
-    #       options.desc = "Grep Word (cwd)";
-    #     };
-    #     "<leader>ss" = {
-    #       action = "lsp_document_symbols";
-    #       options.desc = "LSP Symbols";
-    #     };
-    #     "<leader>sS" = {
-    #       action = "lsp_workspace_symbols";
-    #       options.desc = "LSP Workspace Symbols";
-    #     };
-    #     "<leader>sd" = {
-    #       action = "diagnostics_document";
-    #       options.desc = "Diagnostics (Buffer)";
-    #     };
-    #     "<leader>sD" = {
-    #       action = "diagnostics_workspace";
-    #       options.desc = "Diagnostics (Workspace)";
-    #     };
-    #     "<leader>sh" = {
-    #       action = "help_tags";
-    #       options.desc = "Help Pages";
-    #     };
-    #     "<leader>sk" = {
-    #       action = "keymaps";
-    #       options.desc = "Keymaps";
-    #     };
-    #     "<leader>sm" = {
-    #       action = "marks";
-    #       options.desc = "Marks";
-    #     };
-    #     "<leader>s\"" = {
-    #       action = "registers";
-    #       options.desc = "Registers";
-    #     };
-    #     "<leader>gc" = {
-    #       action = "git_commits";
-    #       options.desc = "Git Commits";
-    #     };
-    #     "<leader>gS" = {
-    #       action = "git_status";
-    #       options.desc = "Git Status";
-    #     };
-    #   };
-    # };
     plugins.trouble = {
       enable = true;
     };
@@ -1039,7 +948,21 @@ in
 
     # UI
     plugins.lualine.enable = true;
-    plugins.bufferline.enable = true;
+    plugins.bufferline = {
+      enable = true;
+      settings.options.diagnostics = false;
+      settings.options.name_formatter.__raw = ''
+        -- Add a space between icon and filename
+        function(buf)
+          return " " .. buf.name
+        end
+      '';
+      settings.options.offsets = [
+        {
+          filetype = "snacks_layout_box";
+        }
+      ];
+    };
 
     # VCS
     plugins.neogit.enable = true;

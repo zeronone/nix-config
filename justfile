@@ -1,3 +1,5 @@
+set shell := ["zsh", "-cu"]
+
 # Build and apply configuration based on the host
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
