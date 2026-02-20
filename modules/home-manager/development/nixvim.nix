@@ -85,6 +85,10 @@ in
       -- Match float border background with the float background
       vim.api.nvim_set_hl(0, "FloatBorder", { link = "NormalFloat" })
 
+      -- Make window separators visually distinct
+      vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#fc9867", bold = true })
+      vim.opt.fillchars:append({ vert = "▊", horiz = "▄", horizup = "▊", horizdown = "▊", vertleft = "▊", vertright = "▊", verthoriz = "▊" })
+
       -- Disable macros
       vim.keymap.set('n', 'q', '<Nop>', { noremap = true, silent = true, desc = 'Disable q key' })
 
@@ -116,9 +120,23 @@ in
       vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { link = "Text" })
       vim.api.nvim_set_hl(0, "SnacksPickerGitStatusUntracked", { link = "Text" })
       vim.api.nvim_set_hl(0, "SnacksPickerGitStatusIgnored", { link = "Text" })
+
+      -- Dot-repeatable window resize helpers (step 10)
+      -- Uses operatorfunc so that pressing "." repeats the last resize
+      local function make_resize_op(cmd)
+        return function()
+          vim.cmd(cmd)
+          vim.cmd("stopinsert")
+        end
+      end
+      _G._resize_h_inc = make_resize_op("resize +10")
+      _G._resize_h_dec = make_resize_op("resize -10")
+      _G._resize_w_dec = make_resize_op("vertical resize -10")
+      _G._resize_w_inc = make_resize_op("vertical resize +10")
     '';
 
     opts = {
+      mouse = "a"; # Enable mouse in all modes
       number = true; # Show line numbers
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
@@ -192,16 +210,30 @@ in
       (mkN "<C-k>" "<C-w>k" "Go to Upper Window")
       (mkN "<C-l>" "<C-w>l" "Go to Right Window")
 
-      # ── Window Splits ──
-      (mkN "<leader>-" "<C-w>s" "Split Window Below")
-      (mkN "<leader>|" "<C-w>v" "Split Window Right")
+      # ── Window Splits (tmux-style) ──
+      (mkN "<leader>w\"" "<C-w>s" "Split Window Below")
+      (mkN "<leader>w%" "<C-w>v" "Split Window Right")
       (mkN "<leader>wd" "<C-w>c" "Delete Window")
 
-      # ── Resize Windows ──
-      (mkN "<C-Up>" "<cmd>resize +2<cr>" "Increase Window Height")
-      (mkN "<C-Down>" "<cmd>resize -2<cr>" "Decrease Window Height")
-      (mkN "<C-Left>" "<cmd>vertical resize -2<cr>" "Decrease Window Width")
-      (mkN "<C-Right>" "<cmd>vertical resize +2<cr>" "Increase Window Width")
+      # ── Resize Windows (dot-repeatable, step 10) ──
+      # Uses operatorfunc + g@l so "." repeats the last resize
+      # stopinsert prevents terminal windows from entering insert/terminal mode
+      (mkNLua "<leader>w+"
+        "function() vim.o.operatorfunc = 'v:lua._resize_h_inc' vim.api.nvim_feedkeys('g@l', 'n', false) end"
+        "Increase Window Height"
+      )
+      (mkNLua "<leader>w-"
+        "function() vim.o.operatorfunc = 'v:lua._resize_h_dec' vim.api.nvim_feedkeys('g@l', 'n', false) end"
+        "Decrease Window Height"
+      )
+      (mkNLua "<leader>w<"
+        "function() vim.o.operatorfunc = 'v:lua._resize_w_dec' vim.api.nvim_feedkeys('g@l', 'n', false) end"
+        "Decrease Window Width"
+      )
+      (mkNLua "<leader>w>"
+        "function() vim.o.operatorfunc = 'v:lua._resize_w_inc' vim.api.nvim_feedkeys('g@l', 'n', false) end"
+        "Increase Window Width"
+      )
 
       # ── Tabs ──
       (mkN "<leader><tab>l" "<cmd>tablast<cr>" "Last Tab")
@@ -252,6 +284,18 @@ in
         function() Snacks.terminal(nil, { cwd = vim.fn.expand("%:p:h") }) end
       '' "Terminal (cwd)")
       (mkLua [ "n" "t" ] "<c-/>" "function() Snacks.terminal() end" "Terminal (Root)")
+
+      # ── Terminal keymaps ──
+      # Esc returns to normal mode instead of being sent to the terminal
+      (mkKeymap "t" "<Esc>" "<C-\\><C-n>" "Exit Terminal Mode")
+      # Send a literal Esc to the terminal (e.g. for sidekick/opencode)
+      (mkKeymap "t" "<C-\\><Esc>" "<cmd>lua vim.api.nvim_feedkeys('\\x1b', 'n', true)<cr>"
+        "Send Esc to Terminal"
+      )
+      # Shift+Enter sends the correct escape sequence to the terminal
+      (mkKeymap "t" "<S-Enter>" "<cmd>lua vim.api.nvim_feedkeys('\\x1b[13;2u', 'n', true)<cr>"
+        "Shift+Enter"
+      )
 
       # ── Toggle (LazyVim layout: <leader>u*) ──
       # Most toggles come from mini-basics with prefix <leader>u
@@ -1132,6 +1176,9 @@ in
           enabled = false;
         };
         cli = {
+          keys = {
+            prompt = false; # Unbind <C-p> (default prompt select) so it passes through to the terminal
+          };
           mux = {
             backend = "tmux";
             enabled = true;
