@@ -73,9 +73,25 @@ in
     extraConfigLua = ''
       require("output_panel").setup({ max_buffer_size = 10000 })
 
-      -- Disable virtual_text diagnostics by default
-      -- Can be enabled by <leader>cd, <leader>cD
-      vim.diagnostic.config({ virtual_text = false })
+      -- Default: virtual_text for Errors only
+      vim.diagnostic.config({ virtual_text = { severity = { min = vim.diagnostic.severity.ERROR } } })
+      _G.diagnostic_vt_state = 0 -- 0: Errors, 1: All, 2: Off
+
+      function _G.cycle_diagnostic_vt()
+        _G.diagnostic_vt_state = (_G.diagnostic_vt_state + 1) % 3
+        local state = _G.diagnostic_vt_state
+
+        if state == 0 then
+          vim.diagnostic.config({ virtual_text = { severity = { min = vim.diagnostic.severity.ERROR } } })
+          vim.notify("Diagnostics: Errors Only")
+        elseif state == 1 then
+          vim.diagnostic.config({ virtual_text = true })
+          vim.notify("Diagnostics: All")
+        else
+          vim.diagnostic.config({ virtual_text = false })
+          vim.notify("Diagnostics: Virtual Text Off")
+        end
+      end
       -- Better defaults
       vim.diagnostic.config({
         float = {
@@ -269,6 +285,7 @@ in
         "function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN }) end"
         "Prev Warning"
       )
+      (mkNLua "<leader>x<tab>" "function() _G.cycle_diagnostic_vt() end" "Cycle Diagnostic Text")
 
       # ── Trouble (LazyVim layout) ──
       (mkN "<leader>xx" "<cmd>Trouble diagnostics toggle<cr>" "Diagnostics (Trouble)")
@@ -696,6 +713,14 @@ in
           "<C-p>" = [
             "select_prev"
             "show"
+          ];
+          "<Up>" = [
+            "select_prev"
+            "fallback"
+          ];
+          "<Down>" = [
+            "select_next"
+            "fallback"
           ];
         };
 

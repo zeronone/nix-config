@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, pkgs, ... }:
 {
   services.envfs.enable = true;
   environment.sessionVariables.ENVFS_RESOLVE_ALWAYS = "1";
