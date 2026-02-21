@@ -1,6 +1,16 @@
 # Work machine
-{ ... }:
 {
+  lib,
+  myDarwinModules,
+  ...
+}:
+{
+  imports = [
+    (myDarwinModules + "/nix-homebrew.nix")
+    (myDarwinModules + "/macbook-us-ansi.nix")
+    (myDarwinModules + "/hammerspoon.nix")
+  ];
+
   networking.knownNetworkServices = [
     "Wi-Fi"
     "USB 10/100/1000 LAN"
@@ -23,4 +33,21 @@
       fi
     '';
   };
+
+  # Don't delete other brews installed on this machine
+  homebrew.onActivation.cleanup = lib.mkForce "none";
+  homebrew.brews = [
+    "openssl"
+    "readline"
+    "coreutils"
+    "ed"
+    "findutils"
+    "gnu-indent"
+    "gnu-sed"
+    "gnu-tar"
+    "gettext"
+    "gnu-which"
+    "gnutls"
+    "grep"
+  ];
 }
