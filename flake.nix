@@ -116,16 +116,20 @@
       mkHomeManager =
         {
           username,
-          pkgs-unstable,
           homeDirectory,
           homeModules ? [ ],
+          tailscaleIpAddr,
+          pkgs-unstable,
         }:
         {
           home-manager.backupFileExtension = "bak";
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.extraSpecialArgs = {
-            inherit pkgs-unstable;
+            inherit
+              pkgs-unstable
+              tailscaleIpAddr
+              ;
             flake-inputs = inputs;
           };
           home-manager.sharedModules = sharedHomeModules;
@@ -142,6 +146,7 @@
         {
           hostname,
           username,
+          tailscaleIpAddr,
           system ? "aarch64-darwin",
           modules ? [ ],
           homeModules ? [ ],
@@ -164,6 +169,7 @@
               pkgs-unstable
               username
               homeDirectory
+              tailscaleIpAddr
               hostname
               ;
           };
@@ -193,6 +199,7 @@
                 username
                 homeDirectory
                 homeModules
+                tailscaleIpAddr
                 pkgs-unstable
                 ;
             })
@@ -205,6 +212,7 @@
         {
           hostname,
           username,
+          tailscaleIpAddr,
           system ? "aarch64-linux",
           modules ? [ ],
           homeModules ? [ ],
@@ -228,6 +236,7 @@
               pkgs-unstable
               username
               homeDirectory
+              tailscaleIpAddr
               hostname
               ;
           };
@@ -278,6 +287,7 @@
                 username
                 homeDirectory
                 homeModules
+                tailscaleIpAddr
                 pkgs-unstable
                 ;
             })
@@ -310,6 +320,7 @@
         darwinConfigurations."IT-JPN-31519" = mkDarwinHost {
           hostname = "IT-JPN-31519";
           username = "arezai";
+          tailscaleIpAddr = "TODO";
           modules = [
             ./modules/darwin/nix-homebrew.nix
             ./modules/darwin/macbook-us-ansi.nix
@@ -345,6 +356,7 @@
         darwinConfigurations."arif-mac" = mkDarwinHost {
           hostname = "arif-mac";
           username = "arif";
+          tailscaleIpAddr = "TODO";
           modules = [
             ./modules/darwin/nix-homebrew.nix
             ./modules/darwin/macbook-us-ansi.nix
@@ -358,6 +370,7 @@
         nixosConfigurations."asahi-nixos" = mkNixosHost {
           hostname = "asahi-nixos";
           username = "arif";
+          tailscaleIpAddr = "100.91.229.87";
           modules = [
             ./modules/nixos/x86_64-emulation.nix
             ./modules/nixos/muvm-fex.nix
@@ -369,6 +382,7 @@
             ./modules/nixos/podman.nix
             ./modules/nixos/rust.nix
             ./modules/nixos/gui-apps.nix
+            ./modules/nixos/tailscale.nix
           ];
           homeModules = [
             ./modules/home-manager/apple-us-iso-fcitx5.nix

@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  tailscaleIpAddr,
+  ...
+}:
 {
   programs.keepassxc = {
     enable = true;
@@ -15,12 +20,6 @@
         HidePasswords = true;
       };
     };
-  };
-
-  # Sync directory at ~/Sync
-  # Access UI at: http://127.0.0.1:8384/
-  services.syncthing = {
-    enable = true;
   };
 
   # Enable creation of XDG autostart entries.

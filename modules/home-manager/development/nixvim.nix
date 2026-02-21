@@ -1,4 +1,5 @@
 {
+  pkgs,
   # In flake.nix it is configured with pkgs-unstable
   pkgs-unstable,
   lib,
@@ -31,6 +32,11 @@ in
 {
   imports = [
     flake-inputs.nixvim.homeModules.nixvim
+  ];
+
+  # Other dependencies
+  home.packages = with pkgs; [
+    unzip
   ];
 
   programs.nixvim = {
