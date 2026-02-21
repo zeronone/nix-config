@@ -81,11 +81,7 @@
       self,
       nixpkgs,
       flake-utils,
-      home-manager,
-      nix-darwin,
       treefmt-nix,
-      nix-vscode-extensions,
-      dolphin-overlay,
       ...
     }@inputs:
     let
