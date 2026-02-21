@@ -2,9 +2,20 @@
   inputs,
 }:
 let
-  myNixModules = ../modules/nixos;
-  myHmModules = ../modules/home-manager;
-  myDarwinModules = ../modules/darwin;
+  lib = inputs.nixpkgs.lib;
+  mapModules =
+    dir:
+    lib.mapAttrs' (
+      name: type:
+      let
+        baseName = lib.removeSuffix ".nix" name;
+      in
+      lib.nameValuePair baseName (dir + "/${name}")
+    ) (builtins.readDir dir);
+
+  myNixModules = mapModules ../modules/nixos;
+  myHmModules = mapModules ../modules/home-manager;
+  myDarwinModules = mapModules ../modules/darwin;
 
   # --- Shared Logic & Helpers ---
   # Global packages available on all systems

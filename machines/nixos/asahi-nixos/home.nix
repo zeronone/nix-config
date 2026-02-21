@@ -1,9 +1,9 @@
 { myHmModules, ... }:
 {
   imports = [
-    (myHmModules + "/apple-us-iso-fcitx5.nix")
-    (myHmModules + "/fontconfig.nix")
-    (myHmModules + "/node.nix")
-    (myHmModules + "/keepassxc.nix")
+    myHmModules.apple-us-iso-fcitx5
+    myHmModules.fontconfig
+    myHmModules.node
+    myHmModules.keepassxc
   ];
 }

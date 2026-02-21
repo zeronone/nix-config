@@ -2,8 +2,8 @@
 { myDarwinModules, ... }:
 {
   imports = [
-    (myDarwinModules + "/nix-homebrew.nix")
-    (myDarwinModules + "/macbook-us-ansi.nix")
+    myDarwinModules.nix-homebrew
+    myDarwinModules.macbook-us-ansi
   ];
 
   networking.knownNetworkServices = [

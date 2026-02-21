@@ -16,18 +16,18 @@
     flake-inputs.nixos-apple-silicon.nixosModules.apple-silicon-support
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    (myNixModules + "/networking.nix")
-    (myNixModules + "/x86_64-emulation.nix")
-    (myNixModules + "/muvm-fex.nix")
-    (myNixModules + "/niri.nix")
-    (myNixModules + "/noctalia.nix")
-    (myNixModules + "/fonts.nix")
-    (myNixModules + "/macbook-notch.nix")
-    (myNixModules + "/macbook-us-ansi.nix")
-    (myNixModules + "/podman.nix")
-    (myNixModules + "/rust.nix")
-    (myNixModules + "/gui-apps.nix")
-    (myNixModules + "/tailscale.nix")
+    myNixModules.networking
+    myNixModules.x86_64-emulation
+    myNixModules.muvm-fex
+    myNixModules.niri
+    myNixModules.noctalia
+    myNixModules.fonts
+    myNixModules.macbook-notch
+    myNixModules.macbook-us-ansi
+    myNixModules.podman
+    myNixModules.rust
+    myNixModules.gui-apps
+    myNixModules.tailscale
   ];
 
   # Binary cache for apple-silicon kernel
