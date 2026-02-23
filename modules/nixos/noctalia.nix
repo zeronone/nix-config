@@ -10,7 +10,7 @@
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = [
     flake-inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
@@ -19,7 +19,7 @@
   };
 
   home-manager.users.${username} =
-    { pkgs, flake-inputs, ... }:
+    { flake-inputs, ... }:
     {
       imports = [
         flake-inputs.noctalia.homeModules.default
@@ -36,6 +36,7 @@
             position = "top";
             showOutline = false;
             showCapsule = true;
+            marginVertical = 8;
             widgets = {
               left = [
                 {

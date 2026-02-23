@@ -26,10 +26,6 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    lazyvim = {
-      url = "github:pfassina/lazyvim-nix";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
 
     # Apple Silicon support for NixOS
     nixos-apple-silicon = {

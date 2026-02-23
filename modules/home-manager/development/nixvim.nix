@@ -73,10 +73,48 @@ in
     extraConfigLua = ''
       require("output_panel").setup({ max_buffer_size = 10000 })
 
-      -- Default: virtual_text for Errors only
-      vim.diagnostic.config({ virtual_text = { severity = { min = vim.diagnostic.severity.ERROR } } })
-      _G.diagnostic_vt_state = 0 -- 0: Errors, 1: All, 2: Off
+      -- Better defaults
+      vim.diagnostic.config({
+        virtual_text = {
+          severity = {
+            min = vim.diagnostic.severity.ERROR
+          }
+        }
+        severity_sort = true
+        float = {
+          border = "rounded", -- 'single', 'double', 'shadow', etc.
+          header = "Diagnostics:", -- Header text
+          prefix = "● ", -- Prefix for each line
+          scope = "cursor", -- Show diagnostics for 'cursor' or 'line'
+          focusable = true, -- Allow focusing the window
+          source = "always",
+          close_events = { "CursorMoved", "BufLeave", "WinLeave", "InsertEnter" }
+        },
+      })
+      -- automatically show diagnostic in float win for current line
+      vim.api.nvim_create_autocmd("CursorHold", {
+        pattern = "*",
+        callback = function()
+          if #vim.diagnostic.get(0) == 0 then
+            return
+          end
 
+          if not vim.b.diagnostics_pos then
+            vim.b.diagnostics_pos = { nil, nil }
+          end
+
+          local cursor_pos = api.nvim_win_get_cursor(0)
+
+          if not vim.deep_equal(cursor_pos, vim.b.diagnostics_pos) then
+            diagnostic.open_float {}
+          end
+
+          vim.b.diagnostics_pos = cursor_pos
+        end,
+      })
+
+      -- Rotate between verbosity
+      _G.diagnostic_vt_state = 0 -- 0: Errors, 1: All, 2: Off
       function _G.cycle_diagnostic_vt()
         _G.diagnostic_vt_state = (_G.diagnostic_vt_state + 1) % 3
         local state = _G.diagnostic_vt_state
@@ -92,17 +130,6 @@ in
           vim.notify("Diagnostics: Virtual Text Off")
         end
       end
-      -- Better defaults
-      vim.diagnostic.config({
-        float = {
-          border = "rounded", -- 'single', 'double', 'shadow', etc.
-          header = "Diagnostics", -- Header text
-          prefix = "● ", -- Prefix for each line
-          scope = "line", -- Show diagnostics for 'cursor' or 'line'
-          focusable = true, -- Allow focusing the window
-          source = "always",
-        },
-      })
 
       -- Match float border background with the float background
       vim.api.nvim_set_hl(0, "FloatBorder", { link = "NormalFloat" })

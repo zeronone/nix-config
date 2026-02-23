@@ -28,10 +28,10 @@ let
       jq
       lsof
       curl
-      direnv
-      nix-direnv
       jujutsu
       git
+      nix-tree
+      unzip
     ];
 
   # Shared home-manager modules for all hosts

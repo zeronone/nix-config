@@ -79,4 +79,35 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "25.11"; # Did you read the comment?
+
+  specialisation = {
+    fairydust.configuration = {
+      system.nixos.tags = [ "fairydust" ];
+
+      # the linux-asahi attribute exported by nixos-apple-silicon is not a proper derivation
+      # So we let it evalute and then modify it after that
+
+      # Wrap the modified kernel back into a package set so Asahi's out-of-tree
+      # modules (like the experimental GPU drivers) compile against it.
+      boot.kernelPackages = lib.mkForce (
+        pkgs.linuxPackagesFor (
+
+          # 'config' here lexcially refers to the OUTER base system configuration.
+          # We grab its fully baked kernel and inject our custom source.
+          config.boot.kernelPackages.kernel.overrideAttrs (oldAttrs: rec {
+            name = "${oldAttrs.name or "linux"}-${version}-fairydust";
+            version = "6.18.10";
+            modDirVersion = version;
+
+            src = pkgs.fetchFromGitHub {
+              owner = "AsahiLinux";
+              repo = "linux";
+              rev = "61b6e714dd19b7bee1c0e6ec4234199e640c2932";
+              hash = "sha256-5eAgJTKcRdjEFzHDSrh/XReaT6Db9YN2RN1SwOs28NE=";
+            };
+          })
+        )
+      );
+    };
+  };
 }

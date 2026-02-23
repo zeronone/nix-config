@@ -1,9 +1,11 @@
 { pkgs-unstable, ... }:
 {
+  home.packages = with pkgs-unstable; [
+    gemini-cli
+  ];
   programs.mcp = {
     enable = true;
   };
-
   programs.opencode = {
     enable = true;
     package = pkgs-unstable.opencode;
@@ -12,11 +14,7 @@
       share = "disabled";
       autoshare = false;
       autoupdate = true;
-      model = "anthropic/claude-opus-4.6";
       theme = "system";
-    };
-    themes = {
-      # nothing yet
     };
   };
 
@@ -32,10 +30,4 @@
       ]
     }
   '';
-
-  # programs.nixvim = {
-  #   extraPlugins = [
-  #     pkgs-unstable.vimPlugins.opencode-nvim
-  #   ];
-  # };
 }
