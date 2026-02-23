@@ -5,7 +5,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo -v; sudo nixos-rebuild switch --flake . |& nom; \
+        sudo -v; nixos-rebuild --sudo switch --flake . |& nom; \
         niri validate -c ./config/niri/config.kdl; \
     else \
         home-manager switch --flake ".#$(hostname)" |& nom; \
@@ -16,7 +16,7 @@ boot:
     @if [ "$(uname)" = "Darwin" ]; then \
         echo "Not supported"; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo -v; sudo nixos-rebuild boot --flake . |& nom; \
+        sudo -v; nixos-rebuild --sudo boot --flake . |& nom; \
     else \
         echo "Not supported"; \
     fi

@@ -78,8 +78,8 @@ in
         virtual_text = {
           severity = {
             min = vim.diagnostic.severity.ERROR,
-          }
-        }
+          },
+        },
         severity_sort = true,
         float = {
           border = "rounded", -- 'single', 'double', 'shadow', etc.
@@ -228,33 +228,6 @@ in
         };
       }
 
-      # ── Better movement (fixes visual mode delay) ──
-      {
-        mode = [
-          "n"
-          "x"
-        ];
-        key = "j";
-        action = "v:count == 0 ? 'gj' : 'j'";
-        options = {
-          expr = true;
-          silent = true;
-          nowait = true;
-        };
-      }
-      {
-        mode = [
-          "n"
-          "x"
-        ];
-        key = "k";
-        action = "v:count == 0 ? 'gk' : 'k'";
-        options = {
-          expr = true;
-          silent = true;
-          nowait = true;
-        };
-      }
 
       # ── General ──
       (mkKeymap [ "i" "x" "n" "s" ] "<C-s>" "<cmd>w<cr><esc>" "Save File")
@@ -708,8 +681,8 @@ in
           local rhs = function() vim.lsp.buf.selection_range(s * vim.v.count1) end
           vim.keymap.set('x', lhs, rhs, { desc = desc })
         end
-        map_lsp_selection('ls', 'Increase selection')
-        map_lsp_selection('lS', 'Decrease selection')
+        map_lsp_selection('<leader>cls', 'Increase selection')
+        map_lsp_selection('<leader>clS', 'Decrease selection')
       '';
     };
     plugins.mini-align.enable = true;
