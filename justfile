@@ -41,8 +41,14 @@ lint:
     nix flake check --all-systems
 
 # Clean up old generations to free up disk space
-clean:
-    nix-collect-garbage -d |& nom
+gc:
+    @if [ -f /etc/NIXOS ]; then \
+        sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 7d; \
+    fi
+    nix-collect-garbage -d
+
+clean-store:
+    nix-store --gc --option keep-outputs false --option keep-derivations false
 
 # Update the flake.lock file to get latest package versions
 update:

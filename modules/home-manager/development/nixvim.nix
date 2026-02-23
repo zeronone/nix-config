@@ -77,10 +77,10 @@ in
       vim.diagnostic.config({
         virtual_text = {
           severity = {
-            min = vim.diagnostic.severity.ERROR
+            min = vim.diagnostic.severity.ERROR,
           }
         }
-        severity_sort = true
+        severity_sort = true,
         float = {
           border = "rounded", -- 'single', 'double', 'shadow', etc.
           header = "Diagnostics:", -- Header text
@@ -185,7 +185,7 @@ in
     '';
 
     opts = {
-      mouse = "a"; # Enable mouse in all modes
+      mouse = "n"; # Enable mouse in normal modes
       number = true; # Show line numbers
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
@@ -225,6 +225,34 @@ in
         options = {
           noremap = true;
           silent = true;
+        };
+      }
+
+      # ── Better movement (fixes visual mode delay) ──
+      {
+        mode = [
+          "n"
+          "x"
+        ];
+        key = "j";
+        action = "v:count == 0 ? 'gj' : 'j'";
+        options = {
+          expr = true;
+          silent = true;
+          nowait = true;
+        };
+      }
+      {
+        mode = [
+          "n"
+          "x"
+        ];
+        key = "k";
+        action = "v:count == 0 ? 'gk' : 'k'";
+        options = {
+          expr = true;
+          silent = true;
+          nowait = true;
         };
       }
 
@@ -379,9 +407,9 @@ in
       (mkNLua "gI" "function() Snacks.picker.lsp_implementations() end" "Goto Implementation")
       (mkNLua "gy" "function() Snacks.picker.lsp_type_definitions() end" "Goto Type Definition")
       (mkNLua "gD" "function() Snacks.picker.lsp_declarations() end" "Goto Declaration")
-      # K for signature help
-      (mkNLua "K" "function() vim.lsp.buf.signature_help() end" "Signature Help")
-      (mkNLua "gK" "function() vim.lsp.buf.hover() end" "Hover (LSP)")
+      # K for hover/signature help
+      (mkNLua "K" "function() vim.lsp.buf.hover() end" "Hover (LSP)")
+      (mkNLua "gK" "function() vim.lsp.buf.signature_help() end" "Signature Help")
       (mkNX "<leader>ca" "<cmd>lua vim.lsp.buf.code_action()<cr>" "Code Action")
       (mkNLua "<leader>cc" "function() vim.lsp.codelens.run() end" "Run Codelens")
       (mkNLua "<leader>cC" "function() vim.lsp.codelens.refresh() end" "Refresh Codelens")
@@ -1297,6 +1325,19 @@ in
     # Test Runner
     plugins.neotest = {
       enable = true;
+      settings = {
+        output = {
+          enabled = true;
+          open_on_run = true;
+        };
+        output_panel = {
+          enabled = true;
+          open = "botright split | resize 15";
+        };
+        quickfix = {
+          enabled = false;
+        };
+      };
       adapters = {
         python.enable = true;
         # Rust is handled by rustaceanvim.neotest
@@ -1319,6 +1360,7 @@ in
     # LSP
     plugins.lsp.enable = true;
     plugins.dap.enable = true;
+    plugins.dap-lldb.enable = true;
     lsp = {
       inlayHints.enable = true;
       servers = {
@@ -1362,6 +1404,10 @@ in
       settings = {
         server = {
           load_vscode_settings = true;
+          standalone = false;
+        };
+        tools = {
+          test_executor = "neotest";
         };
         default_settings = {
           rust-analyzer = {
@@ -1373,9 +1419,7 @@ in
           };
         };
       };
-
     };
-    plugins.dap-lldb.enable = true;
 
     # Misc
     # plugins.neo-tree = {
