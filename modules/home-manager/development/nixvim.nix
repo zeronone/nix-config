@@ -185,7 +185,8 @@ in
     '';
 
     opts = {
-      mouse = "n"; # Enable mouse in normal modes
+      mouse = "a";
+      smoothscroll = true;
       number = true; # Show line numbers
       relativenumber = true; # Show relative line numbers
       shiftwidth = 2; # Tab width should be 2
@@ -228,7 +229,6 @@ in
         };
       }
 
-
       # ── General ──
       (mkKeymap [ "i" "x" "n" "s" ] "<C-s>" "<cmd>w<cr><esc>" "Save File")
       (mkKeymap [ "i" "n" ] "<esc>" "<cmd>noh<cr><esc>" "Escape and Clear hlsearch")
@@ -254,11 +254,7 @@ in
         end
       '' "Delete Buffer and Window")
 
-      # ── Window Navigation ──
-      (mkN "<C-h>" "<C-w>h" "Go to Left Window")
-      (mkN "<C-j>" "<C-w>j" "Go to Lower Window")
-      (mkN "<C-k>" "<C-w>k" "Go to Upper Window")
-      (mkN "<C-l>" "<C-w>l" "Go to Right Window")
+      # ── Window Navigation (handled by tmux-navigator) ──
 
       # ── Window Splits (tmux-style) ──
       (mkN "<leader>w\"" "<C-w>s" "Split Window Below")
@@ -1038,6 +1034,7 @@ in
     };
 
     # Core
+    plugins.tmux-navigator.enable = true;
     plugins.trouble = {
       enable = true;
     };

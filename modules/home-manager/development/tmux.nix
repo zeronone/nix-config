@@ -1,26 +1,37 @@
-{ _, ... }:
+{ pkgs, ... }:
 {
   programs.tmux = {
     enable = true;
     tmuxp.enable = true;
 
-    extraConfig = ''
-      set -g focus-events on
-      # truecolor support
-      set -ga terminal-overrides ",*256col*:Tc"
+    plugins = with pkgs.tmuxPlugins; [
+      vim-tmux-navigator
+    ];
 
-      # From: https://github.com/christoomey/vim-tmux-navigator/blob/master/README.md#add-a-snippet
-      vim_pattern='(\S+/)?g?\.?(view|l?n?vim?x?|fzf)(diff)?(-wrapped)?'
-      is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
-          | grep -iqE '^[^TXZ ]+ +''${vim_pattern}$'"
-      bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
-      bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
-      bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
-      bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
-      bind-key -T copy-mode-vi 'C-h' select-pane -L
-      bind-key -T copy-mode-vi 'C-j' select-pane -D
-      bind-key -T copy-mode-vi 'C-k' select-pane -U
-      bind-key -T copy-mode-vi 'C-l' select-pane -R
+    extraConfig = ''
+      set -g default-terminal "tmux-256color"
+      # Tell tmux that Ghostty supports True Color (RGB/Tc)
+      set -as terminal-features ",xterm-ghostty:RGB"
+      # Enable synchronized updates (reduces flickering in Ghostty)
+      set -as terminal-features ",xterm-ghostty:sync"
+
+      # Enable undercurl support
+      set -as terminal-overrides ',xterm-ghostty:Smulx=\E[4::%p1%dm'
+      # Enable undercurl colors
+      set -as terminal-overrides ',xterm-ghostty:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
+
+      # Enable mouse support
+      set -g mouse on
+      # Make scrolling speed in tmux copy-mode slightly more natural
+      bind -T copy-mode-vi WheelUpPane select-pane \; send-keys -X -N 2 scroll-up
+      bind -T copy-mode-vi WheelDownPane select-pane \; send-keys -X -N 2 scroll-down
+
+      set -g focus-events on
+
+      # Start windows index at 1
+      set -g base-index 1
+      # Start panes index at 1
+      setw -g pane-base-index 1
 
       # make Shift-Enter work in terminal
       # Enable extended keys
@@ -36,7 +47,7 @@
     prefix = "C-a";
     historyLimit = 50000;
     resizeAmount = 10;
-    terminal = "xterm-256color";
+    terminal = "tmux-256color";
     mouse = true;
     # create new session if not existing
     newSession = true;

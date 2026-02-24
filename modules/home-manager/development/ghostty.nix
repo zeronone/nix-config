@@ -8,8 +8,16 @@
       theme = "monokai-pro-spectrum";
       # to make zellij work
       macos-option-as-alt = true;
+      macos-titlebar-style = "hidden";
+      mouse-scroll-multiplier = 1.0;
+
+      gtk-titlebar = false;
+      window-decoration = false;
       font-family = "Iosevka Term";
+
       keybind = [
+        # Clear any default keybinds
+        "clear"
         # Both mac and linux
         "performable:ctrl+c=copy_to_clipboard"
         "performable:super+c=copy_to_clipboard"
