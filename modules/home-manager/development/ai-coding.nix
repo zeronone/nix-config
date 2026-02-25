@@ -2,6 +2,7 @@
 {
   home.packages = with pkgs-unstable; [
     gemini-cli
+    antigravity
   ];
   programs.mcp = {
     enable = true;
