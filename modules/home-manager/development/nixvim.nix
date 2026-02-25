@@ -95,7 +95,7 @@ in
       vim.api.nvim_create_autocmd("CursorHold", {
         pattern = "*",
         callback = function()
-          if #vim.diagnostic.get(0) == 0 then
+          if vim.diagnostic.get(0) == 0 then
             return
           end
 

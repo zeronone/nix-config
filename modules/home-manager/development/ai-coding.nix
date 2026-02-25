@@ -1,8 +1,14 @@
 { pkgs-unstable, ... }:
+let
+  sharedExtensions = import ./vscode-extensions.nix { inherit pkgs-unstable; };
+in
 {
   home.packages = with pkgs-unstable; [
     gemini-cli
-    antigravity
+    (vscode-with-extensions.override {
+      vscode = antigravity;
+      vscodeExtensions = sharedExtensions;
+    })
   ];
   programs.mcp = {
     enable = true;

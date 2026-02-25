@@ -39,6 +39,13 @@
       set -as terminal-features 'xterm*:extkeys'
       # Manual passthrough (if the above doesn't work for your specific term)
       bind -n S-Enter send-keys Escape "[13;2u"
+
+      # Enable automatic renaming
+      set-option -g automatic-rename on
+      # Update the status line every 5 seconds to keep the name current
+      set-option -g status-interval 5
+      # Rename to CWD (basename) if the command is 'bash' or 'zsh', else show the command
+      set-option -g automatic-rename-format "#{?#{or:#{==:#{pane_current_command},bash},#{==:#{pane_current_command},zsh}},#{b:pane_current_path},#{pane_current_command}}"
     '';
 
     # It changes <Esc>+j to <A-j> and thus moving lines in nvim
