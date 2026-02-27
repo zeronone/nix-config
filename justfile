@@ -2,6 +2,7 @@ set shell := ["zsh", "-cu"]
 
 # Build and apply configuration based on the host
 switch:
+    nix flake update claude-code
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
@@ -25,6 +26,7 @@ watch-store:
     cachix watch-store zeronone
 
 check:
+    nix flake update claude-code
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild check --flake .; \
     elif [ -f /etc/NIXOS ]; then \

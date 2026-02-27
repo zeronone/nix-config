@@ -70,6 +70,9 @@
 
     # latest stable release
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
+
+    # latest version of cluade-code
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
   outputs =

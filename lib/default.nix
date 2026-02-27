@@ -88,6 +88,7 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
+          inputs.claude-code.overlays.default
         ];
       };
     in
@@ -111,6 +112,9 @@ let
           {
             nixpkgs = {
               config.allowUnfree = true;
+              overlays = [
+                inputs.claude-code.overlays.default
+              ];
             };
 
             # Global packages
@@ -154,6 +158,7 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
+          inputs.claude-code.overlays.default
         ];
       };
     in
@@ -174,10 +179,13 @@ let
       };
       modules = [
         {
-          nixpkgs.overlays = [
-            inputs.dolphin-overlay.overlays.default
-          ];
-          nixpkgs.config.allowUnfree = true;
+          nixpkgs = {
+            config.allowUnfree = true;
+            overlays = [
+              inputs.dolphin-overlay.overlays.default
+              inputs.claude-code.overlays.default
+            ];
+          };
 
           # other common config
           boot.kernel.sysctl = {

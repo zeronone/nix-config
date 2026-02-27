@@ -41,9 +41,9 @@
   # Enable parallel builds
   nix.settings.max-jobs = "auto";
 
-  # Run: echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/github-token.conf
+  # Run: echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/nix-github-token.conf
   nix.extraOptions = ''
-    !include ${homeDirectory}/.secrets/github-token.conf
+    !include ${homeDirectory}/.secrets/nix-github-token.conf
   '';
 
   # Don't need channels since I use flakes
