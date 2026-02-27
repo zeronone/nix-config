@@ -103,10 +103,10 @@ in
             vim.b.diagnostics_pos = { nil, nil }
           end
 
-          local cursor_pos = api.nvim_win_get_cursor(0)
+          local cursor_pos = vim.api.nvim_win_get_cursor(0)
 
           if not vim.deep_equal(cursor_pos, vim.b.diagnostics_pos) then
-            diagnostic.open_float {}
+            vim.diagnostic.open_float {}
           end
 
           vim.b.diagnostics_pos = cursor_pos

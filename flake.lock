@@ -57,17 +57,17 @@
         "type": "github"
       }
     },
-    "claude-code": {
+    "claude-code-nix": {
       "inputs": {
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1772147197,
-        "narHash": "sha256-vKcqRRxzA3PqtQrVUUOx46fgafYNbfjYk1r91TrUBy4=",
+        "lastModified": 1772160776,
+        "narHash": "sha256-EJ4vOvSPF0o97tBIvvUc4ORpyJbJxbgbCD6R+17n+Wk=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "533bf6195a706b5e36bc2d129cd583ae77e680cb",
+        "rev": "594b1b0977f6ec509522a82f7af637ab0d585853",
         "type": "github"
       },
       "original": {
@@ -548,7 +548,7 @@
       "inputs": {
         "asahi-firmware": "asahi-firmware",
         "bacon-ls": "bacon-ls",
-        "claude-code": "claude-code",
+        "claude-code-nix": "claude-code-nix",
         "dolphin-overlay": "dolphin-overlay",
         "flake-utils": "flake-utils_3",
         "home-manager": "home-manager",

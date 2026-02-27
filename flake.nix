@@ -72,7 +72,7 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
     # latest version of cluade-code
-    claude-code.url = "github:sadjow/claude-code-nix";
+    claude-code-nix.url = "github:sadjow/claude-code-nix";
   };
 
   outputs =
@@ -98,7 +98,9 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = import nixpkgs {
+            inherit system;
+          };
         # Eval the treefmt modules from ./treefmt.nix
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
       in

@@ -88,7 +88,7 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
-          inputs.claude-code.overlays.default
+          inputs.claude-code-nix.overlays.default
         ];
       };
     in
@@ -113,7 +113,7 @@ let
             nixpkgs = {
               config.allowUnfree = true;
               overlays = [
-                inputs.claude-code.overlays.default
+                inputs.claude-code-nix.overlays.default
               ];
             };
 
@@ -158,7 +158,7 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
-          inputs.claude-code.overlays.default
+          inputs.claude-code-nix.overlays.default
         ];
       };
     in
@@ -183,7 +183,7 @@ let
             config.allowUnfree = true;
             overlays = [
               inputs.dolphin-overlay.overlays.default
-              inputs.claude-code.overlays.default
+              inputs.claude-code-nix.overlays.default
             ];
           };
 
