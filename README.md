@@ -34,12 +34,22 @@ echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/nix-github-token
 # Setup tailscale
 sudo tailscale set --operator=$USER
 sudo tailscale up
+# https://app.cachix.org/cache/zeronone/settings/authtokens
+cachix authtoken XXXX
+cachix doctor
 ```
 
 ## Updates
 
 ```
 just switch
+```
+
+## Cachix
+
+```shell
+# push certain builds to personal cachix
+just push-to-cachix nixfmt-1.2.0
 ```
 
 ## Apple Silicon (Asahi Linux) Setup

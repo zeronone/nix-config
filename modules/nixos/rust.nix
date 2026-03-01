@@ -25,13 +25,15 @@
       };
     })
   ];
-  environment.systemPackages = (with pkgs; [
-    rust-stable
-    # cargo run requires linker
-    # Handy to have for non-nix projects
-    gcc
-  ]) ++ (with pkgs-unstable; [
-    # TODO: revert when aarch64 build is ready
-    # bacon-ls
-  ]);
+  environment.systemPackages =
+    (with pkgs; [
+      rust-stable
+      # cargo run requires linker
+      # Handy to have for non-nix projects
+      gcc
+    ])
+    ++ (with pkgs-unstable; [
+      # TODO: revert when aarch64 build is ready
+      # bacon-ls
+    ]);
 }

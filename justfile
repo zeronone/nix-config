@@ -37,9 +37,6 @@ boot: update-bleeding-edge
         echo "Not supported"; \
     fi
 
-watch-store:
-    cachix watch-store zeronone
-
 check: update-bleeding-edge
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild check --flake . |& nom; \
@@ -62,6 +59,41 @@ gc:
         sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 7d; \
     fi
     nix-collect-garbage -d
+
+# Pushes a specific package and its closure from the Nix store to Cachix with confirmation
+push-to-cachix target cachix_cache="zeronone":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    echo "Searching for exact matches of '{{target}}' in /nix/store..."
+    
+    matches=$(find /nix/store -maxdepth 1 -name "*-{{target}}")
+    
+    if [[ -z "$matches" ]]; then
+        echo "No exact builds found for '{{target}}'."
+        exit 1
+    fi
+    
+    echo -e "\nFound the following builds to upload:"
+    for path in $matches; do
+        echo "  - $path"
+    done
+    echo ""
+    
+    # Prompt for confirmation (Defaults to Y if the user just presses Enter)
+    read -r -p "Upload these builds to '{{cachix_cache}}'? [Y/n] " response
+    response=${response:-Y}
+    
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo -e "\nStarting upload..."
+        for path in $matches; do
+            echo "Pushing recursively: $path"
+            nix path-info --recursive "$path" | cachix push "{{cachix_cache}}"
+        done
+        echo "Push complete!"
+    else
+        echo "Upload cancelled."
+    fi
 
 clean-store:
     nix-store --gc --option keep-outputs false --option keep-derivations false
