@@ -27,6 +27,13 @@ EOF
 
 ```bash
 ./bootstrap.sh
+
+# Setup Github access token
+echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/nix-github-token.conf
+
+# Setup tailscale
+sudo tailscale set --operator=$USER
+sudo tailscale up
 ```
 
 ## Updates

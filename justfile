@@ -42,19 +42,19 @@ watch-store:
 
 check: update-bleeding-edge
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo -v; sudo darwin-rebuild check --flake .; \
+        sudo -v; sudo darwin-rebuild check --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
         niri validate -c ./config/niri/config.kdl || exit 1; \
-        nixos-rebuild dry-run --flake .; \
+        nixos-rebuild dry-run --flake . |& nom; \
     else \
         echo "TODO"; \
     fi
 
 fmt:
-    nix fmt
+    nix fmt |& nom 
 
 lint:
-    nix flake check --all-systems
+    nix flake check --all-systems |& nom
 
 # Clean up old generations to free up disk space
 gc:
@@ -67,5 +67,5 @@ clean-store:
     nix-store --gc --option keep-outputs false --option keep-derivations false
 
 # Update the flake.lock file to get latest package versions
-update:
+update-all:
     nix flake update

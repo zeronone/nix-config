@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-unstable,
   flake-inputs,
   config,
   ...
@@ -24,9 +25,13 @@
       };
     })
   ];
-  environment.systemPackages = [
-    pkgs.rust-stable
+  environment.systemPackages = (with pkgs; [
+    rust-stable
+    # cargo run requires linker
+    # Handy to have for non-nix projects
+    gcc
+  ]) ++ (with pkgs-unstable; [
     # TODO: revert when aarch64 build is ready
-    # pkgs.bacon-ls
-  ];
+    # bacon-ls
+  ]);
 }

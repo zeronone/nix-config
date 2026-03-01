@@ -32,6 +32,8 @@ let
       git
       nix-tree
       unzip
+      devenv
+      gh
     ];
 
   # Shared home-manager modules for all hosts
@@ -39,6 +41,8 @@ let
     ../modules/home-manager/shell.nix
     ../modules/home-manager/development
   ];
+
+  tailscaleNet = "curl-featherback.ts.net";
 
   # Helper function to configure home-manager
   mkHomeManager =
@@ -57,6 +61,7 @@ let
         inherit
           pkgs-unstable
           tailscaleIpAddr
+          tailscaleNet
           myNixModules
           myHmModules
           myDarwinModules
@@ -100,6 +105,7 @@ let
           username
           homeDirectory
           tailscaleIpAddr
+          tailscaleNet
           hostname
           myNixModules
           myHmModules
@@ -171,6 +177,7 @@ let
           username
           homeDirectory
           tailscaleIpAddr
+          tailscaleNet
           hostname
           myNixModules
           myHmModules

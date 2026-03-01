@@ -40,7 +40,10 @@
     };
 
     # treefmt
-    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # vscode
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions";
@@ -98,9 +101,9 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-          pkgs = import nixpkgs {
-            inherit system;
-          };
+        pkgs = import nixpkgs {
+          inherit system;
+        };
         # Eval the treefmt modules from ./treefmt.nix
         treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
       in
