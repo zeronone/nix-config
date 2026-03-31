@@ -29,7 +29,7 @@ EOF
 ./bootstrap.sh
 
 # Setup Github access token
-echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/nix-github-token.conf
+echo "access-tokens = github.com=$(gh auth token)" > ~/.secrets/nix-github-token.conf
 
 # Setup tailscale
 sudo tailscale set --operator=$USER

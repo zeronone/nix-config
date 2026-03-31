@@ -11,8 +11,8 @@
   # Set the host platform to aarch64-darwin
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  # Allow nix-darwin to manage Nix
-  nix.enable = true;
+  # Use system's nix
+  nix.enable = false;
   nix.settings = {
     extra-platforms = lib.mkIf (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") [
       "x86_64-darwin"

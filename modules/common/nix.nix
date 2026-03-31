@@ -1,4 +1,4 @@
-{ username, homeDirectory, ... }:
+{ lib, config, username, homeDirectory, ... }:
 {
   nix.settings = {
     substituters = [
@@ -43,7 +43,7 @@
     keep-outputs = true;
   };
 
-  nix.gc = {
+  nix.gc = lib.mkIf config.nix.enable {
     automatic = true;
     options = "--delete-older-than 7d";
   };

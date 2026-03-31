@@ -4,7 +4,7 @@ set -e
 if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Bootstrapping nix-darwin..."
     sudo softwareupdate --install-rosetta
-    sudo nix run nix-darwin -- switch --flake .
+    sudo nix --extra-experimental-features nix-command --extra-experimental-features flakes run nix-darwin -- switch -v --flake .
 
     echo "####### TODO"
     echo "Give accessbility permissions for Karabiner and other apps"

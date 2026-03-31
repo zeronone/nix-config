@@ -34,7 +34,7 @@ let
       unzip
       devenv
       gh
-      cachix
+      # cachix
     ];
 
   # Shared home-manager modules for all hosts

@@ -65,7 +65,7 @@ in
           owner = "JavaHello";
           repo = "spring-boot.nvim";
           rev = "main";
-          hash = "sha256-ioGlxjZIqtNlPedwI/HX3xA3HOWJ50WmWFyYIQPHDrg=";
+          hash = "sha256-JkOWlqyVLcwW7hxOGj5jb8BpUge3bUHbSV0o5qOYW1c=";
         };
       })
     ];
@@ -1282,6 +1282,14 @@ in
         cli = {
           keys = {
             prompt = false; # Unbind <C-p> (default prompt select) so it passes through to the terminal
+          };
+          tools = {
+            claude = {
+              cmd = [
+                "claude"
+                "--enable-auto-mode"
+              ];
+            };
           };
           mux = {
             backend = "tmux";

@@ -1,6 +1,8 @@
-{ ... }:
+{ lib, config, ... }:
 {
   # nix-darwin specific settings
-  nix.optimise.automatic = true;
-  nix.optimise.interval.Hour = 4;
+  nix.optimise = lib.mkIf config.nix.enable {
+    automatic = true;
+    interval.Hour = 4;
+  };
 }
