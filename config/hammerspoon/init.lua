@@ -9,46 +9,6 @@ hs.window.animationDuration = 0 -- disable animations
 hs.loadSpoon("SpoonInstall")
 
 ---------------------------------
--- Helper Function: Issue #135 Fix
--- Moves window to a specific display and registers it with PaperWM
----------------------------------
-local function moveWindowToDisplay(direction)
-    local PaperWM = hs.loadSpoon("PaperWM")
-    local win = hs.window.focusedWindow()
-    if not win then return end
-
-    local screen = win:screen()
-    local nextScreen = nil
-
-    if direction == "West" then
-        nextScreen = screen:toWest()
-    elseif direction == "East" then
-        nextScreen = screen:toEast()
-    elseif direction == "North" then
-        nextScreen = screen:toNorth()
-    elseif direction == "South" then
-        nextScreen = screen:toSouth()
-    end
-
-    if nextScreen then
-        -- Detach from current PaperWM strip
-        if PaperWM.window_list[win:id()] then
-            PaperWM.window_filter:allowWindow(win) -- ensure it's tracked
-        end
-        
-        -- Move using standard HS API
-        win:moveToScreen(nextScreen)
-        
-        -- Re-register with PaperWM on the new screen
-        -- A short delay ensures the move completes before PaperWM grabs it
-        hs.timer.doAfter(0.1, function()
-            PaperWM:addWindow(win)
-            win:focus()
-        end)
-    end
-end
-
----------------------------------
 -- Windows
 ---------------------------------
 
@@ -135,7 +95,12 @@ spoon.SpoonInstall:andUse("PaperWM", {
         -- --- MOVE WINDOW IN STRIP (Mod + Ctrl + H/L) ---
         swap_left  = {hyperctrl, "h"},
         swap_right = {hyperctrl, "l"},
-        -- Removed j/k swap
+
+        -- --- MOVE WINDOW TO MONITOR ---
+        move_window_l        = { hyperctrl, "left" },
+        move_window_r        = { hyperctrl, "right" },
+        move_window_u        = { hyperctrl, "up" },
+        move_window_d        = { hyperctrl, "down" },
 
         -- --- MONITOR FOCUS (Mod + Arrows) ---
         -- PaperWM doesn't have native monitor focus keys in the map,
@@ -164,31 +129,6 @@ spoon.SpoonInstall:andUse("PaperWM", {
     }
 })
 
----------------------------------
--- Manual Bindings (Monitors & Custom Logic)
----------------------------------
-
--- 1. Monitor Focus (Mod + Arrows)
-hs.hotkey.bind(hyper, "left", function() 
-    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenWest() 
-end)
-hs.hotkey.bind(hyper, "right", function() 
-    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenEast() 
-end)
-hs.hotkey.bind(hyper, "up", function() 
-    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenNorth() 
-end)
-hs.hotkey.bind(hyper, "down", function() 
-    hs.focus(); hs.window.filter.defaultCurrentSpace:focusScreenSouth() 
-end)
-
--- 2. Move Window to Monitor (Mod + Ctrl + Arrows)
--- Uses the Issue #135 logic defined at the top
-hs.hotkey.bind(hyperctrl, "left", function() moveWindowToDisplay("West") end)
-hs.hotkey.bind(hyperctrl, "right", function() moveWindowToDisplay("East") end)
-hs.hotkey.bind(hyperctrl, "up", function() moveWindowToDisplay("North") end)
-hs.hotkey.bind(hyperctrl, "down", function() moveWindowToDisplay("South") end)
-
--- 3. App Launcher (Matches Niri Mod+Space)
+-- App Launcher (Matches Niri Mod+Space)
 -- Note: Requires an external launcher or use Spotlight
-hs.hotkey.bind(hyper, "space", function() hs.application.launchOrFocus("Raycast") end)
+hs.hotkey.bind(hyper, "space", function() hs.application.launchOrFocus("Spotlight") end)

@@ -46,16 +46,19 @@ in
       theme = "system";
     };
   };
-  xdg.configFile."opencode/opencode.json".text = ''
-    {
-      "$schema": "https://opencode.ai/config.json",
-      "plugin": [
-        "opencode-gemini-auth@latest",
-        "@tarquinen/opencode-dcp@latest",
-        "opencode-pty",
-        "octto",
-        "@nick-vi/opencode-type-inject"
-      ]
-    }
-  '';
+  xdg.configFile."opencode/opencode.json" = {
+    force = true;
+    text = ''
+      {
+        "$schema": "https://opencode.ai/config.json",
+        "plugin": [
+          "opencode-gemini-auth@latest",
+          "@tarquinen/opencode-dcp@latest",
+          "opencode-pty",
+          "octto",
+          "@nick-vi/opencode-type-inject"
+        ]
+      }
+    '';
+  };
 }

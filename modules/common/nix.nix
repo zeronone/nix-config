@@ -1,4 +1,10 @@
-{ lib, config, username, homeDirectory, ... }:
+{
+  lib,
+  config,
+  username,
+  homeDirectory,
+  ...
+}:
 {
   nix.settings = {
     substituters = [
@@ -51,7 +57,7 @@
   # Enable parallel builds
   nix.settings.max-jobs = "auto";
 
-  # Run: echo "access-tokens = github.com=$(gh auth login)" > ~/.secrets/nix-github-token.conf
+  # Run: echo "access-tokens = github.com=$(gh auth token)" > ~/.secrets/nix-github-token.conf
   nix.extraOptions = ''
     !include ${homeDirectory}/.secrets/nix-github-token.conf
   '';
