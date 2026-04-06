@@ -17,8 +17,8 @@
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
     myNixModules.networking
-    myNixModules.x86_64-emulation
-    myNixModules.muvm-fex
+    # myNixModules.x86_64-emulation
+    # myNixModules.muvm-fex
     myNixModules.niri
     myNixModules.noctalia
     myNixModules.fonts
@@ -91,21 +91,38 @@
       # modules (like the experimental GPU drivers) compile against it.
       boot.kernelPackages = lib.mkForce (
         pkgs.linuxPackagesFor (
-
-          # 'config' here lexcially refers to the OUTER base system configuration.
-          # We grab its fully baked kernel and inject our custom source.
-          config.boot.kernelPackages.kernel.overrideAttrs (oldAttrs: rec {
-            name = "${oldAttrs.name or "linux"}-${version}-fairydust";
-            version = "6.18.10";
-            modDirVersion = version;
+          pkgs.buildLinux {
+            inherit (pkgs) stdenv lib;
+            version = "6.19.11";
+            modDirVersion = "6.19.11";
+            pname = "linux-fairydust";
 
             src = pkgs.fetchFromGitHub {
               owner = "AsahiLinux";
               repo = "linux";
-              rev = "61b6e714dd19b7bee1c0e6ec4234199e640c2932";
-              hash = "sha256-5eAgJTKcRdjEFzHDSrh/XReaT6Db9YN2RN1SwOs28NE=";
+              rev = "4e84610e5722c34e48fef3f33f7bd8faedb13348";
+              hash = "sha256-G32SzJW1paAUaBCnw5cou20WwpuVR8OZSDRpV58IUJU=";
             };
-          })
+
+            kernelPatches = [
+              {
+                name = "Asahi config";
+                patch = null;
+                structuredExtraConfig = with lib.kernel; {
+                  # Apple Silicon Specifics
+                  ARM64_16K_PAGES = yes;
+                  ARM64_MEMORY_MODEL_CONTROL = yes;
+                  ARM64_ACTLR_STATE = yes;
+                  APPLE_WATCHDOG = yes;
+                  APPLE_M1_CPU_PMU = yes;
+                  HID_APPLE = module;
+                  APPLE_PMGR_MISC = yes;
+                  APPLE_PMGR_PWRSTATE = yes;
+                };
+                features.rust = true;
+              }
+            ];
+          }
         )
       );
     };
