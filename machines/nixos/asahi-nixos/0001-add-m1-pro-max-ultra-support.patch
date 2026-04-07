@@ -1,0 +1,27 @@
+diff --git a/drivers/phy/apple/atc.c b/drivers/phy/apple/atc.c
+index 64d0c3dba..42f2a0f29 100644
+--- a/drivers/phy/apple/atc.c
++++ b/drivers/phy/apple/atc.c
+@@ -2279,6 +2279,9 @@ static int atcphy_probe(struct platform_device *pdev)
+ 
+ static const struct of_device_id atcphy_match[] = {
+ 	{ .compatible = "apple,t8103-atcphy" },
++        { .compatible = "apple,t6000-atcphy" },
++        { .compatible = "apple,t6001-atcphy" },
++        { .compatible = "apple,t6002-atcphy" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, atcphy_match);
+diff --git a/drivers/phy/apple/dptx.c b/drivers/phy/apple/dptx.c
+index f0df2d40a..53253d7a1 100644
+--- a/drivers/phy/apple/dptx.c
++++ b/drivers/phy/apple/dptx.c
+@@ -668,6 +668,8 @@ static const struct apple_dptx_phy_hw apple_dptx_hw_t8112 = {
+ };
+ 
+ static const struct of_device_id dptx_phy_match[] = {
++        { .compatible = "apple,t6000-dptx-phy", .data = &apple_dptx_hw_t6020 },
++        { .compatible = "apple,t6001-dptx-phy", .data = &apple_dptx_hw_t6020 },
+ 	{ .compatible = "apple,t6020-dptx-phy", .data = &apple_dptx_hw_t6020 },
+ 	{ .compatible = "apple,t8112-dptx-phy", .data = &apple_dptx_hw_t8112 },
+ 	{},

@@ -44,6 +44,66 @@
     peripheralFirmwareDirectory = flake-inputs.asahi-firmware;
   };
 
+  # Activation script to ensure the boot binary is at the path expected by this Mac
+  # NixOS defaults to /boot/asahi/boot.bin, but this machine uses /boot/m1n1/boot.bin
+  system.activationScripts.sync-m1n1 = {
+    text = ''
+      if [ -f /boot/asahi/boot.bin ]; then
+        mkdir -p /boot/m1n1
+        cp /boot/asahi/boot.bin /boot/m1n1/boot.bin
+      fi
+    '';
+    deps = [ ];
+  };
+
+  # Use the patched fairydust kernel as default
+  boot.kernelPackages = lib.mkForce (
+    pkgs.linuxPackagesFor (
+      (pkgs.buildLinux {
+        inherit (pkgs) stdenv lib;
+        version = "6.19.11";
+        modDirVersion = "6.19.11";
+        pname = "linux-fairydust";
+
+        src = pkgs.fetchFromGitHub {
+          owner = "AsahiLinux";
+          repo = "linux";
+          rev = "4e84610e5722c34e48fef3f33f7bd8faedb13348";
+          hash = "sha256-G32SzJW1paAUaBCnw5cou20WwpuVR8OZSDRpV58IUJU=";
+        };
+
+        kernelPatches = [
+          {
+            name = "Asahi config";
+            patch = null;
+            structuredExtraConfig = with lib.kernel; {
+              # Apple Silicon Specifics
+              ARM64_16K_PAGES = yes;
+              ARM64_MEMORY_MODEL_CONTROL = yes;
+              ARM64_ACTLR_STATE = yes;
+              APPLE_WATCHDOG = yes;
+              APPLE_M1_CPU_PMU = yes;
+              HID_APPLE = module;
+              APPLE_PMGR_MISC = yes;
+              APPLE_PMGR_PWRSTATE = yes;
+              # DP Alt Mode support
+              DRM_APPLE = module;
+              PHY_APPLE_ATC = module;
+              PHY_APPLE_DPTX = module;
+              TYPEC_DP_ALTMODE = module;
+              TYPEC_TPS6598X = module;
+            };
+            features.rust = true;
+          }
+          {
+            name = "M1 Pro/Max/Ultra DP support";
+            patch = ./0001-add-m1-pro-max-ultra-support.patch;
+          }
+        ];
+      })
+    )
+  );
+
   # Bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
@@ -79,52 +139,4 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "25.11"; # Did you read the comment?
-
-  specialisation = {
-    fairydust.configuration = {
-      system.nixos.tags = [ "fairydust" ];
-
-      # the linux-asahi attribute exported by nixos-apple-silicon is not a proper derivation
-      # So we let it evalute and then modify it after that
-
-      # Wrap the modified kernel back into a package set so Asahi's out-of-tree
-      # modules (like the experimental GPU drivers) compile against it.
-      boot.kernelPackages = lib.mkForce (
-        pkgs.linuxPackagesFor (
-          pkgs.buildLinux {
-            inherit (pkgs) stdenv lib;
-            version = "6.19.11";
-            modDirVersion = "6.19.11";
-            pname = "linux-fairydust";
-
-            src = pkgs.fetchFromGitHub {
-              owner = "AsahiLinux";
-              repo = "linux";
-              rev = "4e84610e5722c34e48fef3f33f7bd8faedb13348";
-              hash = "sha256-G32SzJW1paAUaBCnw5cou20WwpuVR8OZSDRpV58IUJU=";
-            };
-
-            kernelPatches = [
-              {
-                name = "Asahi config";
-                patch = null;
-                structuredExtraConfig = with lib.kernel; {
-                  # Apple Silicon Specifics
-                  ARM64_16K_PAGES = yes;
-                  ARM64_MEMORY_MODEL_CONTROL = yes;
-                  ARM64_ACTLR_STATE = yes;
-                  APPLE_WATCHDOG = yes;
-                  APPLE_M1_CPU_PMU = yes;
-                  HID_APPLE = module;
-                  APPLE_PMGR_MISC = yes;
-                  APPLE_PMGR_PWRSTATE = yes;
-                };
-                features.rust = true;
-              }
-            ];
-          }
-        )
-      );
-    };
-  };
 }
