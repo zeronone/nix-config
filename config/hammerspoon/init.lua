@@ -44,7 +44,7 @@ local function initPaperWM(PaperWM)
     local screens = {}
     for _, screen in ipairs(allScreens) do
         local name = screen:name()
-        if not name:find("^DELL") then
+        if name:find("^LG") then
             table.insert(screens, screen:id())
         end
     end
