@@ -19,6 +19,8 @@
       font-family = "Iosevka Term";
 
       keybind = [
+        # Disable full-screen (conflicts with PaperWM)
+        "super+enter=unbind"
         # Both mac and linux
         "performable:ctrl+c=copy_to_clipboard"
         "performable:super+c=copy_to_clipboard"

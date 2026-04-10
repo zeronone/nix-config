@@ -9,6 +9,7 @@
     myDarwinModules.nix-homebrew
     myDarwinModules.macbook-us-ansi
     myDarwinModules.hammerspoon
+    myDarwinModules.desktop-ui
   ];
 
   networking.knownNetworkServices = [

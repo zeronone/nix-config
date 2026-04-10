@@ -12,10 +12,6 @@ in
     };
   };
 
-  # some default settings needed by the spoons below
-  system.defaults.dock.mru-spaces = false;
-  system.defaults.spaces.spans-displays = false;
-
   homebrew.casks = [ "hammerspoon" ];
   home-manager.users.${username} = {
     # ensure directory exists

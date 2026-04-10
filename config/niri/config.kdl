@@ -273,6 +273,11 @@ binds {
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
 
+    // --- WORKSPACE NAVIGATION (Hyper + Alt + Arrows) ---
+    // Matches Mac's cmd+alt+(left|right) with InstantSpaceSwitcher
+    Mod+Left  { focus-workspace-up; }
+    Mod+Right { focus-workspace-down; }
+
     // --- MOVE TO WORKSPACE (Hyper + Ctrl + #) ---
     Mod+Ctrl+1 { move-column-to-workspace 1; }
     Mod+Ctrl+2 { move-column-to-workspace 2; }

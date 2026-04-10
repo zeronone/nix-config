@@ -22,6 +22,9 @@ MouseFollowsFocus = hs.loadSpoon("MouseFollowsFocus")
 MouseFollowsFocus:start()
 
 local function initPaperWM(PaperWM)
+    -- Only tile standard windows (filters out dialogs, sheets, file pickers, etc.)
+    PaperWM.window_filter:setDefaultFilter({ allowRoles = "AXStandardWindow" })
+
     -- Apps to Ignore
     PaperWM.window_filter:rejectApp("Karabiner-Elements")
     PaperWM.window_filter:rejectApp("Zoom Workplace")

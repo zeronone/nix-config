@@ -4,6 +4,7 @@
   imports = [
     myDarwinModules.nix-homebrew
     myDarwinModules.macbook-us-ansi
+    myDarwinModules.desktop-ui
   ];
 
   networking.knownNetworkServices = [
