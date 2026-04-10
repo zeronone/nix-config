@@ -973,6 +973,9 @@ in
               hidden = true;
               ignored = true;
             };
+            files = {
+              hidden = true;
+            };
           };
           # Flash integration for jump labels in picker list
           actions = {

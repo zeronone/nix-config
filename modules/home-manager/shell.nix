@@ -69,6 +69,8 @@ in
     enable = true;
     nix-direnv.enable = true;
     enableZshIntegration = true;
+    # direnv 2.37.1 fish test gets SIGKILL'd in macOS nix sandbox
+    package = pkgs.direnv.overrideAttrs (_: { doCheck = false; });
   };
   programs.starship = {
     enable = true;
