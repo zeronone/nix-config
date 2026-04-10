@@ -16,6 +16,7 @@
       ...
     }:
     {
+
       # Two types of GUI apps
       # Nix-managed (properly versioned and configured)
       # Flatpak-managed (don't care about versioning)

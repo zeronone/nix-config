@@ -54,11 +54,34 @@ lint:
     nix flake check --all-systems |& nom
 
 # Clean up old generations to free up disk space
-gc:
+gc: clean-boot
     @if [ -f /etc/NIXOS ]; then \
         sudo nix profile wipe-history --profile /nix/var/nix/profiles/system --older-than 7d; \
     fi
     nix-collect-garbage -d
+
+# Safely remove orphaned kernels and initrds from /boot/EFI/nixos
+clean-boot:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -d /boot/EFI/nixos ]; then echo "Not a NixOS system with EFI boot"; exit 0; fi
+    echo "Cleaning up orphaned kernels and initrds in /boot/EFI/nixos..."
+    
+    # 1. Clear any .tmp files left by failed copies
+    sudo rm -vf /boot/EFI/nixos/*.tmp
+    
+    # 2. Identify files referenced by current boot entries
+    # We grep for linux/initrd lines and extract the filename
+    ACTIVE_FILES=$(grep -E 'linux|initrd' /boot/loader/entries/*.conf | awk '{print $2}' | xargs -n1 basename | sort -u)
+    
+    # 3. Find and remove files not in that list
+    find /boot/EFI/nixos -maxdepth 1 -type f | while read -r FILE; do
+        BASENAME=$(basename "$FILE")
+        if ! echo "$ACTIVE_FILES" | grep -q "^$BASENAME$"; then
+            sudo rm -v "$FILE"
+        fi
+    done
+    df -h /boot
 
 # Pushes a specific package and its closure from the Nix store to Cachix with confirmation
 push-to-cachix target cachix_cache="zeronone":
