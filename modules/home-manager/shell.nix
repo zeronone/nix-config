@@ -64,6 +64,9 @@ in
   programs.git = {
     enable = true;
     settings.init.defaultBranch = "main";
+    includes = [
+      { path = "~/.gitconfig.local"; }
+    ];
   };
   programs.direnv = {
     enable = true;

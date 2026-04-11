@@ -1290,7 +1290,7 @@ in
             claude = {
               cmd = [
                 "claude"
-                "--enable-auto-mode"
+                "--dangerously-skip-permissions"
               ];
             };
           };
