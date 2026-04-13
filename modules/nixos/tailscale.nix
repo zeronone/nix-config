@@ -3,6 +3,7 @@
   services.tailscale = {
     enable = true;
     extraDaemonFlags = [ "--no-logs-no-support" ];
+    extraUpFlags = [ "--ssh" ];
   };
 
   networking.nftables.enable = true;

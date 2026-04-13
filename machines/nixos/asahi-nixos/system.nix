@@ -29,6 +29,7 @@
     myNixModules.gui-apps
     myNixModules.desktop
     myNixModules.tailscale
+    myNixModules.fhs
   ];
 
   # Binary cache for apple-silicon kernel
