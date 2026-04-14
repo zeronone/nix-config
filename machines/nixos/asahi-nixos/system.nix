@@ -29,6 +29,7 @@
     myNixModules.gui-apps
     myNixModules.desktop
     myNixModules.tailscale
+    myNixModules.ssh
     myNixModules.fhs
   ];
 
@@ -117,8 +118,8 @@
 
   # Sound (https://github.com/nix-community/nixos-apple-silicon/issues/352)
   hardware.asahi.setupAsahiSound = true;
-  services.pipewire.configPackages = lib.mkForce [];
-  services.pipewire.wireplumber.configPackages = lib.mkForce [];
+  services.pipewire.configPackages = lib.mkForce [ ];
+  services.pipewire.wireplumber.configPackages = lib.mkForce [ ];
   environment.systemPackages = [ pkgs.asahi-audio ];
 
   # Use the systemd-boot EFI boot loader.

@@ -1,4 +1,9 @@
-{ lib, pkgs, pkgs-unstable, ... }:
+{
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 let
   sharedExtensions = import ./vscode-extensions.nix { inherit pkgs-unstable; };
 in
@@ -17,7 +22,9 @@ in
   # ClaudeCode
   nix.settings = {
     extra-substituters = [ "https://claude-code.cachix.org" ];
-    extra-trusted-public-keys = [ "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=" ];
+    extra-trusted-public-keys = [
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+    ];
   };
   programs.claude-code = {
     enable = true;

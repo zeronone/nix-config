@@ -16,6 +16,9 @@ let
   sortFilesCmd = "${lib.getExe pkgs.eza} -s modified -1 --no-quotes --reverse";
 in
 {
+  # For locally compiled projects and non-Nix binaries (e.g. midori-harness)
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
   home.packages = with pkgs; [
     # Manually installing bash instead of home-manager
     # It messes up muvm
@@ -73,7 +76,9 @@ in
     nix-direnv.enable = true;
     enableZshIntegration = true;
     # direnv 2.37.1 fish test gets SIGKILL'd in macOS nix sandbox
-    package = pkgs.direnv.overrideAttrs (_: { doCheck = false; });
+    package = pkgs.direnv.overrideAttrs (_: {
+      doCheck = false;
+    });
   };
   programs.starship = {
     enable = true;
