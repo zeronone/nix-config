@@ -232,6 +232,12 @@ in
       # ── General ──
       (mkKeymap [ "i" "x" "n" "s" ] "<C-s>" "<cmd>w<cr><esc>" "Save File")
       (mkKeymap [ "i" "n" ] "<esc>" "<cmd>noh<cr><esc>" "Escape and Clear hlsearch")
+      (mkLua "n" "<esc><esc>" ''
+        function()
+          pcall(function() require('trouble').close() end)
+          vim.cmd('cclose | lclose')
+        end
+      '' "Close Auxiliary Windows")
       (mkN "<leader>qq" "<cmd>qa<cr>" "Quit All")
       (mkN "<leader>fn" "<cmd>enew<cr>" "New File")
       (mkN "<leader>xl" "<cmd>lopen<cr>" "Location List")
