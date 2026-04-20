@@ -222,6 +222,7 @@ let
             users.users.${username} = {
               isNormalUser = true;
               initialPassword = "password";
+              linger = true;
               extraGroups = [
                 "wheel"
                 "networkmanager"

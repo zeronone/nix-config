@@ -58,7 +58,6 @@
     '';
     deps = [ ];
   };
-
   # Use the fairydust kernel with basic M1 Pro/Max support
   boot.kernelPackages = lib.mkForce (
     pkgs.linuxPackagesFor (

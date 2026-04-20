@@ -7,7 +7,6 @@
     myHmModules.keepassxc
   ];
 
-  users.users."${username}".linger = true;
   systemd.user.services.midori-harness = {
     Unit = {
       Description = "Midori Harness - midori-labs";
