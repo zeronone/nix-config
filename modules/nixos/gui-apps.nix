@@ -15,6 +15,48 @@
       flake-inputs,
       ...
     }:
+    let
+      # Build a chromium native-messaging-host package: drops <name>.json into
+      # etc/chromium/native-messaging-hosts/, which the home-manager chromium
+      # module symlinks into ~/.config/chromium/NativeMessagingHosts/.
+      mkChromiumNativeMessagingHost =
+        manifest:
+        pkgs.runCommand "${manifest.name}-chromium-native-messaging-host"
+          {
+            manifestJson = builtins.toJSON manifest;
+            passAsFile = [ "manifestJson" ];
+          }
+          ''
+            install -Dm644 "$manifestJsonPath" \
+              "$out/etc/chromium/native-messaging-hosts/${manifest.name}.json"
+          '';
+
+      claudeChromeExtensionId = "fcoeoabgfenejglbffodgkkbkcdhcgfn";
+      # Claude Code creates the native host binary at runtime when /chrome runs.
+      # We only ship the manifest pointing at that path so chromium can find it.
+      claudeCodeNativeMessagingHost = mkChromiumNativeMessagingHost {
+        name = "com.anthropic.claude_code_browser_extension";
+        description = "Claude Code Browser Extension Native Messaging Host";
+        path = "/home/${username}/.claude/chrome/chrome-native-host";
+        type = "stdio";
+        allowed_origins = [
+          "chrome-extension://${claudeChromeExtensionId}/"
+        ];
+      };
+
+      keepassxcChromeExtensionId = "oboonakemofpalcgghocfoadofidjkkk";
+      # pkgs.keepassxc only ships the Mozilla manifest, so build the chromium
+      # one ourselves pointing at the same keepassxc-proxy binary.
+      keepassxcChromiumNativeMessagingHost = mkChromiumNativeMessagingHost {
+        name = "org.keepassxc.keepassxc_browser";
+        description = "KeePassXC integration with native messaging support";
+        path = "${pkgs.keepassxc}/bin/keepassxc-proxy";
+        type = "stdio";
+        allowed_origins = [
+          "chrome-extension://${keepassxcChromeExtensionId}/"
+        ];
+      };
+    in
     {
 
       # Two types of GUI apps
@@ -83,7 +125,11 @@
 
       # The following GUI apps are directly managed by Nix
       # We want more control on them, with proper versioning
-      programs.firefox.enable = true;
+      programs.firefox = {
+        enable = true;
+        # KeePassXC ships the Firefox manifest under lib/mozilla/native-messaging-hosts/
+        nativeMessagingHosts = [ pkgs.keepassxc ];
+      };
       programs.chromium = {
         enable = true;
         # Use latest from unstable
@@ -97,7 +143,13 @@
           # Vimium extension ID
           { id = "dbepggeogbaibhgnhhndojpepiihcmeb"; }
           # keepassxc
-          { id = "oboonakemofpalcgghocfoadofidjkkk"; }
+          { id = keepassxcChromeExtensionId; }
+          # Claude for Chrome
+          { id = claudeChromeExtensionId; }
+        ];
+        nativeMessagingHosts = [
+          claudeCodeNativeMessagingHost
+          keepassxcChromiumNativeMessagingHost
         ];
       };
     };

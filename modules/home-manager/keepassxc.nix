@@ -8,18 +8,21 @@
   programs.keepassxc = {
     enable = true;
     autostart = lib.mkIf config.xdg.autostart.enable true;
-    settings = {
-      Browser.Enabled = true;
+    # problematic
+    # settings = {
+    #   Browser = {
+    #     Enabled = true;
+    #   };
 
-      # https://wiki.nixos.org/wiki/Secret_Service
-      FdoSecrets.Enabled = true;
+    #   # https://wiki.nixos.org/wiki/Secret_Service
+    #   FdoSecrets.Enabled = true;
 
-      GUI = {
-        AdvancedSettings = true;
-        CompactMode = true;
-        HidePasswords = true;
-      };
-    };
+    #   GUI = {
+    #     AdvancedSettings = true;
+    #     CompactMode = true;
+    #     HidePasswords = true;
+    #   };
+    # };
   };
 
   # Enable creation of XDG autostart entries.
