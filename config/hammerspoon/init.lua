@@ -13,13 +13,20 @@ hs.loadSpoon("SpoonInstall")
 ---------------------------------
 
 -- ActiveSpace (Optional if strictly no workspaces, but harmless to keep for focus)
-ActiveSpace = hs.loadSpoon("ActiveSpace")
-ActiveSpace.compact = true
-ActiveSpace:start()
+spoon.SpoonInstall:andUse("ActiveSpace", {
+    start = true,
+    config = {
+        compact = true
+    }
+})
 
 -- MouseFollowsFocus
-MouseFollowsFocus = hs.loadSpoon("MouseFollowsFocus")
-MouseFollowsFocus:start()
+if hs.loadSpoon("MouseFollowsFocus") then
+    MouseFollowsFocus = spoon.MouseFollowsFocus
+    MouseFollowsFocus:start()
+else
+    print("Warning: MouseFollowsFocus Spoon could not be loaded.")
+end
 
 local function initPaperWM(PaperWM)
     -- Only tile standard windows (filters out dialogs, sheets, file pickers, etc.)
