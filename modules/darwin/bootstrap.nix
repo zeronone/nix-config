@@ -39,6 +39,16 @@
   system.defaults.WindowManager.EnableStandardClickToShowDesktop = false;
   system.defaults.NSGlobalDomain."com.apple.swipescrolldirection" = false;
 
+  # Disable Cmd+H ("Hide") and Cmd+Option+H ("Hide Others") by remapping the
+  # menu items to an unreachable shortcut (Cmd+Opt+Ctrl+Shift+H).
+  # Cmd+Option+H is reliably disabled everywhere (menu title is literal).
+  # Cmd+H is only caught in apps whose menu reads literally "Hide"; Apple apps
+  # use "Hide <AppName>" and would need per-app overrides.
+  system.defaults.CustomUserPreferences."NSGlobalDomain".NSUserKeyEquivalents = {
+    "Hide" = "@~^$h";
+    "Hide Others" = "@~^$h";
+  };
+
   # Networking
   networking.dns = [
     "1.1.1.1" # Cloudflare

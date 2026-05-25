@@ -4,7 +4,8 @@
       "Bash(osascript:*)",
       "Bash(system_profiler SPDisplaysDataType)",
       "Bash(hs -c \"for _, s in ipairs\\(hs.screen.allScreens\\(\\)\\) do print\\(s:name\\(\\)\\) end\")",
-      "Bash(/Applications/Hammerspoon.app/Contents/Frameworks/hs/hs:*)"
+      "Bash(/Applications/Hammerspoon.app/Contents/Frameworks/hs/hs:*)",
+      "Bash(nix flake *)"
     ]
   }
 }
