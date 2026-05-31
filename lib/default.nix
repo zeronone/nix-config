@@ -95,6 +95,7 @@ let
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
           inputs.claude-code-nix.overlays.default
+          inputs.antigravity-nix.overlays.default
         ];
       };
     in
@@ -121,6 +122,7 @@ let
               config.allowUnfree = true;
               overlays = [
                 inputs.claude-code-nix.overlays.default
+                inputs.antigravity-nix.overlays.default
               ];
             };
 
@@ -166,6 +168,7 @@ let
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
           inputs.claude-code-nix.overlays.default
+          inputs.antigravity-nix.overlays.default
         ];
       };
     in
@@ -190,8 +193,27 @@ let
           nixpkgs = {
             config.allowUnfree = true;
             overlays = [
-              inputs.dolphin-overlay.overlays.default
+              # TODO: Revert to `inputs.dolphin-overlay.overlays.default` once upstream dolphin-overlay supports Plasma 6/NixOS 26.05
+              (final: prev: {
+                kdePackages = prev.kdePackages.overrideScope (
+                  kfinal: kprev: {
+                    dolphin = prev.symlinkJoin {
+                      name = "dolphin-wrapped";
+                      paths = [ kprev.dolphin ];
+                      nativeBuildInputs = [ prev.makeWrapper ];
+                      postBuild = ''
+                        rm $out/bin/dolphin
+                        makeWrapper ${kprev.dolphin}/bin/dolphin $out/bin/dolphin \
+                          --set XDG_CONFIG_DIRS "${prev.kdePackages.plasma-workspace}/etc/xdg:$XDG_CONFIG_DIRS" \
+                          --set XDG_MENU_PREFIX "plasma-" \
+                          --run "${kprev.kservice}/bin/kbuildsycoca6 --noincremental"
+                      '';
+                    };
+                  }
+                );
+              })
               inputs.claude-code-nix.overlays.default
+              inputs.antigravity-nix.overlays.default
             ];
           };
 

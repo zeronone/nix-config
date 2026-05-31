@@ -129,6 +129,7 @@
         enable = true;
         # KeePassXC ships the Firefox manifest under lib/mozilla/native-messaging-hosts/
         nativeMessagingHosts = [ pkgs.keepassxc ];
+        configPath = ".mozilla/firefox";
       };
       programs.chromium = {
         enable = true;

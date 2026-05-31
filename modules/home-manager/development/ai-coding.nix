@@ -14,6 +14,8 @@ in
       vscode = antigravity;
       vscodeExtensions = sharedExtensions;
     })
+    google-antigravity-ide
+    google-antigravity-cli
   ];
   programs.mcp = {
     enable = true;
@@ -63,6 +65,8 @@ in
       share = "disabled";
       autoshare = false;
       autoupdate = true;
+    };
+    tui = {
       theme = "system";
     };
   };

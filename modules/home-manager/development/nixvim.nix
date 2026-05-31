@@ -47,6 +47,7 @@ in
     vimAlias = true;
     defaultEditor = true;
     waylandSupport = lib.mkIf pkgs-unstable.stdenv.hostPlatform.isLinux true;
+    version.enableNixpkgsReleaseCheck = false;
 
     extraPlugins = with pkgs-unstable.vimPlugins; [
       vim-nix
@@ -1375,9 +1376,9 @@ in
     # nvim-java plugin
     # this manages the jdtls, and associated plugins
     # Also needs spring-boot
+    plugins.spring-boot.enable = true;
     plugins.java = {
       enable = true;
-      # spring-boot is already enabled above
       # require('java').setup() will be called by nixvim
       # https://github.com/nvim-java/nvim-java?tab=readme-ov-file
       luaConfig.post = ''

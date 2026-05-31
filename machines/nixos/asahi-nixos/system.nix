@@ -119,6 +119,32 @@
   hardware.asahi.setupAsahiSound = true;
   services.pipewire.configPackages = lib.mkForce [ ];
   services.pipewire.wireplumber.configPackages = lib.mkForce [ ];
+  # Fix Bluetooth audio disconnections on Apple Silicon / Asahi Linux:
+  # 1. Disable HFP/HSP headset profiles ("bluez5.roles") so apps (like Chromium input)
+  #    requesting mic access don't trigger a profile switch. Switching between A2DP
+  #    and HSP/HFP often fails under Broadcom firmware/driver and crashes the transport.
+  #    This forces the use of the high-quality internal MacBook microphones instead.
+  # 2. Increase idle suspend timeout to 30 seconds to prevent audio dropouts during
+  #    momentary pauses or network buffering, while still preserving power in long runs.
+  services.pipewire.wireplumber.extraConfig = {
+    "10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.roles" = [ "a2dp_sink" "a2dp_source" "bap_sink" "bap_source" ];
+      };
+      "monitor.bluez.rules" = [
+        {
+          matches = [
+            { "node.name" = "~bluez_output.*"; }
+          ];
+          actions = {
+            update-props = {
+              "session.suspend-timeout-seconds" = 30;
+            };
+          };
+        }
+      ];
+    };
+  };
   environment.systemPackages = [ pkgs.asahi-audio ];
 
   # Use the systemd-boot EFI boot loader.

@@ -11,7 +11,7 @@ update-bleeding-edge:
 
     if [ "$AGE" -gt 86400 ]; then
         echo "Updating bleeding-edge deps flake (lockfile is $((AGE / 3600))h old)..."
-        nix flake update claude-code-nix
+        nix flake update claude-code-nix antigravity-nix
     else
         echo "Skipping beleeding-edge deps update (lockfile only $((AGE / 3600))h old)."
     fi

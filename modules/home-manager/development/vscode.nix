@@ -3,7 +3,7 @@ let
   sharedExtensions = import ./vscode-extensions.nix { inherit pkgs-unstable; };
 in
 {
-  programs.vscode = {
+  programs.vscodium = {
     enable = true;
     package = pkgs-unstable.vscodium;
     mutableExtensionsDir = true;
