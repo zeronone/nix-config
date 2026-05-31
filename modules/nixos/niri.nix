@@ -38,6 +38,8 @@
     xwayland-satellite
     swaybg
     mako
+    flameshot
+    grim
 
     # Dolphin
     kdePackages.qtsvg
@@ -57,6 +59,11 @@
       };
       xdg.configFile = {
         "niri/config.kdl".source = ../../config/niri/config.kdl;
+        "flameshot/flameshot.ini".text = ''
+          [General]
+          disabledGrimWarning=true
+          useGrimAdapter=true
+        '';
       };
     };
 }

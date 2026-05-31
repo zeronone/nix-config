@@ -46,6 +46,15 @@
       set-option -g status-interval 5
       # Rename to CWD (basename) if the command is 'bash' or 'zsh', else show the command
       set-option -g automatic-rename-format "#{?#{or:#{==:#{pane_current_command},bash},#{==:#{pane_current_command},zsh}},#{b:pane_current_path},#{pane_current_command}}"
+
+      # enable clipboard (paste image to CLI tool)
+      set -s set-clipboard on
+
+      # Allow programs in tmux to bypass tmux and send graphics to the terminal (e.g. Kitty Graphics Protocol)
+      set -g allow-passthrough on
+
+      # Update Wayland display and terminal program environment variables when attaching to tmux
+      set -g update-environment "WAYLAND_DISPLAY XDG_RUNTIME_DIR TERM_PROGRAM TERM_PROGRAM_VERSION"
     '';
 
     # It changes <Esc>+j to <A-j> and thus moving lines in nvim

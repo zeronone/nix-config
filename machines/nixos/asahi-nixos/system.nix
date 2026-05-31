@@ -129,7 +129,12 @@
   services.pipewire.wireplumber.extraConfig = {
     "10-bluez" = {
       "monitor.bluez.properties" = {
-        "bluez5.roles" = [ "a2dp_sink" "a2dp_source" "bap_sink" "bap_source" ];
+        "bluez5.roles" = [
+          "a2dp_sink"
+          "a2dp_source"
+          "bap_sink"
+          "bap_source"
+        ];
       };
       "monitor.bluez.rules" = [
         {

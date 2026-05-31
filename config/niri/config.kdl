@@ -213,6 +213,18 @@ window-rule {
     open-floating true
 }
 
+window-rule {
+    match app-id="flameshot"
+    open-floating true
+    open-fullscreen true
+}
+
+window-rule {
+    match app-id=r#"^org\.kde\.dolphin$"#
+    match title="Save Screenshot"
+    open-floating true
+}
+
 // Example: block out two password managers from screen capture.
 // (This example rule is commented out with a "/-" in front.)
 /-window-rule {
@@ -355,9 +367,8 @@ binds {
     XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
     // --- SCREENSHOTS ---
-    Print { screenshot; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
+    Super+Shift+4 { spawn-sh "flameshot gui"; }
+    Ctrl+Shift+4 { spawn-sh "flameshot gui"; }
 
     // --- SYSTEM CONTROL ---
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
