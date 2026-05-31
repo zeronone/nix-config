@@ -63,15 +63,15 @@
     pkgs.linuxPackagesFor (
       (pkgs.buildLinux {
         inherit (pkgs) stdenv lib;
-        version = "6.19.11";
-        modDirVersion = "6.19.11";
+        version = "6.19.14";
+        modDirVersion = "6.19.14";
         pname = "linux-fairydust";
 
         src = pkgs.fetchFromGitHub {
           owner = "AsahiLinux";
           repo = "linux";
-          rev = "4e84610e5722c34e48fef3f33f7bd8faedb13348";
-          hash = "sha256-G32SzJW1paAUaBCnw5cou20WwpuVR8OZSDRpV58IUJU=";
+          rev = "e2d30dc1dd6931da5aa42112fb4f26cab0973da5";
+          hash = "sha256-uAt3e4qIjUOtycVt5GO0OwYnzlSETN32Wa8Xn4EOa2k=";
         };
 
         kernelPatches = [

@@ -32,13 +32,6 @@ output "eDP-1" {
   position x=0 y=0
 }
 
-output "LG Electronics LG HDR 4K 007NTNH58935" {
-  // Logical: 2560x1440
-  mode "3840x2160@60"
-  scale 1.5
-  position x=-524 y=-1440
-}
-
 // Noctalia recommendation
 layer-rule {
   match namespace="^noctalia-overview"
