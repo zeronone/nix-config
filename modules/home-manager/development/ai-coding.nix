@@ -22,12 +22,6 @@ in
   };
 
   # ClaudeCode
-  nix.settings = {
-    extra-substituters = [ "https://claude-code.cachix.org" ];
-    extra-trusted-public-keys = [
-      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
-    ];
-  };
   programs.claude-code = {
     enable = true;
     # From claude-code overlay, latest version
