@@ -10,6 +10,7 @@
     myDarwinModules.macbook-us-ansi
     myDarwinModules.hammerspoon
     myDarwinModules.desktop-ui
+    myDarwinModules.local-llm
   ];
 
   networking.knownNetworkServices = [

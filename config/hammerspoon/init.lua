@@ -60,6 +60,11 @@ end
 
 local function watchDisplays()
     local PaperWM = hs.loadSpoon("PaperWM")
+    -- Tear down existing subscriptions/watchers before re-applying the screen
+    -- filter. Calling start() without stop() stacks duplicate window-event
+    -- subscriptions, which causes "no anchor window in space" / "add window
+    -- does not have a space" errors as handlers race against cleared state.
+    PaperWM:stop()
     initPaperWM(PaperWM)
     PaperWM:start()
 end
