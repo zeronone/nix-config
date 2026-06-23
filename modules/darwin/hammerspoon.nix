@@ -1,6 +1,6 @@
 { pkgs, username, ... }:
 let
-  hammerSpoonRepoCommit = "cbb1ce1";
+  hammerSpoonRepoCommit = "5c20bcecc380acff5f0f5df7a718c5679aaaf62a";
 in
 {
   # System Settings
@@ -27,7 +27,7 @@ in
 
     home.file.".config/hammerspoon/Spoons/MouseFollowsFocus.spoon" = {
       source = pkgs.fetchzip {
-        url = " https://github.com/Hammerspoon/Spoons/raw/${hammerSpoonRepoCommit}/Spoons/MouseFollowsFocus.spoon.zip";
+        url = "https://github.com/Hammerspoon/Spoons/raw/${hammerSpoonRepoCommit}/Spoons/MouseFollowsFocus.spoon.zip";
         hash = "sha256-TI3LxurbBohvR9xI+HvrorGZl5QyPB1+uSX0uMC2RiQ=";
       };
     };

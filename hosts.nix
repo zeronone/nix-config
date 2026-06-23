@@ -9,6 +9,12 @@
     tailscaleIpAddr = "TODO";
   };
 
+  darwinConfigurations."ITSO-WX6092" = mylib.mkDarwinHost {
+    hostname = "ITSO-WX6092";
+    username = "arezai";
+    tailscaleIpAddr = "TODO";
+  };
+
   darwinConfigurations."arif-mac" = mylib.mkDarwinHost {
     hostname = "arif-mac";
     username = "arif";
