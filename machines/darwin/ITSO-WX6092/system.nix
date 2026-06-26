@@ -11,6 +11,7 @@
     myDarwinModules.hammerspoon
     myDarwinModules.desktop-ui
     myDarwinModules.local-llm
+    myDarwinModules.fonts
   ];
 
   networking.knownNetworkServices = [
@@ -38,6 +39,7 @@
 
   # Don't delete other brews installed on this machine
   homebrew.onActivation.cleanup = lib.mkForce "none";
+  homebrew.taps = [ "atlassian/acli" ];
   homebrew.brews = [
     "openssl"
     "readline"
@@ -51,5 +53,7 @@
     "gnu-which"
     "gnutls"
     "grep"
+    "glab"
+    "atlassian/acli/acli"
   ];
 }
