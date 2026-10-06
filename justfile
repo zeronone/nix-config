@@ -136,3 +136,10 @@ update-all:
 update-immich:
     nix flake update nixpkgs-immich
     nix eval --raw .#nixosConfigurations.momiji-homelab.config.services.immich.package.version; echo
+
+# Edit momiji-homelab's sops secrets
+edit-secrets: (sops "machines/nixos/momiji-homelab/secrets.yaml")
+
+# sops with the passphrase-protected age key, e.g. `just sops updatekeys <file>` after editing .sops.yaml
+sops *args:
+    SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt.age nix run --inputs-from . nixpkgs#sops -- {{args}}

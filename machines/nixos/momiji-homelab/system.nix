@@ -11,7 +11,18 @@
   hostname,
   ...
 }:
+let
+  # LAN addressing, also passed to the other modules of this host as the `lan` argument
+  lan = {
+    address = "192.168.100.3";
+    prefixLength = 24;
+    gateway = "192.168.100.1";
+    dns = "192.168.100.1";
+  };
+in
 {
+  _module.args.lan = lan;
+
   imports = [
     flake-inputs.disko.nixosModules.disko
     ./disko.nix
@@ -19,13 +30,18 @@
     ./storage.nix
     ./immich.nix
     ./dashboard.nix
+    ./adguard.nix
     myNixModules.tailscale
     myNixModules.ssh-lan
     myNixModules.podman
     myNixModules.disk-health
     myNixModules.intel-gpu
     myNixModules.mdns
+    myNixModules.sops
   ];
+
+  # Edit with `just edit-secrets`
+  sops.defaultSopsFile = ./secrets.yaml;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 10;
@@ -54,8 +70,8 @@
         ethernet.mac-address = "6c:1f:f7:a5:6b:c8";
         ipv4 = {
           method = "manual";
-          address1 = "192.168.100.3/24,192.168.100.1";
-          dns = "192.168.100.1;";
+          address1 = "${lan.address}/${toString lan.prefixLength},${lan.gateway}";
+          dns = "${lan.dns};";
         };
         ipv6.method = "auto";
       };
@@ -71,9 +87,9 @@
     };
   };
 
+  # Only the work Mac (no Tailscale) logs in with a key; tailnet machines use Tailscale SSH
   users.users.${username}.openssh.authorizedKeys.keys = [
-    # ~/.ssh/id_github.pub
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM50iMhN9wacVqvVuT0UvP/KLRsHtQBbmHga6zpvGgZ+ arif.matsuda@gmail.com"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm9EQ3WlBQ3nterYlu0OlJNDepguJndQh9AxpLIiNP+ arif@IT-JPN-31519"
   ];
 
   zramSwap.enable = true;

@@ -1,90 +1,62 @@
-## Overview
+# nix-config
 
-- Machine configs
+Nix flake for my macOS (nix-darwin) and NixOS machines.
 
-## Dependencies
+- `hosts.nix`: host list
+- `machines/{darwin,nixos}/<host>/`: per-host config
+- `modules/`: shared modules (`common`, `darwin`, `nixos`, `home-manager`)
+- `lib/`: host builders
 
-- MacOSX
+## Install
 
-```
+macOS:
+
+```sh
 curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install | sh
 ```
 
-- Linux (non NixOS)
+Linux (non-NixOS):
 
-```
+```sh
 sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
-
 mkdir -p ~/.config/nix
-cat <<EOF > ~/.config/nix/nix.conf
-experimental-features = nix-command flakes
-EOF
+echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
 ```
 
-## Initial setup
+Then:
 
-```bash
+```sh
 ./bootstrap.sh
-
-# Setup Github access token
 echo "access-tokens = github.com=$(gh auth token)" > ~/.secrets/nix-github-token.conf
-
-# Setup tailscale
 sudo tailscale set --operator=$USER
 sudo tailscale up
-# https://app.cachix.org/cache/zeronone/settings/authtokens
-cachix authtoken XXXX
-cachix doctor
+cachix authtoken XXXX   # https://app.cachix.org/cache/zeronone/settings/authtokens
 ```
 
-## Updates
+## Usage
 
-```
-just switch
-```
+`just --list` for all recipes. Common ones:
 
-## Cachix
+- `just switch`: build and apply this machine's config
+- `just update-all`: update flake inputs
+- `just push-to-cachix <package>`: push a build to the `zeronone` cache
 
-```shell
-# push certain builds to personal cachix
-just push-to-cachix nixfmt-1.2.0
-```
+## Secrets
 
-## Apple Silicon (Asahi Linux) Setup
+[sops-nix](https://github.com/Mic92/sops-nix). Each host that uses secrets has its own `machines/<os>/<host>/secrets.yaml`, encrypted to that host and to my age key, so a host can only read its own secrets. Recipients per file are in `.sops.yaml`.
 
-Apple Silicon Macs require non-distributable firmware files for Wi-Fi and other peripherals.
-These are stored in a private git repository and referenced as a flake input.
+- My key: `~/.config/sops/age/keys.txt.age` (passphrase-protected), backup in KeePassXC
+- Hosts decrypt at activation with their SSH host key (`modules/nixos/sops.nix`); the age recipient is `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`
+- Edit: `just edit-secrets`, or `just sops <file>` for any file
+- After changing recipients in `.sops.yaml`: `just sops updatekeys <file>`. If a key leaked, change the secrets themselves too; old versions stay in git history.
+- In Nix, pass secrets as paths (`config.sops.secrets.<name>.path`) or `sops.templates`, never as values
 
-### Initial firmware setup (on the Asahi Linux machine)
+## Asahi firmware
 
-1. Create a private git repository (e.g., `github.com/zeronone/asahi-firmware`)
+Apple Silicon needs non-distributable firmware, kept in the private `asahi-firmware` repo (flake input). On the Asahi machine, after a macOS update or for a new machine type:
 
-1. Push firmware to the repository:
-
-   ```bash
-   ./scripts/push-asahi-firmware.sh --dir m1pro
-   ```
-
-   Use a different `--dir` for each machine type (e.g., `m1pro`, `m2max`, `m3`).
-
-1. Update the flake lock file:
-
-   ```bash
-   nix flake lock --update-input asahi-firmware
-   ```
-
-1. Proceed with normal installation:
-
-   ```bash
-   ./bootstrap.sh
-   ```
-
-### Updating firmware
-
-If firmware is updated (e.g., after macOS update), re-run:
-
-```bash
+```sh
 ./scripts/push-asahi-firmware.sh --dir m1pro
-nix flake lock --update-input asahi-firmware
+nix flake update asahi-firmware
 just switch
 ```

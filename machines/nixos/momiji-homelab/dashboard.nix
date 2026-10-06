@@ -1,34 +1,38 @@
-# Web UIs for the NAS:
-#   Homepage  :8082  front page (live CPU/RAM/temp/disk usage, SMART summary, links)  LAN + tailnet
+# Web UIs for the NAS (plain HTTP; only reachable on the LAN and the tailnet):
+#   Homepage  :80    front page (live CPU/RAM/temp/disk usage, SMART summary, links)  LAN + tailnet
+#                    Caddy with basic auth in front of :8082: arif / homepage-password-hash
+#                    (sops, bcrypt from `nix run nixpkgs#caddy -- hash-password`).
 #   Cockpit   :9090  admin: storage (md/LVM, later ZFS), services, logs, terminal,     LAN + tailnet
 #                    files, podman containers. Log in as arif (PAM); sudo for admin.
-#   Scrutiny  :8080  SMART history + failure prediction per disk (no auth)            tailnet only
-# https://momiji-homelab.<tailnet> (tailscale serve, valid cert) -> Homepage. Immich keeps its own
-# node, https://immich.<tailnet> (see immich.nix). Other ports are reachable directly on the tailnet.
-# On the LAN: http://momiji-homelab.local:8082 (mDNS) or http://192.168.100.3:8082.
+#   Scrutiny  :8080  SMART history + failure prediction per disk (no auth)            LAN + tailnet
+#   AdGuard   :3000  DNS ad blocking (adguard.nix)                                     LAN + tailnet
+# Homepage: http://192.168.100.3, http://momiji-homelab.local (mDNS), http://<tailnet IP or name>,
+# and https://momiji-homelab.<tailnet> (tailscale serve, valid cert). Immich keeps its own node,
+# https://immich.<tailnet> (see immich.nix). Other ports are reachable directly on the tailnet.
 {
   config,
   lib,
   pkgs,
   hostname,
   tailscaleNet,
+  tailscaleIpAddr,
+  lan,
   ...
 }:
 let
   tsHost = "${hostname}.${tailscaleNet}";
-  lanHosts = [
-    "${hostname}.local"
-    "192.168.100.3"
-  ];
   allHosts = [
     tsHost
     hostname
-  ]
-  ++ lanHosts;
+    tailscaleIpAddr
+    "${hostname}.local"
+    lan.address
+  ];
 
   homepagePort = config.services.homepage-dashboard.listenPort;
   cockpitPort = config.services.cockpit.port;
   scrutinyPort = config.services.scrutiny.settings.web.listen.port;
+  adguardPort = config.services.adguardhome.port;
 
   tailscale = lib.getExe config.services.tailscale.package;
 in
@@ -36,21 +40,25 @@ in
   services.cockpit = {
     enable = true;
     openFirewall = true;
-    allowed-origins = map (h: "https://${h}:${toString cockpitPort}") allHosts;
+    allowed-origins = map (h: "http://${h}:${toString cockpitPort}") allHosts;
     plugins = with pkgs; [
       cockpit-files
       cockpit-podman
       # with ZFS: cockpit-zfs
     ];
-    settings.WebService.LoginTo = false;
+    settings.WebService = {
+      LoginTo = false;
+      # Serve plain HTTP instead of redirecting to the self-signed HTTPS
+      AllowUnencrypted = true;
+    };
   };
   # Cockpit's Storage page talks to udisks
   services.udisks2.enable = true;
 
   services.scrutiny = {
     enable = true;
-    # Not opened on the LAN (no auth); reachable via tailnet and through Homepage's widget
-    openFirewall = false;
+    # No auth, but read-only SMART data; fine on the home LAN
+    openFirewall = true;
     settings.web.listen.port = 8080;
     collector = {
       enable = true;
@@ -58,13 +66,74 @@ in
     };
   };
 
+  # The login in front of Homepage, which has no auth of its own
+  sops.secrets.homepage-password-hash = { };
+  sops.templates."caddy.env" = {
+    # Single quotes: systemd must not touch the $s in the bcrypt hash
+    content = "HOMEPAGE_PASSWORD_HASH='${config.sops.placeholder.homepage-password-hash}'";
+    restartUnits = [ "caddy.service" ];
+  };
+  services.caddy = {
+    enable = true;
+    globalConfig = "auto_https off";
+    environmentFile = config.sops.templates."caddy.env".path;
+    virtualHosts.":80".extraConfig = ''
+      basic_auth {
+        arif {$HOMEPAGE_PASSWORD_HASH}
+      }
+      reverse_proxy 127.0.0.1:${toString homepagePort}
+    '';
+  };
+  networking.firewall.allowedTCPPorts = [ 80 ];
+
+  # AdGuard API password for the widget (the secret is declared in adguard.nix)
+  sops.templates."homepage.env" = {
+    content = "HOMEPAGE_VAR_ADGUARD_PASSWORD='${config.sops.placeholder.adguard-password}'";
+    restartUnits = [ "homepage-dashboard.service" ];
+  };
+
   services.homepage-dashboard = {
     enable = true;
-    openFirewall = true;
+    # Only reachable through Caddy
+    listenPort = 8082;
+    openFirewall = false;
+    environmentFiles = [ config.sops.templates."homepage.env".path ];
+    # Caddy passes the Host header through: no port, as clients use :80 (or tailscale serve's 443)
     allowedHosts = builtins.concatStringsSep "," (
-      # tsHost without a port: requests arriving through tailscale serve on 443
-      [ tsHost ] ++ map (h: "${h}:${toString homepagePort}") (allHosts ++ [ "localhost" ])
+      allHosts
+      ++ [
+        "localhost"
+        "127.0.0.1"
+      ]
     );
+    # Links point at tailnet names. When the page is opened by any other address (e.g. the LAN IP
+    # from a machine without Tailscale), rewrite them to that address so they keep working.
+    customJS = ''
+      (() => {
+        const here = location.hostname;
+        if (here === "${tsHost}") return;
+        // tailnet host in a link -> port on this machine ("" keeps the link's port)
+        const ports = ${
+          builtins.toJSON {
+            ${tsHost} = "";
+            "immich.${tailscaleNet}" = toString config.services.immich.port;
+          }
+        };
+        const rewrite = () => {
+          for (const a of document.querySelectorAll("a[href]")) {
+            const url = new URL(a.href, location.href);
+            if (!(url.hostname in ports)) continue;
+            const port = ports[url.hostname];
+            url.protocol = "http:";
+            url.hostname = here;
+            if (port) url.port = port;
+            a.href = url.href;
+          }
+        };
+        rewrite();
+        new MutationObserver(rewrite).observe(document.body, { childList: true, subtree: true });
+      })();
+    '';
     settings = {
       title = hostname;
       theme = "dark";
@@ -113,9 +182,22 @@ in
         System = [
           {
             Cockpit = {
-              href = "https://${tsHost}:${toString cockpitPort}";
+              href = "http://${tsHost}:${toString cockpitPort}";
               description = "Storage, services, logs, terminal";
               icon = "cockpit.svg";
+            };
+          }
+          {
+            "AdGuard Home" = {
+              href = "http://${tsHost}:${toString adguardPort}";
+              description = "DNS ad blocking";
+              icon = "adguard-home.svg";
+              widget = {
+                type = "adguard";
+                url = "http://127.0.0.1:${toString adguardPort}";
+                username = "arif";
+                password = "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}";
+              };
             };
           }
           {
@@ -135,13 +217,16 @@ in
     ];
   };
 
-  # https://momiji-homelab.<tailnet> -> Homepage. The serve config persists in tailscaled state;
+  # The Next.js server binds all interfaces unless told otherwise
+  systemd.services.homepage-dashboard.environment.HOSTNAME = "127.0.0.1";
+
+  # https://momiji-homelab.<tailnet> -> Caddy -> Homepage. The serve config persists in tailscaled state;
   # this (re)applies it declaratively. No-op until `sudo tailscale up` has been run once.
   systemd.services.homepage-tailscale-serve = {
     description = "Expose Homepage on the tailnet via tailscale serve";
     after = [
       "tailscaled.service"
-      "homepage-dashboard.service"
+      "caddy.service"
     ];
     wants = [ "tailscaled.service" ];
     wantedBy = [ "multi-user.target" ];
@@ -158,7 +243,7 @@ in
         echo "tailscale is not logged in yet; skipping serve setup"
         exit 0
       fi
-      ${tailscale} serve --bg --https=443 http://127.0.0.1:${toString homepagePort}
+      ${tailscale} serve --bg --https=443 http://127.0.0.1:80
     '';
   };
 }

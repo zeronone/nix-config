@@ -15,6 +15,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Secrets decrypted at activation (used by momiji-homelab)
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Flake Utils
     flake-utils.url = "github:numtide/flake-utils";
 
