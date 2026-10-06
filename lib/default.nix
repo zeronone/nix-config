@@ -43,6 +43,13 @@ let
     ../modules/home-manager/development
   ];
 
+  # Terminal-only subset for headless servers (no ghostty/vscode/AI tooling)
+  headlessHomeModules = [
+    ../modules/home-manager/shell.nix
+    ../modules/home-manager/development/nixvim.nix
+    ../modules/home-manager/development/tmux.nix
+  ];
+
   tailscaleNet = "curl-featherback.ts.net";
 
   # Helper function to configure home-manager
@@ -53,6 +60,7 @@ let
       tailscaleIpAddr,
       pkgs-unstable,
       homeModules ? [ ],
+      sharedModules ? sharedHomeModules,
     }:
     {
       home-manager.backupFileExtension = "bak";
@@ -69,7 +77,7 @@ let
           ;
         flake-inputs = inputs;
       };
-      home-manager.sharedModules = sharedHomeModules;
+      home-manager.sharedModules = sharedModules;
       home-manager.users.${username} = {
         imports = homeModules;
         home.username = username;
@@ -158,6 +166,8 @@ let
       username,
       tailscaleIpAddr,
       system ? "aarch64-linux",
+      # Servers: skip desktop-only packages and GUI home-manager modules
+      headless ? false,
     }:
     let
       machineDir = ../machines/nixos/${hostname};
@@ -228,10 +238,8 @@ let
             # Global packages
             environment.systemPackages =
               (globalPackages pkgs)
-              ++ (with pkgs; [
-                wl-clipboard
-                coreutils
-              ]);
+              ++ inputs.nixpkgs.lib.optionals (!headless) [ pkgs.wl-clipboard ]
+              ++ [ pkgs.coreutils ];
           }
         )
         inputs.home-manager.nixosModules.default
@@ -261,6 +269,7 @@ let
             pkgs-unstable
             ;
           homeModules = [ (machineDir + /home.nix) ];
+          sharedModules = if headless then headlessHomeModules else sharedHomeModules;
         })
       ];
     };

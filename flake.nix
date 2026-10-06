@@ -5,6 +5,15 @@
     # Nixpkgs
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinned separately: Immich DB migrations are one-way, so bump this deliberately
+    # (`nix flake update nixpkgs-immich`), never as a side effect of a bulk update.
+    nixpkgs-immich.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    # Declarative disk partitioning (used by nixos-anywhere for momiji-homelab)
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Flake Utils
     flake-utils.url = "github:numtide/flake-utils";

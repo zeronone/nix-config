@@ -26,4 +26,13 @@
     username = "arif";
     tailscaleIpAddr = "100.91.229.87";
   };
+
+  # UGREEN DXP4800 Plus NAS (Immich). See machines/nixos/momiji-homelab/README.md
+  nixosConfigurations."momiji-homelab" = mylib.mkNixosHost {
+    hostname = "momiji-homelab";
+    username = "arif";
+    tailscaleIpAddr = "100.88.104.85";
+    system = "x86_64-linux";
+    headless = true;
+  };
 }

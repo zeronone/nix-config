@@ -22,7 +22,7 @@ switch: update-bleeding-edge
         sudo -v; sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
         sudo -v; nixos-rebuild --sudo switch --flake . |& nom; \
-        niri validate -c ./config/niri/config.kdl; \
+        if command -v niri >/dev/null; then niri validate -c ./config/niri/config.kdl; fi; \
     else \
         home-manager switch --flake ".#$(hostname)" |& nom; \
     fi
@@ -41,7 +41,7 @@ check: update-bleeding-edge
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild check --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
-        niri validate -c ./config/niri/config.kdl || exit 1; \
+        if command -v niri >/dev/null; then niri validate -c ./config/niri/config.kdl || exit 1; fi; \
         nixos-rebuild dry-run --flake . |& nom; \
     else \
         echo "TODO"; \
@@ -83,6 +83,12 @@ clean-boot:
     done
     df -h /boot
 
+# Deploy the NAS from this machine. Builds on the NAS itself (it is x86_64)
+# Usage: just deploy-homelab [switch|boot|test|dry-activate]
+deploy-homelab action="switch" host="arif@192.168.100.3":
+    nix run --inputs-from . nixpkgs#nixos-rebuild -- {{action}} --flake .#momiji-homelab \
+        --target-host {{host}} --build-host {{host}} --sudo --ask-sudo-password
+
 # Pushes a specific package and its closure from the Nix store to Cachix with confirmation
 push-to-cachix target cachix_cache="zeronone":
     #!/usr/bin/env bash
@@ -122,5 +128,11 @@ clean-store:
     nix-store --gc --option keep-outputs false --option keep-derivations false
 
 # Update the flake.lock file to get latest package versions
+# (except nixpkgs-immich: Immich DB migrations are one-way, bump it with `just update-immich`)
 update-all:
-    nix flake update
+    nix flake update $(nix flake metadata --json | jq -r '.locks.nodes.root.inputs | keys[] | select(. != "nixpkgs-immich")')
+
+# Bump Immich on momiji-homelab (read the Immich release notes first)
+update-immich:
+    nix flake update nixpkgs-immich
+    nix eval --raw .#nixosConfigurations.momiji-homelab.config.services.immich.package.version; echo
