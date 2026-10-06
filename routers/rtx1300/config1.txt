@@ -1,0 +1,152 @@
+# Yamaha RTX1300, full config: v6plus static IPv4, AdGuard DNS, filters. Emergency fallback: config0.txt.
+# Template: `just render routers/rtx1300/config1.txt`, values via `just edit-secrets routers/rtx1300`.
+# Passwords are not in here: set them on the console (`administrator password`, `login user admin`).
+# (An invalid password line makes a config import stop part-way, leaving the router without a LAN address.)
+user attribute admin administrator=2
+ip routing process fast
+ip route default gateway tunnel 1
+ipv6 route default gateway dhcp lan2
+ipv6 prefix 1 dhcp-prefix@lan2::/64
+lan flexible-port lan1=1-8,10 lan2=9
+ip lan1 address 192.168.100.1/24
+# The v6plus CE address: its interface ID encodes the public IPv4, so it is a secret too
+ipv6 lan1 address dhcp-prefix@lan2::${V6PLUS_INTERFACE_ID}/64
+ipv6 lan1 prefix change log on
+ipv6 lan1 rtadv send 1 o_flag=on
+ipv6 lan1 dhcp service server
+switch control use lan1 on terminal=on
+description lan2 v6Plus_StaticIP
+lan linkup send-wait-time lan2 5
+ipv6 lan2 secure filter in 101000 101002 101003 101004
+ipv6 lan2 secure filter out 101099 dynamic 101098 101099
+ipv6 lan2 dhcp service client
+ngn type lan2 ntt
+tunnel select 1
+ description tunnel "v6Plus Static IPv4"
+ tunnel encapsulation ipip
+ tunnel endpoint remote address 2404:9200:225:100::65
+ ip tunnel mtu 1460
+ ip tunnel nat descriptor 20000
+ ip tunnel tcp mss limit auto
+ ip tunnel secure filter in 200003 200020 200021 200022 200023 200024 200025 200030 200039
+ ip tunnel secure filter out 200010 200011 200012 200013 200020 200021 200022 200023 200024 200025 200099 dynamic 200080 200081 200082 200083 200084 200085 200098 200099
+ tunnel enable 1
+# IPv4 filters for tunnel 1, from Yamaha's examples:
+#   https://network.yamaha.com/setting/router_firewall/ipv6/v6plus (inbound reject, dynamic outbound)
+#   https://network.yamaha.com/setting/router_firewall/vpn/connect/ipsec_pass_through-rtx_gui/vpn-connect-ipsec_pass_through-rtx_gui_rtx.txt
+#   (anti-spoofing, private destinations, NetBIOS/SMB); its tcpfin/tcprst "restrict" rules are for dial-up, so left out
+ip filter 200003 reject 192.168.100.0/24 * * * *
+ip filter 200010 reject * 10.0.0.0/8 * * *
+ip filter 200011 reject * 172.16.0.0/12 * * *
+ip filter 200012 reject * 192.168.0.0/16 * * *
+ip filter 200013 reject * 192.168.100.0/24 * * *
+ip filter 200020 reject * * udp,tcp 135 *
+ip filter 200021 reject * * udp,tcp * 135
+ip filter 200022 reject * * udp,tcp netbios_ns-netbios_ssn *
+ip filter 200023 reject * * udp,tcp * netbios_ns-netbios_ssn
+ip filter 200024 reject * * udp,tcp 445 *
+ip filter 200025 reject * * udp,tcp * 445
+ip filter 200030 pass * 192.168.100.0/24 icmp * *
+ip filter 200039 reject * *
+ip filter 200099 pass * * * * *
+ip filter dynamic 200080 * * ftp syslog=off
+ip filter dynamic 200081 * * domain syslog=off
+ip filter dynamic 200082 * * www syslog=off
+ip filter dynamic 200083 * * smtp syslog=off
+ip filter dynamic 200084 * * pop3 syslog=off
+ip filter dynamic 200085 * * submission syslog=off
+ip filter dynamic 200098 * * tcp syslog=off
+ip filter dynamic 200099 * * udp syslog=off
+# Idle UDP flows (e.g. Tailscale direct connections) are remembered 120s instead of 30s
+ip filter dynamic timer udp-idle-time=120
+nat descriptor type 20000 masquerade
+nat descriptor address outer 20000 ${V6PLUS_PUBLIC_IP}
+ipv6 filter 101000 pass * * icmp6 * *
+ipv6 filter 101002 pass * * udp * 546
+ipv6 filter 101003 pass * * 4
+# Tailscale: direct (non-relayed) connections to LAN devices over IPv6, e.g. momiji-homelab on UDP 41641
+ipv6 filter 101004 pass * * udp * 41641
+ipv6 filter 101099 pass * * * * *
+ipv6 filter dynamic 101098 * * tcp syslog=off
+ipv6 filter dynamic 101099 * * udp syslog=off
+telnetd service off
+dhcp service server
+dhcp server rfc2131 compliant except remain-silent
+dhcp scope 1 192.168.100.50-192.168.100.191/24
+dhcp client release linkdown on
+dns host lan1
+# AdGuard on momiji-homelab; 1.1.1.1 only if it doesn't answer (unfiltered while the NAS is down)
+dns server 192.168.100.3 1.1.1.1
+# home.lan is answered from the `ip host` entries below and never forwarded (AdGuard forwards it here)
+dns server select 1 reject any home.lan
+dns service fallback on
+dns private address spoof on
+ip host cloud-key.home.lan 192.168.100.4
+ip host momiji-homelab.home.lan 192.168.100.3
+ip host router.home.lan 192.168.100.1
+ip host wifi.home.lan 192.168.100.2
+schedule at 1 startup * lua emfs:/v6plus_map_e.lua
+# Clock: at boot and hourly (the boot run can fail before the internet is up)
+schedule at 2 startup * ntpdate ntp.nict.jp
+schedule at 3 */* *:00 * ntpdate ntp.nict.jp
+# Logs to momiji-homelab (journalctl -t rtx1300)
+syslog host 192.168.100.3
+syslog notice on
+syslog info on
+# Firmware: `http revision-up go` on the console, or hold DOWNLOAD for 3s
+http revision-up permit on
+operation http revision-up permit on
+sip use off
+sshd service on
+sshd host lan
+statistics traffic on
+statistics nat on
+embedded file v6plus_map_e.lua <<EOF
+UPD_SV = "http://fcs.enabler.ne.jp/update"
+USERNAME = "${V6PLUS_USER}"
+PASSWORD = "${V6PLUS_PASSWORD}"
+WAN_IF = "LAN2"
+
+LOG_PTN = "Add%s+IPv6%s+prefix.+%(Lifetime%:%s+%d+%)%s+via%s+" .. WAN_IF .. "%s+by"
+LOG_LEVEL = "info"
+LOG_PFX = "[v6plus]"
+FAIL_MSG = "Failed to notify IPv6 address to the update server. (remaining retry: %d time(s))"
+
+function logger(msg)
+rt.syslog(LOG_LEVEL, string.format("%s %s", LOG_PFX, msg))
+end
+
+local rtn, count, log, result
+local req_t = {}
+local res_t
+req_t.url = string.format("%s?user=%s&pass=%s", UPD_SV, USERNAME, PASSWORD)
+req_t.method = "GET"
+while true do
+rtn = rt.syslogwatch(LOG_PTN)
+if rtn then
+count = 3
+while true do
+res_t = rt.httprequest(req_t)
+if res_t.rtn1 then
+logger("Notified IPv6 address to the update server.")
+if res_t.code == 200 then
+result = "Succeeded"
+else
+result = "Failed"
+end
+log = string.format("%s to update IPv6 address. (code=%d, body=%s)", result, res_t.code, res_t.body)
+logger(log)
+break
+end
+count = count - 1
+if count > 0 then
+logger(string.format(FAIL_MSG, count))
+rt.sleep(10)
+else
+logger("Failed to notify IPv6 address to the update server.")
+break
+end
+end
+end
+end
+EOF

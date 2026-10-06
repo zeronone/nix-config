@@ -46,10 +46,11 @@ cachix authtoken XXXX   # https://app.cachix.org/cache/zeronone/settings/authtok
 [sops-nix](https://github.com/Mic92/sops-nix). Each host that uses secrets has its own `machines/<os>/<host>/secrets.yaml`, encrypted to that host and to my age key, so a host can only read its own secrets. Recipients per file are in `.sops.yaml`.
 
 - My key: `~/.config/sops/age/keys.txt.age` (passphrase-protected), backup in KeePassXC
-- Hosts decrypt at activation with their SSH host key (`modules/nixos/sops.nix`); the age recipient is `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`
-- Edit: `just edit-secrets`, or `just sops <file>` for any file
+- Hosts decrypt at activation with their SSH host key; the age recipient is `ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub`. Macs without Remote Login have no host key: generate one with `age-keygen` and set `sops.age.keyFile`
+- Edit: `just edit-secrets <host|dir>` (e.g. `momiji-homelab`, `routers/rtx1300`), or `just sops <file>`
 - After changing recipients in `.sops.yaml`: `just sops updatekeys <file>`. If a key leaked, change the secrets themselves too; old versions stay in git history.
 - In Nix, pass secrets as paths (`config.sops.secrets.<name>.path`) or `sops.templates`, never as values
+- Files outside Nix (e.g. `routers/rtx1300/config1.txt`) are templates with `${VAR}` placeholders: `just render <template>` fills them from the `secrets.yaml` next to it into `dist/` (gitignored)
 
 ## Asahi firmware
 

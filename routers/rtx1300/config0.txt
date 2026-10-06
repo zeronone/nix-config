@@ -1,0 +1,38 @@
+# Yamaha RTX1300, emergency config: after a factory reset, paste this on the console to get online.
+# Factory reset: hold microSD + USB + DOWNLOAD while powering on. Factory login: admin / admin, LAN 192.168.100.1 (ports 1-8).
+# Plain v6plus MAP-E (shared IPv4, rules fetched automatically), the ISP's DNS, LAN + DHCP.
+# No secrets and not a template. Then set passwords (`administrator password`, `login user admin`) and `save`.
+# From Yamaha's v6plus example (DHCPv6 case): https://network.yamaha.com/setting/router_firewall/ipv6/v6plus
+ip route default gateway tunnel 1
+ipv6 route default gateway dhcp lan2
+lan flexible-port lan1=1-8,10 lan2=9
+ip lan1 address 192.168.100.1/24
+ipv6 prefix 1 dhcp-prefix@lan2::/64
+ipv6 lan1 address dhcp-prefix@lan2::1/64
+ipv6 lan1 rtadv send 1 o_flag=on
+ipv6 lan1 dhcp service server
+ipv6 lan2 dhcp service client
+ipv6 lan2 address dhcp
+# The only filter: IPv6 inbound. Without it every LAN device is reachable from the internet over IPv6.
+ipv6 lan2 secure filter in 200030 200031 200038 200039
+ipv6 lan2 secure filter out 200099 dynamic 200098 200099
+ngn type lan2 ntt
+tunnel select 1
+ tunnel encapsulation map-e
+ tunnel map-e type v6plus
+ ip tunnel mtu 1460
+ ip tunnel nat descriptor 1000
+ tunnel enable 1
+ipv6 filter 200030 pass * * icmp6 * *
+ipv6 filter 200031 pass * * 4
+ipv6 filter 200038 pass * * udp * 546
+ipv6 filter 200039 reject * *
+ipv6 filter 200099 pass * * * * *
+ipv6 filter dynamic 200098 * * tcp syslog=off
+ipv6 filter dynamic 200099 * * udp syslog=off
+nat descriptor type 1000 masquerade
+nat descriptor address outer 1000 map-e
+dhcp service server
+dhcp scope 1 192.168.100.50-192.168.100.191/24
+dns host lan1
+dns server dhcp lan2

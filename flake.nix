@@ -15,7 +15,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Secrets decrypted at activation (used by momiji-homelab)
+    # Secrets (sops-nix), loaded on all NixOS and Darwin hosts
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";

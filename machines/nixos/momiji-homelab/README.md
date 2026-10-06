@@ -31,4 +31,4 @@ Disk alerts: `journalctl -t nas-notify`. Immich DB backups: `/volume3/immich-lib
 
 - Deploy: `just deploy-homelab`
 - Update Immich: `just update-immich` (read the release notes first; `just update-all` skips it)
-- Secrets: `just edit-secrets` (see the root README). `homepage-password-hash` is bcrypt: `nix run nixpkgs#caddy -- hash-password`
+- Secrets: `just edit-secrets momiji-homelab` (see the root README). `homepage-password-hash` is bcrypt: `nix run nixpkgs#caddy -- hash-password`

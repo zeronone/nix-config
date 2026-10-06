@@ -6,6 +6,7 @@
   config,
   lib,
   pkgs,
+  lan,
   ...
 }:
 {
@@ -21,11 +22,19 @@
         upstream_dns = [
           "https://dns.cloudflare.com/dns-query"
           "https://dns.quad9.net/dns-query"
+          # Local names (`ip host` entries on the router); the router never forwards them back
+          "[/home.lan/]${lan.gateway}"
         ];
+        # Used only when all upstreams fail
+        fallback_dns = [ "https://dns.google/dns-query" ];
+        # Reverse lookups for LAN addresses go to the router, so the query log shows names
+        use_private_ptr_resolvers = true;
+        local_ptr_upstreams = [ lan.gateway ];
         # Plain DNS, only to resolve the DoH hostnames above
         bootstrap_dns = [
           "1.1.1.1"
           "9.9.9.9"
+          "8.8.8.8"
         ];
       };
       filters = [

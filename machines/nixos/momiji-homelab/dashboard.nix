@@ -6,7 +6,7 @@
 #                    files, podman containers. Log in as arif (PAM); sudo for admin.
 #   Scrutiny  :8080  SMART history + failure prediction per disk (no auth)            LAN + tailnet
 #   AdGuard   :3000  DNS ad blocking (adguard.nix)                                     LAN + tailnet
-# Homepage: http://192.168.100.3, http://momiji-homelab.local (mDNS), http://<tailnet IP or name>,
+# Homepage: http://192.168.100.3, http://momiji-homelab.home.lan, http://momiji-homelab.local (mDNS), http://<tailnet IP or name>,
 # and https://momiji-homelab.<tailnet> (tailscale serve, valid cert). Immich keeps its own node,
 # https://immich.<tailnet> (see immich.nix). Other ports are reachable directly on the tailnet.
 {
@@ -26,6 +26,7 @@ let
     hostname
     tailscaleIpAddr
     "${hostname}.local"
+    "${hostname}.${lan.domain}"
     lan.address
   ];
 
@@ -52,6 +53,11 @@ in
       AllowUnencrypted = true;
     };
   };
+  # cockpit-ws reads cockpit.conf only at start; restart it on deploys that change it (e.g. Origins)
+  systemd.services.cockpit.restartTriggers = [ config.environment.etc."cockpit/cockpit.conf".source ];
+  systemd.services.cockpit-wsinstance-http.restartTriggers = [
+    config.environment.etc."cockpit/cockpit.conf".source
+  ];
   # Cockpit's Storage page talks to udisks
   services.udisks2.enable = true;
 

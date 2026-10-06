@@ -137,9 +137,29 @@ update-immich:
     nix flake update nixpkgs-immich
     nix eval --raw .#nixosConfigurations.momiji-homelab.config.services.immich.package.version; echo
 
-# Edit momiji-homelab's sops secrets
-edit-secrets: (sops "machines/nixos/momiji-homelab/secrets.yaml")
+# Edit the secrets.yaml of a host or directory, e.g. `just edit-secrets momiji-homelab`, `just edit-secrets routers/rtx1300`
+edit-secrets name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    shopt -s nullglob
+    for f in machines/*/{{name}}/secrets.yaml {{name}}/secrets.yaml; do
+        [ -e "$f" ] && exec {{just_executable()}} sops "$f"
+    done
+    echo "no secrets.yaml for {{name}}" >&2
+    exit 1
 
 # sops with the passphrase-protected age key, e.g. `just sops updatekeys <file>` after editing .sops.yaml
 sops *args:
     SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt.age nix run --inputs-from . nixpkgs#sops -- {{args}}
+
+# Fill a template's ${VAR}s from the sops secrets.yaml next to it into dist/ (gitignored), e.g. `just render routers/rtx1300/config1.txt`
+render template:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    out="dist/{{template}}"
+    mkdir -p "$(dirname "$out")"
+    umask 077
+    SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt.age nix shell --inputs-from . nixpkgs#sops nixpkgs#gettext -c \
+        sops exec-env "$(dirname {{template}})/secrets.yaml" "scripts/render-template.sh {{template}}" > "$out.tmp"
+    mv "$out.tmp" "$out"
+    echo "$out (contains secrets; delete after use: rm -r dist)"

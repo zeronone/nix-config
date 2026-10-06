@@ -139,6 +139,7 @@ let
           }
         )
         inputs.home-manager.darwinModules.home-manager
+        inputs.sops-nix.darwinModules.sops
         ../modules/common/nix.nix
         ../modules/darwin/bootstrap.nix
         (machineDir + /system.nix)
@@ -243,6 +244,7 @@ let
           }
         )
         inputs.home-manager.nixosModules.default
+        inputs.sops-nix.nixosModules.sops
         ../modules/common/nix.nix
         (machineDir + /system.nix)
         (

@@ -17,6 +17,8 @@ let
     address = "192.168.100.3";
     prefixLength = 24;
     gateway = "192.168.100.1";
+    # Names from the router's `ip host` entries
+    domain = "home.lan";
     dns = "192.168.100.1";
   };
 in
@@ -31,16 +33,16 @@ in
     ./immich.nix
     ./dashboard.nix
     ./adguard.nix
+    ./router-syslog.nix
     myNixModules.tailscale
     myNixModules.ssh-lan
     myNixModules.podman
     myNixModules.disk-health
     myNixModules.intel-gpu
     myNixModules.mdns
-    myNixModules.sops
   ];
 
-  # Edit with `just edit-secrets`
+  # Edit with `just edit-secrets momiji-homelab`
   sops.defaultSopsFile = ./secrets.yaml;
 
   boot.loader.systemd-boot.enable = true;

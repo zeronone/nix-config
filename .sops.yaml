@@ -1,10 +1,15 @@
-# Recipients for `sops`. After changing keys here, run `just update-secret-keys`.
+# Recipients for `sops`. After changing keys here, run `just sops updatekeys <file>`.
 keys:
-  - &arif age1uxzdeuzt5xz3s5pu2z29tx39pl7dmlf32js4tvx7zw392maqmalshrxarl # ~/.config/sops/age/keys.txt on the Mac
+  - &admin age1uxzdeuzt5xz3s5pu2z29tx39pl7dmlf32js4tvx7zw392maqmalshrxarl # edits all secrets: ~/.config/sops/age/keys.txt.age
   - &momiji-homelab age19w2gpz26nxel0fujqrv0thz4l0x4jvlrgrvg5t0yfch0lf4ueqcslk2dl6 # ssh host key
 creation_rules:
   - path_regex: machines/nixos/momiji-homelab/secrets\.yaml$
     key_groups:
       - age:
-          - *arif
+          - *admin
           - *momiji-homelab
+  # Values for the router config templates (`just render`); only I decrypt them
+  - path_regex: routers/[^/]+/secrets\.yaml$
+    key_groups:
+      - age:
+          - *admin
