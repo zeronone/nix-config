@@ -1,5 +1,5 @@
 # Disk health for NAS-style hosts: SMART monitoring, mdadm event alerts, monthly RAID scrub, SSD TRIM.
-# Alerts go to the journal: `journalctl -t nas-notify` (also surfaced in Cockpit > Logs).
+# Alerts are push notifications (./notify.nix), also in the journal: `journalctl -t notify`.
 {
   config,
   lib,
@@ -7,19 +7,11 @@
   ...
 }:
 let
-  notify = pkgs.writeShellApplication {
-    name = "nas-notify";
-    runtimeInputs = [ pkgs.util-linux ];
-    text = ''
-      title="$1"
-      shift
-      logger -t nas-notify -p user.warning "$title: $*"
-    '';
-  };
+  notify = lib.getExe config.notify.package;
 
   # smartd `-M exec` passes the details via environment variables
   smartdNotify = pkgs.writeShellScript "smartd-notify" ''
-    exec ${lib.getExe notify} "[${config.networking.hostName}] $SMARTD_SUBJECT" "$SMARTD_FULLMESSAGE"
+    exec ${notify} -p high -t warning,floppy_disk "$SMARTD_SUBJECT" "$SMARTD_FULLMESSAGE"
   '';
 
   # mdadm PROGRAM is called as: <event> <md-device> [<component-device>]
@@ -27,16 +19,19 @@ let
   mdadmNotify = pkgs.writeShellScript "mdadm-notify" ''
     case "$1" in
       NewArray|RebuildStarted|SparesMissing) exit 0 ;;
+      Fail|FailSpare|DegradedArray) priority=urgent ;;
+      *) priority=default ;;
     esac
     md="$(basename "$(readlink -f "$2")")"
     mismatches="$(cat "/sys/block/$md/md/mismatch_cnt" 2>/dev/null || echo "?")"
-    exec ${lib.getExe notify} "[${config.networking.hostName}] mdadm: $1 on $2" \
+    exec ${notify} -p "$priority" -t floppy_disk "mdadm: $1 on $2" \
       "event=$1 array=$2 component=''${3:-} mismatch_cnt=$mismatches"
   '';
 in
 {
+  imports = [ ./notify.nix ];
+
   environment.systemPackages = [
-    notify
     pkgs.smartmontools
     pkgs.nvme-cli
     pkgs.hdparm

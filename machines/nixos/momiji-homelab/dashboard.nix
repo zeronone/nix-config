@@ -8,7 +8,7 @@
 #   AdGuard   :3000  DNS ad blocking (adguard.nix)                                     LAN + tailnet
 # Homepage: http://192.168.100.3, http://momiji-homelab.home.lan, http://momiji-homelab.local (mDNS), http://<tailnet IP or name>,
 # and https://momiji-homelab.<tailnet> (tailscale serve, valid cert). Immich keeps its own node,
-# https://immich.<tailnet> (see immich.nix). Other ports are reachable directly on the tailnet.
+# https://immich.<tailnet> (see immich.nix), so does ntfy (ntfy.nix). Other ports are reachable directly on the tailnet.
 {
   config,
   lib,
@@ -123,6 +123,7 @@ in
           builtins.toJSON {
             ${tsHost} = "";
             "immich.${tailscaleNet}" = toString config.services.immich.port;
+            "ntfy.${tailscaleNet}" = toString config.tailscaleNodes.ntfy;
           }
         };
         const rewrite = () => {
@@ -204,6 +205,13 @@ in
                 username = "arif";
                 password = "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}";
               };
+            };
+          }
+          {
+            ntfy = {
+              href = "https://ntfy.${tailscaleNet}";
+              description = "Push notifications";
+              icon = "ntfy.svg";
             };
           }
           {

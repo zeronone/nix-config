@@ -34,12 +34,15 @@ in
     ./dashboard.nix
     ./adguard.nix
     ./router-syslog.nix
+    ./tailscale-nodes.nix
+    ./ntfy.nix
     myNixModules.tailscale
     myNixModules.ssh-lan
     myNixModules.podman
     myNixModules.disk-health
     myNixModules.intel-gpu
     myNixModules.mdns
+    myNixModules.ugreen-leds
   ];
 
   # Edit with `just edit-secrets momiji-homelab`
@@ -93,6 +96,10 @@ in
   users.users.${username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm9EQ3WlBQ3nterYlu0OlJNDepguJndQh9AxpLIiNP+ arif@IT-JPN-31519"
   ];
+
+  # Hardware watchdog (/dev/watchdog0): reboots the box if the kernel or systemd hangs for 30s.
+  # Independent of the BIOS watchdog option, which stays off.
+  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   zramSwap.enable = true;
 

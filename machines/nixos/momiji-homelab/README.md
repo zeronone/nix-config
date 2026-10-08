@@ -24,11 +24,14 @@ UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 8 GB RAM, Intel UHD iGPU, Nano
 | AdGuard Home | `:3000`, DNS on `:53` | `adguard.nix` |
 | Cockpit | `:9090` | System admin |
 | Scrutiny | `:8080` | SMART history |
+| ntfy | `https://ntfy.curl-featherback.ts.net`, `:2586` | Push notifications, topic `homelab` (`ntfy.nix`) |
 
-Disk alerts: `journalctl -t nas-notify`. Immich DB backups: `/volume3/immich-library/backups`.
+Notifications (`notify`, also `journalctl -t notify`): failed services, SMART/mdadm events, router events (`router-syslog.nix`). Immich DB backups: `/volume3/immich-library/backups`.
+
+Front LEDs: `ugreen-leds.nix`. A red bay LED means the disk vanished or failed SMART; it stays red until `systemctl restart ugreen-diskiomon`.
 
 ## Operations
 
 - Deploy: `just deploy-homelab`
 - Update Immich: `just update-immich` (read the release notes first; `just update-all` skips it)
-- Secrets: `just edit-secrets momiji-homelab` (see the root README). `homepage-password-hash` is bcrypt: `nix run nixpkgs#caddy -- hash-password`
+- Secrets: `just edit-secrets momiji-homelab` (see the root README). `homepage-password-hash` is bcrypt: `nix run nixpkgs#caddy -- hash-password`; `ntfy-password-hash`: `nix run nixpkgs#ntfy-sh -- user hash`; `ntfy-publish-token`: `nix run nixpkgs#ntfy-sh -- token generate`

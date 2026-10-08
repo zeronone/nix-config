@@ -149,8 +149,9 @@ edit-secrets name:
     exit 1
 
 # sops with the passphrase-protected age key, e.g. `just sops updatekeys <file>` after editing .sops.yaml
+[positional-arguments]
 sops *args:
-    SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt.age nix run --inputs-from . nixpkgs#sops -- {{args}}
+    SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt.age nix run --inputs-from . nixpkgs#sops -- "$@"
 
 # Fill a template's ${VAR}s from the sops secrets.yaml next to it into dist/ (gitignored), e.g. `just render routers/rtx1300/config1.txt`
 render template:

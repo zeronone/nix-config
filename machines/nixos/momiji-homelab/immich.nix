@@ -19,15 +19,6 @@ let
   # The tag follows the server version so they can't drift.
   mlImage = "ghcr.io/immich-app/immich-machine-learning:v${config.services.immich.package.version}-openvino";
   mlPort = 3003;
-
-  tsImmichServe = pkgs.writeText "immich-serve.json" (
-    builtins.toJSON {
-      TCP."443".HTTPS = true;
-      # containerboot substitutes ${TS_CERT_DOMAIN}
-      Web."\${TS_CERT_DOMAIN}:443".Handlers."/".Proxy =
-        "http://host.containers.internal:${toString config.services.immich.port}";
-    }
-  );
 in
 {
   disabledModules = [ "services/web-apps/immich.nix" ];
@@ -75,27 +66,10 @@ in
       # The box has 8G RAM
       extraOptions = [ "--memory=2500m" ];
     };
-
-    # Tailscale sidecar: tailnet node "immich" serving https://immich.<tailnet>. Userspace mode
-    # (no tun, so it can't clash with the host's tailscaled); reaches Immich via the podman bridge.
-    # Node identity lives in /var/lib/tailscale-immich.
-    containers.tailscale-immich = {
-      image = "docker.io/tailscale/tailscale:stable";
-      hostname = "immich";
-      environment = {
-        TS_STATE_DIR = "/var/lib/tailscale";
-        TS_USERSPACE = "true";
-        TS_SERVE_CONFIG = "/config/serve.json";
-      };
-      volumes = [
-        "/var/lib/tailscale-immich:/var/lib/tailscale"
-        "${tsImmichServe}:/config/serve.json:ro"
-      ];
-    };
   };
 
-  systemd.tmpfiles.rules = [
-    "d /var/cache/immich-ml 0750 root root -"
-    "d /var/lib/tailscale-immich 0700 root root -"
-  ];
+  # https://immich.<tailnet>
+  tailscaleNodes.immich = config.services.immich.port;
+
+  systemd.tmpfiles.rules = [ "d /var/cache/immich-ml 0750 root root -" ];
 }

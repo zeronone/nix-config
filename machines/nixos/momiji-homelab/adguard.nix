@@ -77,4 +77,6 @@
   # Podman's container DNS (aardvark-dns) listens on 10.88.0.1:53, which would block AdGuard's
   # wildcard bind. Move it; podman redirects the containers' port-53 queries there itself.
   virtualisation.containers.containersConf.settings.network.dns_bind_port = 1153;
+  # The podman module only opens 53 on the bridge; without this, container DNS times out
+  networking.firewall.interfaces.podman0.allowedUDPPorts = [ 1153 ];
 }
