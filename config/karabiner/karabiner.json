@@ -1,119 +1,134 @@
 {
-  "global": {
-    "show_in_menu_bar": false
-  },
-  "profiles": [
-    {
-      "name": "Default profile",
-      "selected": true,
-      "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" },
-      "complex_modifications": {
-        "parameters": {
-          "basic.to_if_held_down_threshold_milliseconds": 200,
-          "basic.to_if_alone_timeout_milliseconds": 200,
-          "basic.to_delayed_action_delay_milliseconds": 200,
-          "basic.simultaneous_threshold_milliseconds": 50
-        },
-        "rules": [
-          {
-            "description": "Tab one shot. Hyper-lite (Cmd+Opt) when held or combined.",
-            "manipulators": [
-              {
-                "type": "basic",
-                "from": {
-                  "key_code": "tab",
-                  "modifiers": { "optional": ["any"] }
+    "global": { "show_in_menu_bar": false },
+    "profiles": [
+        {
+            "complex_modifications": {
+                "parameters": {
+                    "basic.to_delayed_action_delay_milliseconds": 200,
+                    "basic.to_if_alone_timeout_milliseconds": 200,
+                    "basic.to_if_held_down_threshold_milliseconds": 200
                 },
-                "to": [
-                  {
-                    "key_code": "left_command",
-                    "modifiers": ["left_option"]
-                  }
-                ],
-                "to_if_alone": [
-                  {
-                    "key_code": "tab"
-                  }
+                "rules": [
+                    {
+                        "description": "Tab one shot. Hyper-lite (Cmd+Opt) when held or combined.",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_command",
+                                        "modifiers": ["left_option"]
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "tab" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Return one shot. Ctrl when held or combined.",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "right_control" }],
+                                "to_if_alone": [{ "key_code": "return_or_enter" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Left Command to Eisu on tap",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "left_command" }],
+                                "to_if_alone": [{ "key_code": "japanese_eisu" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Right Command to Kana on tap",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "right_command",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "right_command" }],
+                                "to_if_alone": [{ "key_code": "japanese_kana" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Remap Microsoft Ergonomic Office key to Option (Alt) safely by hardware ID",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "identifiers": [
+                                            {
+                                                "product_id": 2092,
+                                                "vendor_id": 1118
+                                            }
+                                        ],
+                                        "type": "device_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": { "mandatory": ["left_control", "left_option", "left_shift"] }
+                                },
+                                "to": [{ "key_code": "left_option" }],
+                                "to_after_key_up": [{ "key_code": "vk_none" }],
+                                "type": "basic"
+                            }
+                        ]
+                    }
                 ]
-              }
-            ]
-          },
-          {
-            "description": "Return one shot. Ctrl when held or combined.",
-            "manipulators": [
-              {
-                "type": "basic",
-                "from": {
-                  "key_code": "return_or_enter",
-                  "modifiers": { "optional": ["any"] }
-                },
-                "to": [
-                  {
-                    "key_code": "right_control"
-                  }
-                ],
-                "to_if_alone": [
-                  {
-                    "key_code": "return_or_enter"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "description": "Left Command to Eisu on tap",
-            "manipulators": [
-              {
-                "type": "basic",
-                "from": {
-                  "key_code": "left_command",
-                  "modifiers": {
-                    "optional": [
-                      "any"
+            },
+            "devices": [
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": true,
+                        "product_id": 2092,
+                        "vendor_id": 1118
+                    },
+                    "ignore": false,
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "left_command" },
+                            "to": [{ "key_code": "left_option" }]
+                        },
+                        {
+                            "from": { "key_code": "left_option" },
+                            "to": [{ "key_code": "left_command" }]
+                        },
+                        {
+                            "from": { "key_code": "right_command" },
+                            "to": [{ "key_code": "right_option" }]
+                        },
+                        {
+                            "from": { "key_code": "right_option" },
+                            "to": [{ "key_code": "right_command" }]
+                        }
                     ]
-                  }
-                },
-                "to": [
-                  {
-                    "key_code": "left_command"
-                  }
-                ],
-                "to_if_alone": [
-                  {
-                    "key_code": "japanese_eisu"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "description": "Right Command to Kana on tap",
-            "manipulators": [
-              {
-                "type": "basic",
-                "from": {
-                  "key_code": "right_command",
-                  "modifiers": {
-                    "optional": [
-                      "any"
-                    ]
-                  }
-                },
-                "to": [
-                  {
-                    "key_code": "right_command"
-                  }
-                ],
-                "to_if_alone": [
-                  {
-                    "key_code": "japanese_kana"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ]
+                }
+            ],
+            "name": "Default profile",
+            "selected": true,
+            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+        }
+    ]
 }
