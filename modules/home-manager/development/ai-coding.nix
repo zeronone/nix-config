@@ -9,11 +9,6 @@ let
 in
 {
   home.packages = with pkgs-unstable; [
-    gemini-cli
-    (vscode-with-extensions.override {
-      vscode = antigravity;
-      vscodeExtensions = sharedExtensions;
-    })
     google-antigravity-ide
     google-antigravity-cli
   ];

@@ -54,7 +54,11 @@ cachix authtoken XXXX   # https://app.cachix.org/cache/zeronone/settings/authtok
 
 ## Asahi firmware
 
-Apple Silicon needs non-distributable firmware, kept in the private `asahi-firmware` repo (flake input). On the Asahi machine, after a macOS update or for a new machine type:
+Apple Silicon needs non-distributable firmware, kept in the private `asahi-firmware` repo (flake input). On the Asahi machine, after a macOS update:
+
+1. Boot into macOS and run `curl -sL https://alx.sh | sh` in Terminal.
+2. Select option `v` (**Rebuild vendor firmware package**) to export the new firmware to `/boot`.
+3. Boot back into NixOS and run:
 
 ```sh
 ./scripts/push-asahi-firmware.sh --dir m1pro

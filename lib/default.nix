@@ -30,6 +30,7 @@ let
       curl
       jujutsu
       git
+      git-lfs
       nix-tree
       unzip
       devenv

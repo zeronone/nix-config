@@ -41,37 +41,42 @@
     ];
   };
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      libva-v4l2_request-sofus13 = final.callPackage "${flake-inputs.nixos-apple-silicon}/apple-silicon-support/packages/libva-v4l2_request-sofus13" { };
+      avd-fw = prev.runCommand "avd-fw" { } "mkdir -p $out/lib/firmware";
+    })
+  ];
+
   hardware.asahi = {
     enable = true;
-    # Firmware from private git repo (see scripts/push-asahi-firmware.sh)
     peripheralFirmwareDirectory = flake-inputs.asahi-firmware;
+    avd = {
+      enable = true;
+      vaapi-support = true;
+    };
   };
 
-  # Activation script to ensure the boot binary is at the path expected by this Mac
-  # NixOS defaults to /boot/asahi/boot.bin, but this machine uses /boot/m1n1/boot.bin
-  system.activationScripts.sync-m1n1 = {
-    text = ''
-      if [ -f /boot/asahi/boot.bin ]; then
-        mkdir -p /boot/m1n1
-        cp /boot/asahi/boot.bin /boot/m1n1/boot.bin
-      fi
-    '';
-    deps = [ ];
-  };
-  # Use the fairydust kernel with basic M1 Pro/Max support
+  # Use the fairydust branch: the asahi-x.y.z release that nixos-apple-silicon
+  # ships, plus the DP alt mode hacks that make the left-front USB-C port a
+  # DisplayPort output on the 14/16" MacBook Pro (see t600x-j314-j316.dtsi).
+  # The old 0001-add-m1-pro-max-ultra-support.patch is no longer needed: t600x
+  # atcphy nodes fall back to "apple,t8103-atcphy", and M1 Pro has no dptx-phy.
+  # Keep version in sync with the branch's Makefile, and the Asahi config in
+  # sync with nixos-apple-silicon's packages/linux-asahi/default.nix.
   boot.kernelPackages = lib.mkForce (
     pkgs.linuxPackagesFor (
-      (pkgs.buildLinux {
+      pkgs.buildLinux {
         inherit (pkgs) stdenv lib;
-        version = "6.19.14";
-        modDirVersion = "6.19.14";
+        version = "7.1.13";
+        modDirVersion = "7.1.13";
         pname = "linux-fairydust";
 
         src = pkgs.fetchFromGitHub {
           owner = "AsahiLinux";
           repo = "linux";
-          rev = "e2d30dc1dd6931da5aa42112fb4f26cab0973da5";
-          hash = "sha256-uAt3e4qIjUOtycVt5GO0OwYnzlSETN32Wa8Xn4EOa2k=";
+          rev = "ce9f2eba72c061a50b2d790450e90af3439d8c24"; # fairydust, 2026-09-08
+          hash = "sha256-W3yMSUe6xa+M/X0k86kbCS4g3d7jJmO3WV9L/5rQRhI=";
         };
 
         kernelPatches = [
@@ -88,6 +93,8 @@
               HID_APPLE = module;
               APPLE_PMGR_MISC = yes;
               APPLE_PMGR_PWRSTATE = yes;
+              # Prevents bluetooth stuttering (defaults to 'n')
+              BT_BRCMEXT = yes;
               # DP Alt Mode support
               DRM_APPLE = module;
               PHY_APPLE_ATC = module;
@@ -97,12 +104,8 @@
             };
             features.rust = true;
           }
-          {
-            name = "M1 Pro/Max/Ultra DP support";
-            patch = ./0001-add-m1-pro-max-ultra-support.patch;
-          }
         ];
-      })
+      }
     )
   );
 

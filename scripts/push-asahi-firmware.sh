@@ -1,31 +1,37 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p git git-lfs openssh
+#!nix-shell -i bash -p git git-lfs openssh asahi-fwextract
 set -e
 
 FIRMWARE_REPO="git@github.com:zeronone/asahi-firmware.git"
 FIRMWARE_DIR="m1pro"
 FIRMWARE_SOURCE="/boot/asahi"
+LOCAL_REPO="$HOME/myfiles/asahi-firmware"
 
 usage() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
-    echo "Push Apple Silicon firmware to private git repository. Run it from a machine with firmware installed."
-    echo "Dependencies (git, git-lfs, openssh) are provided via nix-shell."
+    echo "Push Apple Silicon firmware to private git repository."
+    echo "Dependencies (git, git-lfs, openssh, asahi-fwextract) are provided via nix-shell."
     echo ""
     echo "Options:"
-    echo "  -r, --repo URL      Git repository URL (default: $FIRMWARE_REPO)"
-    echo "  -d, --dir NAME      Subdirectory in repo for this machine (default: $FIRMWARE_DIR)"
-    echo "  -s, --source PATH   Source firmware path (default: $FIRMWARE_SOURCE)"
-    echo "  -h, --help          Show this help message"
+    echo "  -r, --repo URL         Git repository URL (default: $FIRMWARE_REPO)"
+    echo "  -l, --local-dir PATH   Local path for firmware repository (default: $LOCAL_REPO)"
+    echo "  -d, --dir NAME         Subdirectory in repo for this machine (default: $FIRMWARE_DIR)"
+    echo "  -s, --source PATH      Source firmware directory (default: $FIRMWARE_SOURCE)"
+    echo "  -h, --help             Show this help message"
     echo ""
     echo "Example:"
-    echo "  $0 --dir m2max"
+    echo "  $0 --dir m1pro"
 }
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -r|--repo)
             FIRMWARE_REPO="$2"
+            shift 2
+            ;;
+        -l|--local-dir)
+            LOCAL_REPO="$2"
             shift 2
             ;;
         -d|--dir)
@@ -65,26 +71,49 @@ echo "GitHub SSH authentication successful."
 
 if [[ ! -d "$FIRMWARE_SOURCE" ]]; then
     echo "Error: Firmware source directory not found: $FIRMWARE_SOURCE"
-    echo "Make sure you're running this on an Asahi Linux system with firmware installed."
     exit 1
 fi
 
 if [[ ! -f "$FIRMWARE_SOURCE/all_firmware.tar.gz" ]]; then
     echo "Error: all_firmware.tar.gz not found in $FIRMWARE_SOURCE"
+    echo ""
+    echo "If you recently updated macOS, the vendor firmware needs to be exported:"
+    echo "  1. Reboot into macOS."
+    echo "  2. Open Terminal and run: curl -sL https://alx.sh | sh"
+    echo "  3. Choose the option to export/update firmware for your existing Linux install."
+    echo "  4. Reboot into NixOS and re-run this script."
     exit 1
 fi
 
-TEMP_DIR=$(mktemp -d)
-trap "rm -rf $TEMP_DIR" EXIT
+FW_EXTRACT_DIR=$(mktemp -d)
 
-echo "Cloning firmware repository..."
-git clone "$FIRMWARE_REPO" "$TEMP_DIR/repo"
-cd "$TEMP_DIR/repo"
+cleanup() {
+    rm -rf "$FW_EXTRACT_DIR" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+echo "Extracting firmware package using asahi-fwextract..."
+mkdir -p "$FW_EXTRACT_DIR"
+asahi-fwextract "$FIRMWARE_SOURCE" "$FW_EXTRACT_DIR"
+
+if [[ ! -d "$LOCAL_REPO/.git" ]]; then
+    echo "Cloning firmware repository to $LOCAL_REPO..."
+    mkdir -p "$(dirname "$LOCAL_REPO")"
+    git clone "$FIRMWARE_REPO" "$LOCAL_REPO"
+    cd "$LOCAL_REPO"
+else
+    echo "Using existing firmware repository at $LOCAL_REPO..."
+    cd "$LOCAL_REPO"
+    echo "Pulling latest changes from remote..."
+    git pull origin main 2>/dev/null || git pull origin master 2>/dev/null || true
+fi
 
 echo "Copying firmware to $FIRMWARE_DIR/..."
 mkdir -p "$FIRMWARE_DIR"
 cp -p "$FIRMWARE_SOURCE/all_firmware.tar.gz" "$FIRMWARE_DIR/"
 cp -p "$FIRMWARE_SOURCE"/kernelcache* "$FIRMWARE_DIR/" 2>/dev/null || true
+cp -pr "$FW_EXTRACT_DIR"/* "$FIRMWARE_DIR/"
+
 git lfs track "$FIRMWARE_DIR/*"
 
 echo "Checking for changes..."

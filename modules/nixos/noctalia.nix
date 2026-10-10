@@ -25,71 +25,40 @@
         flake-inputs.noctalia.homeModules.default
       ];
 
-      programs.noctalia-shell = {
+      programs.noctalia = {
         enable = true;
         settings = {
           wallpaper = {
             enabled = false;
           };
           bar = {
-            density = "compact";
-            position = "top";
-            showOutline = false;
-            showCapsule = true;
-            marginVertical = 8;
-            widgets = {
-              left = [
-                {
-                  hideUnoccupied = false;
-                  id = "Workspace";
-                  labelMode = "none";
-                }
-                {
-                  id = "Launcher";
-                }
-                {
-                  id = "SystemMonitor";
-                }
-                {
-                  id = "ActiveWindow";
-                }
-                {
-                  id = "MediaMini";
-                }
+            main = {
+              position = "top";
+              capsule = true;
+              margin_edge = 8;
+              start = [
+                "workspaces"
+                "launcher"
+                "sysmon"
+                "active-window"
+                "media"
               ];
               center = [ ];
-              right = [
-                {
-                  id = "Network";
-                }
-                {
-                  id = "Bluetooth";
-                }
-                {
-                  id = "Volume";
-                }
-                {
-                  id = "Brightness";
-                }
-                {
-                  alwaysShowPercentage = false;
-                  id = "Battery";
-                  warningThreshold = 30;
-                }
-                {
-                  formatHorizontal = "HH:mm";
-                  formatVertical = "HH mm";
-                  id = "Clock";
-                  useMonospacedFont = true;
-                  usePrimaryColor = true;
-                }
-                {
-                  id = "NotificationHistory";
-                }
-                {
-                  id = "ControlCenter";
-                }
+              end = [
+                "network"
+                "bluetooth"
+                "volume"
+                "brightness"
+                "battery"
+                "clock"
+                "notifications"
+                "control-center"
               ];
+            };
+          };
+          widget = {
+            clock = {
+              format = "{:%H:%M}";
             };
           };
         };

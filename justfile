@@ -21,7 +21,7 @@ switch: update-bleeding-edge
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo -v; sudo darwin-rebuild switch --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo -v; nixos-rebuild --sudo switch --flake . |& nom; \
+        sudo -v; nixos-rebuild --sudo switch --flake . --impure |& nom; \
         if command -v niri >/dev/null; then niri validate -c ./config/niri/config.kdl; fi; \
     else \
         home-manager switch --flake ".#$(hostname)" |& nom; \
@@ -32,7 +32,7 @@ boot: update-bleeding-edge
     @if [ "$(uname)" = "Darwin" ]; then \
         echo "Not supported"; \
     elif [ -f /etc/NIXOS ]; then \
-        sudo -v; nixos-rebuild --sudo boot --flake . |& nom; \
+        sudo -v; nixos-rebuild --sudo boot --flake . --impure |& nom; \
     else \
         echo "Not supported"; \
     fi
@@ -42,7 +42,7 @@ check: update-bleeding-edge
         sudo -v; sudo darwin-rebuild check --flake . |& nom; \
     elif [ -f /etc/NIXOS ]; then \
         if command -v niri >/dev/null; then niri validate -c ./config/niri/config.kdl || exit 1; fi; \
-        nixos-rebuild dry-run --flake . |& nom; \
+        nixos-rebuild dry-run --flake . --impure |& nom; \
     else \
         echo "TODO"; \
     fi
