@@ -114,6 +114,7 @@
   hardware.bluetooth.powerOnBoot = true;
   hardware.bluetooth.settings = {
     General = {
+      ControllerMode = "bredr";
       Experimental = true;
     };
   };

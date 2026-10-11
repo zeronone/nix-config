@@ -78,7 +78,9 @@ let
           ;
         flake-inputs = inputs;
       };
-      home-manager.sharedModules = sharedModules;
+      home-manager.sharedModules = sharedModules ++ [
+        inputs.nix-index-database.homeModules.default
+      ];
       home-manager.users.${username} = {
         imports = homeModules;
         home.username = username;
@@ -141,6 +143,7 @@ let
         )
         inputs.home-manager.darwinModules.home-manager
         inputs.sops-nix.darwinModules.sops
+        inputs.nix-index-database.darwinModules.default
         ../modules/common/nix.nix
         ../modules/darwin/bootstrap.nix
         (machineDir + /system.nix)
@@ -246,6 +249,7 @@ let
         )
         inputs.home-manager.nixosModules.default
         inputs.sops-nix.nixosModules.sops
+        inputs.nix-index-database.nixosModules.default
         ../modules/common/nix.nix
         (machineDir + /system.nix)
         (
