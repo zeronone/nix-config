@@ -115,6 +115,9 @@
   hardware.bluetooth.settings = {
     General = {
       ControllerMode = "bredr";
+      JustWorksRepairing = "always";
+      AlwaysPairable = true;
+      PairableTimeout = 0;
       Experimental = true;
     };
   };
