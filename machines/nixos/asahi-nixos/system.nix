@@ -165,6 +165,10 @@
   # should be set to false for asahi
   boot.loader.efi.canTouchEfiVariables = false;
 
+  # Optimize initrd compression
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = [ "-19" "-T0" ];
+
   # Set your time zone.
   time.timeZone = "Asia/Tokyo";
 
