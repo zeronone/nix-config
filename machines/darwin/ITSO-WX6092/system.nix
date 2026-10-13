@@ -8,6 +8,7 @@
   imports = [
     myDarwinModules.nix-homebrew
     myDarwinModules.macbook-us-ansi
+    myDarwinModules.ac-no-sleep
     myDarwinModules.hammerspoon
     myDarwinModules.desktop-ui
     myDarwinModules.local-llm
