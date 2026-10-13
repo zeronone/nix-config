@@ -21,9 +21,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Flake Utils
-    flake-utils.url = "github:numtide/flake-utils";
-
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -111,11 +108,12 @@
     {
       self,
       nixpkgs,
-      flake-utils,
       treefmt-nix,
       ...
     }@inputs:
     let
+      lib = nixpkgs.lib;
+
       # Library of shared functions
       mylib = import ./lib/default.nix {
         inherit inputs;
@@ -125,26 +123,76 @@
       myhosts = import ./hosts.nix {
         inherit inputs mylib;
       };
+
+      allHosts = (myhosts.nixosConfigurations or { }) // (myhosts.darwinConfigurations or { });
+      hostSystem = host: host.pkgs.stdenv.hostPlatform.system;
+
+      # Eval the treefmt modules from ./treefmt.nix
+      treefmtEval = system: treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} ./treefmt.nix;
+
+      forAllSystems = lib.genAttrs [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
     in
-    # --- System Specific Outputs (formatter, checks) ---
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-        # Eval the treefmt modules from ./treefmt.nix
-        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
-      in
-      {
-        # for `nix fmt`
-        formatter = treefmtEval.config.build.wrapper;
-        # for `nix flake check`
-        checks = {
-          formatting = treefmtEval.config.build.check self;
-        };
-      }
-    )
+    # --- System Specific Outputs (formatter, checks, devShells) ---
+    {
+      # for `nix fmt`
+      formatter = forAllSystems (system: (treefmtEval system).config.build.wrapper);
+
+      # for `nix flake check`
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          formatting = (treefmtEval system).config.build.check self;
+
+          # Evaluates every host (any platform) without building anything
+          eval-hosts = pkgs.writeText "eval-hosts" (
+            lib.concatLines (
+              lib.mapAttrsToList (
+                name: host:
+                "${name} ${builtins.unsafeDiscardStringContext host.config.system.build.toplevel.drvPath}"
+              ) allHosts
+            )
+          );
+        }
+        # Full system closures of the hosts native to this system
+        // lib.mapAttrs' (name: host: lib.nameValuePair "host-${name}" host.config.system.build.toplevel) (
+          lib.filterAttrs (_: host: hostSystem host == system) allHosts
+        )
+      );
+
+      # `nix develop`, or automatically via direnv (.envrc)
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.mkShellNoCC {
+            packages = with pkgs; [
+              sops
+              age
+              just
+              jq
+              nix-output-monitor
+              nvd
+              nixd
+              nixos-rebuild
+              nixos-anywhere
+              (treefmtEval system).config.build.wrapper
+            ];
+            shellHook = ''
+              export SOPS_AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt.age"
+            '';
+          };
+        }
+      );
+    }
     //
       # --- System Agnostic Outputs (NixOS/Darwin Configurations) ---
       myhosts;
