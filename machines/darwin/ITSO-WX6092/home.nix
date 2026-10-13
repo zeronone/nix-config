@@ -1,5 +1,16 @@
-{ lib, ... }:
 {
+  pkgs,
+  flake-inputs,
+  ...
+}:
+let
+  llm-agents = flake-inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+in
+{
+  home.packages = [
+    llm-agents.coderabbit-cli
+  ];
+
   # work machine: source ~/.zprofile before ~/.zshrc so work env loads correctly
   # (dotDir below redirects ZDOTDIR, so these are not read automatically)
   programs.zsh = {
