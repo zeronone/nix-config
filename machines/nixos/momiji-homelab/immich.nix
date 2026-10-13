@@ -63,8 +63,6 @@ in
       volumes = [ "/var/cache/immich-ml:/cache" ];
       environment.TZ = config.time.timeZone;
       devices = [ "/dev/dri:/dev/dri" ];
-      # The box has 8G RAM
-      extraOptions = [ "--memory=2500m" ];
     };
   };
 

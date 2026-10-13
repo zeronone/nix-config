@@ -1,4 +1,4 @@
-# UGREEN DXP4800 Plus class NAS (Pentium Gold 8505, 8G RAM). A NanoKVM is attached via USB/HDMI
+# UGREEN DXP4800 Plus class NAS (Pentium Gold 8505, 16G RAM). A NanoKVM is attached via USB/HDMI
 # for console/BIOS access.
 #   - 256G KIOXIA NVMe : NixOS                          -> ./disko.nix
 #   - 128G Phison NVMe : UGOS (unused; BIOS Boot Override)

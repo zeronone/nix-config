@@ -1,6 +1,6 @@
 # momiji-homelab
 
-UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 8 GB RAM, Intel UHD iGPU, NanoKVM for the console.
+UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 16 GB RAM, Intel UHD iGPU, NanoKVM for the console.
 
 - LAN: `192.168.100.3`, `momiji-homelab.local`
 - Tailnet: `momiji-homelab.curl-featherback.ts.net` (`100.88.104.85`)
