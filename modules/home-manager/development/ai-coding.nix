@@ -2,15 +2,17 @@
   lib,
   pkgs,
   pkgs-unstable,
+  flake-inputs,
   ...
 }:
 let
+  llm-agents = flake-inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
   sharedExtensions = import ./vscode-extensions.nix { inherit pkgs-unstable; };
 in
 {
-  home.packages = with pkgs-unstable; [
-    google-antigravity-ide
-    google-antigravity-cli
+  home.packages = [
+    pkgs-unstable.antigravity-ide
+    llm-agents.antigravity-cli
   ];
   programs.mcp = {
     enable = true;
@@ -19,8 +21,7 @@ in
   # ClaudeCode
   programs.claude-code = {
     enable = true;
-    # From claude-code overlay, latest version
-    package = pkgs.claude-code;
+    package = llm-agents.claude-code;
     # enableMcpIntegration = true;
     # Settings managed via activation script below so the file is writable at runtime
     # (Claude Code needs to write to settings.json for commands like /effort)
@@ -48,7 +49,7 @@ in
   # Opencode
   programs.opencode = {
     enable = true;
-    package = pkgs-unstable.opencode;
+    package = llm-agents.opencode;
     enableMcpIntegration = true;
     settings = {
       share = "disabled";

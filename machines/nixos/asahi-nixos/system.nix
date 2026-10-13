@@ -43,7 +43,10 @@
 
   nixpkgs.overlays = [
     (final: prev: {
-      libva-v4l2_request-sofus13 = final.callPackage "${flake-inputs.nixos-apple-silicon}/apple-silicon-support/packages/libva-v4l2_request-sofus13" { };
+      libva-v4l2_request-sofus13 =
+        final.callPackage
+          "${flake-inputs.nixos-apple-silicon}/apple-silicon-support/packages/libva-v4l2_request-sofus13"
+          { };
       avd-fw = prev.runCommand "avd-fw" { } "mkdir -p $out/lib/firmware";
     })
   ];

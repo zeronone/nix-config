@@ -11,8 +11,10 @@
   # Set the host platform to aarch64-darwin
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  # Use system's nix
-  nix.enable = false;
+  # nix-darwin manages the daemon and /etc/nix/nix.conf, so modules/common/nix.nix applies on macOS too.
+  # Install Nix with the official installer only. Determinate Nix and the Lix installer run their own
+  # daemon and nix.conf and need `nix.enable = false`, which silently drops all of the above.
+  nix.enable = true;
   nix.settings = {
     extra-platforms = lib.mkIf (pkgs.stdenv.hostPlatform.system == "aarch64-darwin") [
       "x86_64-darwin"

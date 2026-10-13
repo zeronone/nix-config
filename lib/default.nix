@@ -36,16 +36,20 @@ let
       devenv
       gh
       # cachix
+      # `minimal` skips the bundled gh (installed above)
+      inputs.diffle.packages.${pkgs.stdenv.hostPlatform.system}.minimal
     ];
 
   # Shared home-manager modules for all hosts
   sharedHomeModules = [
+    ../modules/home-manager/nix.nix
     ../modules/home-manager/shell.nix
     ../modules/home-manager/development
   ];
 
   # Terminal-only subset for headless servers (no ghostty/vscode/AI tooling)
   headlessHomeModules = [
+    ../modules/home-manager/nix.nix
     ../modules/home-manager/shell.nix
     ../modules/home-manager/development/nixvim.nix
     ../modules/home-manager/development/tmux.nix
@@ -105,8 +109,6 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
-          inputs.claude-code-nix.overlays.default
-          inputs.antigravity-nix.overlays.default
         ];
       };
     in
@@ -131,10 +133,6 @@ let
           {
             nixpkgs = {
               config.allowUnfree = true;
-              overlays = [
-                inputs.claude-code-nix.overlays.default
-                inputs.antigravity-nix.overlays.default
-              ];
             };
 
             # Global packages
@@ -182,8 +180,6 @@ let
         config.allowUnfree = true;
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
-          inputs.claude-code-nix.overlays.default
-          inputs.antigravity-nix.overlays.default
         ];
       };
     in
@@ -227,8 +223,6 @@ let
                   }
                 );
               })
-              inputs.claude-code-nix.overlays.default
-              inputs.antigravity-nix.overlays.default
             ];
           };
 

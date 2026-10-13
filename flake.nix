@@ -89,13 +89,15 @@
     # latest stable release
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
-    # latest version of cluade-code
-    claude-code-nix.url = "github:sadjow/claude-code-nix";
+    # AI coding agents (claude-code, opencode, antigravity-cli, ...), updated daily upstream.
+    # No `inputs.nixpkgs.follows`: upstream builds against its own pinned nixpkgs, so we get
+    # the exact combination its CI tested and hits cache.numtide.com instead of rebuilding.
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
-    # antigravity-nix
-    antigravity-nix = {
-      url = "github:jacopone/antigravity-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+    # Browser-based git diff reviewer
+    diffle = {
+      url = "github:moritzwilksch/diffle";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # Weekly updated nix-index database for nix-locate and command-not-found

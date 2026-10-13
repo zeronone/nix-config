@@ -27,7 +27,7 @@ Then:
 
 ```sh
 ./bootstrap.sh
-echo "access-tokens = github.com=$(gh auth token)" > ~/.secrets/nix-github-token.conf
+(umask 077; echo "access-tokens = github.com=$(gh auth token)" > ~/.secrets/nix-github-token.conf)
 sudo tailscale set --operator=$USER
 sudo tailscale up
 cachix authtoken XXXX   # https://app.cachix.org/cache/zeronone/settings/authtokens
@@ -57,8 +57,8 @@ cachix authtoken XXXX   # https://app.cachix.org/cache/zeronone/settings/authtok
 Apple Silicon needs non-distributable firmware, kept in the private `asahi-firmware` repo (flake input). On the Asahi machine, after a macOS update:
 
 1. Boot into macOS and run `curl -sL https://alx.sh | sh` in Terminal.
-2. Select option `v` (**Rebuild vendor firmware package**) to export the new firmware to `/boot`.
-3. Boot back into NixOS and run:
+1. Select option `v` (**Rebuild vendor firmware package**) to export the new firmware to `/boot`.
+1. Boot back into NixOS and run:
 
 ```sh
 ./scripts/push-asahi-firmware.sh --dir m1pro
