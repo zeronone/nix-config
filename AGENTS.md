@@ -13,7 +13,6 @@ Nix flake for all my machines (nix-darwin, NixOS, home-manager).
 
 | Host | Kind | System | User |
 |---|---|---|---|
-| `IT-JPN-31519` | darwin | aarch64-darwin | arezai |
 | `ITSO-WX6092` | darwin | aarch64-darwin | arezai |
 | `arif-mac` | darwin | aarch64-darwin | arif |
 | `asahi-nixos` | nixos | aarch64-linux | arif |
