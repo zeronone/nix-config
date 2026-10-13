@@ -83,11 +83,11 @@ clean-boot:
     done
     df -h /boot
 
-# Deploy the NAS from this machine. Builds on the NAS itself (it is x86_64)
-# Usage: just deploy-homelab [switch|boot|test|dry-activate]
-deploy-homelab action="switch" host="arif@192.168.100.3":
-    nix run --inputs-from . nixpkgs#nixos-rebuild -- {{action}} --flake .#momiji-homelab \
-        --target-host {{host}} --build-host {{host}} --sudo --ask-sudo-password
+# Deploy a NixOS host over the LAN, building on the host itself (flake name = hostname = <host>.home.lan)
+# Usage: just deploy momiji-homelab [switch|boot|test|dry-activate]
+deploy host action="switch" user="arif":
+    nix run --inputs-from . nixpkgs#nixos-rebuild -- {{action}} --flake .#{{host}} \
+        --target-host {{user}}@{{host}}.home.lan --build-host {{user}}@{{host}}.home.lan --sudo --ask-sudo-password
 
 # Pushes a specific package and its closure from the Nix store to Cachix with confirmation
 push-to-cachix target cachix_cache="zeronone":

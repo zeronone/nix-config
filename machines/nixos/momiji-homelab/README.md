@@ -32,6 +32,6 @@ Front LEDs: `ugreen-leds.nix`. A red bay LED means the disk vanished or failed S
 
 ## Operations
 
-- Deploy: `just deploy-homelab`
+- Deploy: `just deploy momiji-homelab`
 - Update Immich: `just update-immich` (read the release notes first; `just update-all` skips it)
 - Secrets: `just edit-secrets momiji-homelab` (see the root README). `homepage-password-hash` is bcrypt: `nix run nixpkgs#caddy -- hash-password`; `ntfy-password-hash`: `nix run nixpkgs#ntfy-sh -- user hash`; `ntfy-publish-token`: `nix run nixpkgs#ntfy-sh -- token generate`
