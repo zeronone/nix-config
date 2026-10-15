@@ -36,6 +36,7 @@ in
     ./router-syslog.nix
     ./tailscale-nodes.nix
     ./ntfy.nix
+    ./home-assistant.nix
     myNixModules.tailscale
     myNixModules.ssh-lan
     myNixModules.podman

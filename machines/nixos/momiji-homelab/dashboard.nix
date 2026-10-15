@@ -8,7 +8,7 @@
 #   AdGuard   :3000  DNS ad blocking (adguard.nix)                                     LAN + tailnet
 # Homepage: http://192.168.100.3, http://momiji-homelab.home.lan, http://momiji-homelab.local (mDNS), http://<tailnet IP or name>,
 # and https://momiji-homelab.<tailnet> (tailscale serve, valid cert). Immich keeps its own node,
-# https://immich.<tailnet> (see immich.nix), so does ntfy (ntfy.nix). Other ports are reachable directly on the tailnet.
+# https://immich.<tailnet> (see immich.nix), so do ntfy (ntfy.nix) and Home Assistant (home-assistant.nix). Other ports are reachable directly on the tailnet.
 {
   config,
   lib,
@@ -124,6 +124,7 @@ in
             ${tsHost} = "";
             "immich.${tailscaleNet}" = toString config.services.immich.port;
             "ntfy.${tailscaleNet}" = toString config.tailscaleNodes.ntfy;
+            "home-assistant.${tailscaleNet}" = toString config.tailscaleNodes.home-assistant;
           }
         };
         const rewrite = () => {
@@ -227,7 +228,18 @@ in
           }
         ];
       }
-      # Later: { Home = [ { "Home Assistant" = { href = "http://${tsHost}:8123"; icon = "home-assistant.svg"; }; } ]; }
+      {
+        Home = [
+          {
+            "Home Assistant" = {
+              href = "https://home-assistant.${tailscaleNet}";
+              description = "Smart home";
+              icon = "home-assistant.svg";
+              siteMonitor = "http://127.0.0.1:${toString config.tailscaleNodes.home-assistant}";
+            };
+          }
+        ];
+      }
     ];
   };
 

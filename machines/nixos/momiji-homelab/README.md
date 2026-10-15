@@ -25,6 +25,7 @@ UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 16 GB RAM, Intel UHD iGPU, Nan
 | Cockpit | `:9090` | System admin |
 | Scrutiny | `:8080` | SMART history |
 | ntfy | `https://ntfy.curl-featherback.ts.net`, `:2586` | Push notifications, topic `homelab` (`ntfy.nix`) |
+| Home Assistant | `https://home-assistant.curl-featherback.ts.net`, `:8123` | Matter server on localhost:5580 (`home-assistant.nix`) |
 
 Notifications (`notify`, also `journalctl -t notify`): failed services, SMART/mdadm events, router events (`router-syslog.nix`). Immich DB backups: `/volume3/immich-library/backups`.
 
