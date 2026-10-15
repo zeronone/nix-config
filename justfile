@@ -83,11 +83,12 @@ clean-boot:
     done
     df -h /boot
 
-# Deploy a NixOS host over the LAN, building on the host itself (flake name = hostname = <host>.home.lan)
+# Deploy a NixOS host, building on the host itself (flake name = hostname; ssh user and address
+# come from the ssh config, see modules/common/ssh-homelab.nix)
 # Usage: just deploy momiji-homelab [switch|boot|test|dry-activate]
-deploy host action="switch" user="arif":
+deploy host action="switch":
     nix run --inputs-from . nixpkgs#nixos-rebuild -- {{action}} --flake .#{{host}} \
-        --target-host {{user}}@{{host}}.home.lan --build-host {{user}}@{{host}}.home.lan --sudo --ask-sudo-password
+        --target-host {{host}} --build-host {{host}} --sudo --ask-sudo-password
 
 # Pushes a specific package and its closure from the Nix store to Cachix with confirmation
 push-to-cachix target cachix_cache="zeronone":

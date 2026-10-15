@@ -93,9 +93,12 @@ in
     };
   };
 
-  # Only the work Mac (no Tailscale) logs in with a key; tailnet machines use Tailscale SSH
+  # LAN-only SSH clients: machines that can't run Tailscale log in to the LAN sshd with a key
+  # (~/.ssh/id_homelab, picked by modules/common/ssh-homelab.nix). Everything on the tailnet uses
+  # Tailscale SSH and needs no entry here.
   users.users.${username}.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm9EQ3WlBQ3nterYlu0OlJNDepguJndQh9AxpLIiNP+ arif@IT-JPN-31519"
+    # Work Mac
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm9EQ3WlBQ3nterYlu0OlJNDepguJndQh9AxpLIiNP+ arezai@ITSO-WX6092"
   ];
 
   # Hardware watchdog (/dev/watchdog0): reboots the box if the kernel or systemd hangs for 30s.

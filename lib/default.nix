@@ -143,6 +143,7 @@ let
         inputs.sops-nix.darwinModules.sops
         inputs.nix-index-database.darwinModules.default
         ../modules/common/nix.nix
+        ../modules/common/ssh-homelab.nix
         ../modules/darwin/bootstrap.nix
         (machineDir + /system.nix)
         {
@@ -245,6 +246,7 @@ let
         inputs.sops-nix.nixosModules.sops
         inputs.nix-index-database.nixosModules.default
         ../modules/common/nix.nix
+        ../modules/common/ssh-homelab.nix
         (machineDir + /system.nix)
         (
           { pkgs, ... }:
