@@ -61,7 +61,11 @@ in
       image = mlImage;
       ports = [ "127.0.0.1:${toString mlPort}:3003" ];
       volumes = [ "/var/cache/immich-ml:/cache" ];
-      environment.TZ = config.time.timeZone;
+      environment = {
+        TZ = config.time.timeZone;
+        # Newer model exports (Immich 3.3+); existing embeddings stay valid
+        MACHINE_LEARNING_MODEL_REVISION = "v2";
+      };
       devices = [ "/dev/dri:/dev/dri" ];
     };
   };
