@@ -31,6 +31,7 @@
     myNixModules.tailscale
     myNixModules.ssh
     myNixModules.fhs
+    myNixModules.ac-no-sleep
   ];
 
   # Binary cache for apple-silicon kernel
