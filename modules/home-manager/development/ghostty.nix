@@ -5,7 +5,7 @@
     package = if pkgs.system == "aarch64-darwin" then null else pkgs.ghostty;
     enableZshIntegration = true;
     settings = {
-      theme = "monokai-pro-spectrum";
+      theme = "Catppuccin Latte";
       # to make zellij work
       macos-option-as-alt = true;
       mouse-scroll-multiplier = 1.0;
