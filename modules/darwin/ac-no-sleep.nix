@@ -43,47 +43,67 @@ in
 
   launchd.daemons.ac-no-sleep = {
     path = [
+      "/bin"
       "/usr/bin"
       "/usr/sbin"
     ];
+    # Event driven: blocks on `pmset -g pslog` (prints a line on every power source change) and only
+    # uses shell builtins between events, so it forks nothing while idle. The only polling is the HID
+    # idle counter, and only while paused on AC.
     script = ''
-      interval=2
       # Paused: allow sleep. Set on battery or after `sleepnow`; cleared on AC on the next user input
       # (HID idle counter going down), so dark wakes (Power Nap, plugging in while asleep) don't keep
       # the Mac awake.
       paused=0
+      src=""
       last_src=""
-      last_idle=0
+      last_idle=""
+
+      hid_idle() {
+        local out
+        out=$(ioreg -c IOHIDSystem -d 4)
+        [[ $out =~ \"HIDIdleTime\"\ =\ ([0-9]+) ]] && echo "''${BASH_REMATCH[1]}"
+      }
+
       while true; do
-        if pmset -g ps | head -1 | grep -q "AC Power"; then src=ac; else src=battery; fi
-        idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ { print $NF; exit }')
-        idle=''${idle:-0}
+        # Power source change (line read) or 2s timeout to check for a `sleepnow` request
+        if IFS= read -r -t 2 line; then
+          case $line in
+            *"drawing from 'AC Power'"*) src=ac ;;
+            *"drawing from "*) src=battery ;;
+            *) continue ;;
+          esac
+        elif [ $? -le 128 ]; then
+          exit 1 # pmset exited; launchd restarts us
+        fi
 
         if [ -e ${request} ]; then
           rm -f ${request}
           paused=1
+          last_idle=""
           pmset -a disablesleep 0
           pmset sleepnow
-        elif [ "$src" = battery ]; then
-          paused=1
-          if [ "$last_src" != battery ]; then
+        elif [ "$src" != "$last_src" ]; then
+          if [ "$src" = battery ]; then
+            paused=1
             pmset -a disablesleep 0
             # Unplugged with the lid already closed: sleep now rather than stay awake in the bag
             if [ "$last_src" = ac ] && ioreg -r -k AppleClamshellState -d 1 | grep -q '"AppleClamshellState" = Yes'; then
               pmset sleepnow
             fi
-          fi
-        else
-          [ "$paused" = 1 ] && [ "$idle" -lt "$last_idle" ] && paused=0
-          if [ "$paused" = 0 ] && ! pmset -g | grep -q "SleepDisabled[[:space:]]*1"; then
+          elif [ "$paused" = 0 ]; then
             pmset -a disablesleep 1
           fi
+          last_src=$src
+        elif [ "$src" = ac ] && [ "$paused" = 1 ]; then
+          idle=$(hid_idle)
+          if [ -n "$last_idle" ] && [ -n "$idle" ] && [ "$idle" -lt "$last_idle" ]; then
+            paused=0
+            pmset -a disablesleep 1
+          fi
+          last_idle=$idle
         fi
-
-        last_src=$src
-        last_idle=$idle
-        sleep $interval
-      done
+      done < <(pmset -g pslog)
     '';
     serviceConfig = {
       RunAtLoad = true;
