@@ -5,6 +5,7 @@
     myDarwinModules.nix-homebrew
     myDarwinModules.macbook-us-ansi
     myDarwinModules.ac-no-sleep
+    myDarwinModules.spotlight-off
     myDarwinModules.desktop-ui
   ];
 
