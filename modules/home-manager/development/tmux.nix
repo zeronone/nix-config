@@ -1,4 +1,34 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  tmux = lib.getExe config.programs.tmux.package;
+
+  # macOS notification for bells from ssh windows (e.g. Claude on a remote host),
+  # unless the window is in front of me. Posted by Ghostty (OSC 777) via the client's terminal.
+  ssh-bell-notify = pkgs.writeShellApplication {
+    name = "tmux-ssh-bell-notify";
+    text = ''
+      window=$1
+      [ "$(${tmux} display -p -t "$window" '#{pane_current_command}')" = ssh ] || exit 0
+
+      active=$(${tmux} display -p -t "$window" '#{window_active}')
+      clients=$(${tmux} list-clients -t "$window" -F '#{client_flags}')
+      if [ "$active" = 1 ] && [[ $clients == *focused* ]]; then
+        exit 0
+      fi
+
+      title=$(${tmux} display -p -t "$window" '#S:#I #W')
+      target=$(${tmux} display -p -t "$window" '#{client_tty}')
+      if [ -n "$target" ]; then
+        printf '\e]777;notify;Bell: %s;Bell in an ssh session\a' "''${title//;/,}" >"$target"
+      fi
+    '';
+  };
+in
 {
   programs.tmux = {
     enable = true;
@@ -55,6 +85,10 @@
 
       # Update Wayland display and terminal program environment variables when attaching to tmux
       set -g update-environment "WAYLAND_DISPLAY XDG_RUNTIME_DIR TERM_PROGRAM TERM_PROGRAM_VERSION"
+    ''
+    + lib.optionalString pkgs.stdenv.isDarwin ''
+
+      set-hook -g alert-bell 'run-shell -b "${lib.getExe ssh-bell-notify} #{window_id}"'
     '';
 
     # It changes <Esc>+j to <A-j> and thus moving lines in nvim
