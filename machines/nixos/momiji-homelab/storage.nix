@@ -105,6 +105,62 @@ let
     esac
     exec ${lib.getExe config.notify.package} -p "$priority" -t floppy_disk "$1" "$(cat)"
   '';
+
+  # Status for the Homepage card (served by Caddy, see dashboard.nix), plus an alert when snapshots
+  # stop: ZED reports faults, but nothing else notices sanoid silently not running.
+  zfsStatus = pkgs.writeShellApplication {
+    name = "zfs-status";
+    # jq programs in single quotes
+    excludeShellChecks = [ "SC2016" ];
+    runtimeInputs = [
+      config.boot.zfs.package
+      pkgs.jq
+      pkgs.coreutils
+      pkgs.gnused
+    ];
+    text = ''
+      pool=tank
+      out=/run/zfs-status/$pool.json
+      stale_flag=/run/zfs-status-stale
+      write() { jq -n "$@" >"$out.tmp" && mv "$out.tmp" "$out"; }
+
+      if ! status=$(zpool status -jp "$pool"); then
+        write '{health: "UNAVAILABLE"}'
+        exit 0
+      fi
+      health=$(jq -r --arg p "$pool" '.pools[$p].state' <<<"$status")
+      errors=$(jq --arg p "$pool" '[.pools[$p] | .. | objects | select(has("read_errors"))
+        | (.read_errors, .write_errors, .checksum_errors | tonumber)] | add' <<<"$status")
+      read -r used avail < <(zfs list -Hp -o used,avail "$pool")
+
+      # e.g. "scrub repaired 0B in 01:23:45 with 0 errors on Sun Oct 18 03:23:45 2026"
+      scan=$(zpool status "$pool" | sed -n 's/^ *scan: //p')
+      if [[ $scan =~ ^scrub\ repaired\ .*\ with\ ([0-9]+)\ errors\ on\ (.*)$ ]]; then
+        scrub="$(date -d "''${BASH_REMATCH[2]}" +%F), ''${BASH_REMATCH[1]} errors"
+      elif [[ $scan == "scrub in progress"* ]]; then
+        scrub="in progress"
+      else
+        scrub="never"
+      fi
+
+      # Newest snapshot of any dataset in the pool (unix time)
+      snap=$(zfs list -Hp -t snapshot -o creation -s creation -r "$pool" | tail -n 1)
+      write --arg health "$health" --argjson errors "$errors" --argjson used "$used" \
+        --argjson avail "$avail" --arg scrub "$scrub" --arg snap "''${snap:+$(date -d "@$snap" -Iseconds)}" \
+        '{$health, $errors, $used, $avail, $scrub, snapshot: (if $snap == "" then null else $snap end)}'
+
+      # sanoid snapshots hourly: alert once when the newest is over 2 hours old, again after recovery
+      if [ -z "$snap" ] || [ $(($(date +%s) - snap)) -gt 7200 ]; then
+        if [ ! -e "$stale_flag" ]; then
+          touch "$stale_flag"
+          ${lib.getExe config.notify.package} -p high -t floppy_disk "ZFS: no recent snapshot of $pool" \
+            "Newest snapshot: ''${snap:+$(date -d "@$snap")}''${snap:-none}. Check sanoid.service."
+        fi
+      else
+        rm -f "$stale_flag"
+      fi
+    '';
+  };
 in
 {
   # Assemble md arrays (incremental, via udev). Shows up as /dev/md127 (foreign homehost);
@@ -134,7 +190,11 @@ in
   boot.extraModprobeConfig = ''
     options zfs zfs_arc_max=${toString (8 * 1024 * 1024 * 1024)}
   '';
-  environment.systemPackages = [ tankCreate ];
+  environment.systemPackages = [
+    tankCreate
+    # Find and restore earlier versions of a file from snapshots: `httm -r <path>`
+    pkgs.httm
+  ];
 
   services.zfs.autoScrub = {
     enable = true;
@@ -155,6 +215,25 @@ in
       hourly = 24;
       daily = 30;
       monthly = 6;
+    };
+  };
+
+  systemd.services.zfs-status = {
+    description = "Write ZFS pool status for Homepage, alert on stale snapshots";
+    after = [ "zfs-import.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = lib.getExe zfsStatus;
+      RuntimeDirectory = "zfs-status";
+      RuntimeDirectoryMode = "0755";
+      RuntimeDirectoryPreserve = true;
+    };
+  };
+  systemd.timers.zfs-status = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1min";
+      OnUnitActiveSec = "5min";
     };
   };
 }

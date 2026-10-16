@@ -34,6 +34,7 @@ let
   cockpitPort = config.services.cockpit.port;
   scrutinyPort = config.services.scrutiny.settings.web.listen.port;
   adguardPort = config.services.adguardhome.port;
+  zfsStatusPort = 8083;
 
   tailscale = lib.getExe config.services.tailscale.package;
 in
@@ -90,6 +91,12 @@ in
       reverse_proxy 127.0.0.1:${toString homepagePort}
     '';
   };
+  # Local only: the ZFS status JSON (storage.nix) for the Homepage card
+  services.caddy.virtualHosts."http://127.0.0.1:${toString zfsStatusPort}".extraConfig = ''
+    bind 127.0.0.1
+    root * /run/zfs-status
+    file_server
+  '';
   networking.firewall.allowedTCPPorts = [ 80 ];
 
   # AdGuard API password for the widget (the secret is declared in adguard.nix)
@@ -213,6 +220,48 @@ in
               href = "https://ntfy.${tailscaleNet}";
               description = "Push notifications";
               icon = "ntfy.svg";
+            };
+          }
+          {
+            "ZFS pool" = {
+              href = "http://${tsHost}:${toString cockpitPort}/system/terminal";
+              description = "tank (RAIDZ1) at /volume3";
+              icon = "mdi-harddisk";
+              widget = {
+                type = "customapi";
+                url = "http://127.0.0.1:${toString zfsStatusPort}/tank.json";
+                display = "list";
+                mappings = [
+                  {
+                    field = "health";
+                    label = "Health";
+                  }
+                  {
+                    field = "errors";
+                    label = "Errors";
+                    format = "number";
+                  }
+                  {
+                    field = "used";
+                    label = "Used";
+                    format = "bytes";
+                  }
+                  {
+                    field = "avail";
+                    label = "Free";
+                    format = "bytes";
+                  }
+                  {
+                    field = "scrub";
+                    label = "Last scrub";
+                  }
+                  {
+                    field = "snapshot";
+                    label = "Last snapshot";
+                    format = "relativeDate";
+                  }
+                ];
+              };
             };
           }
           {
