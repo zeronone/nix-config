@@ -35,7 +35,10 @@
     };
 
     # common casks
-    casks = [ "keepassxc" ];
+    casks = [
+      "keepassxc"
+      "raycast"
+    ];
 
     # common brews
     brews = [

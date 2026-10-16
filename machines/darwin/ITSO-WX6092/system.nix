@@ -10,7 +10,6 @@
     myDarwinModules.macbook-us-ansi
     myDarwinModules.ac-no-sleep
     myDarwinModules.spotlight-off
-    myDarwinModules.hammerspoon
     myDarwinModules.desktop-ui
     myDarwinModules.local-llm
     myDarwinModules.fonts
