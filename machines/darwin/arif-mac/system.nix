@@ -7,6 +7,7 @@
     myDarwinModules.ac-no-sleep
     myDarwinModules.spotlight-off
     myDarwinModules.desktop-ui
+    myDarwinModules.brightness-sync
   ];
 
   networking.knownNetworkServices = [

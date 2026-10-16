@@ -13,6 +13,7 @@
     myDarwinModules.desktop-ui
     myDarwinModules.local-llm
     myDarwinModules.fonts
+    myDarwinModules.brightness-sync
   ];
 
   networking.knownNetworkServices = [
