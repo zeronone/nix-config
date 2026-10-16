@@ -56,7 +56,7 @@ in
   hardware.enableRedistributableFirmware = true;
 
   networking.hostName = hostname;
-  # Required by ZFS (planned)
+  # Required by ZFS
   networking.hostId = "b60f83bd";
 
   # Static 192.168.100.3 on the 10GbE port (AQC113, atlantic), matched by MAC so interface

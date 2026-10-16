@@ -13,7 +13,8 @@ UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 16 GB RAM, Intel UHD iGPU, Nan
 |---|---|
 | 256G KIOXIA NVMe | NixOS, Postgres (`disko.nix`) |
 | 128G Phison NVMe | UGOS, unused (BIOS Boot Override) |
-| 2× 4T ST4000VN006 | md RAID1 → LVM → ext4 at `/volume3`, Immich library (`storage.nix`) |
+| 2× 4T ST4000VN008 | ZFS RAIDZ1 `tank` at `/volume3`, Immich library (`storage.nix`) |
+| 2× 4T ST4000VN006 | old md RAID1 → LVM → ext4, read-only at `/volume3-old`; joins `tank` later (`storage.nix`) |
 
 ## Services
 
@@ -27,7 +28,7 @@ UGREEN DXP4800 Plus class NAS: Pentium Gold 8505, 16 GB RAM, Intel UHD iGPU, Nan
 | ntfy | `https://ntfy.curl-featherback.ts.net`, `:2586` | Push notifications, topic `homelab` (`ntfy.nix`) |
 | Home Assistant | `https://home-assistant.curl-featherback.ts.net`, `:8123` | Matter server on localhost:5580 (`home-assistant.nix`) |
 
-Notifications (`notify`, also `journalctl -t notify`): failed services, SMART/mdadm events, router events (`router-syslog.nix`). Immich DB backups: `/volume3/immich-library/backups`.
+Notifications (`notify`, also `journalctl -t notify`): failed services, SMART/mdadm/ZFS events, router events (`router-syslog.nix`). Immich DB backups: `/volume3/immich-library/backups`.
 
 Front LEDs: `ugreen-leds.nix`. A red bay LED means the disk vanished or failed SMART; it stays red until `systemctl restart ugreen-diskiomon`.
 

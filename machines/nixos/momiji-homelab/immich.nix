@@ -70,6 +70,9 @@ in
     };
   };
 
+  # The ML server exits with 143 (SIGTERM) on stop; don't count that as a failure (it fires notify-failure)
+  systemd.services.podman-immich-machine-learning.serviceConfig.SuccessExitStatus = [ 143 ];
+
   # https://immich.<tailnet>
   tailscaleNodes.immich = config.services.immich.port;
 

@@ -2,7 +2,7 @@
 #   Homepage  :80    front page (live CPU/RAM/temp/disk usage, SMART summary, links)  LAN + tailnet
 #                    Caddy with basic auth in front of :8082: arif / homepage-password-hash
 #                    (sops, bcrypt from `nix run nixpkgs#caddy -- hash-password`).
-#   Cockpit   :9090  admin: storage (md/LVM, later ZFS), services, logs, terminal,     LAN + tailnet
+#   Cockpit   :9090  admin: storage (disks, md/LVM), services, logs, terminal,         LAN + tailnet
 #                    files, podman containers. Log in as arif (PAM); sudo for admin.
 #   Scrutiny  :8080  SMART history + failure prediction per disk (no auth)            LAN + tailnet
 #   AdGuard   :3000  DNS ad blocking (adguard.nix)                                     LAN + tailnet
@@ -45,7 +45,7 @@ in
     plugins = with pkgs; [
       cockpit-files
       cockpit-podman
-      # with ZFS: cockpit-zfs
+      # cockpit-zfs: fails to build in nixos-26.05 (tailwind/postcss)
     ];
     settings.WebService = {
       LoginTo = false;
